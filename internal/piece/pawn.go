@@ -22,3 +22,7 @@ func (p Pawn) GetColour() colour.Colour {
 func (p Pawn) GetPiecePoints() PiecePoints {
 	return PiecePointsPawn
 }
+
+func (p Pawn) GetPieceType() PieceType {
+	return PieceTypePawn
+}

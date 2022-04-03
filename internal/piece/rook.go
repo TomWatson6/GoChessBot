@@ -22,3 +22,7 @@ func (r Rook) GetColour() colour.Colour {
 func (r Rook) GetPiecePoints() PiecePoints {
 	return PiecePointsRook
 }
+
+func (r Rook) GetPieceType() PieceType {
+	return PieceTypeRook
+}

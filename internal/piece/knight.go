@@ -22,3 +22,7 @@ func (k Knight) GetColour() colour.Colour {
 func (k Knight) GetPiecePoints() PiecePoints {
 	return PiecePointsKnight
 }
+
+func (k Knight) GetPieceType() PieceType {
+	return PieceTypeKnight
+}

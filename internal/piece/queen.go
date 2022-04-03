@@ -22,3 +22,7 @@ func (q Queen) GetColour() colour.Colour {
 func (q Queen) GetPiecePoints() PiecePoints {
 	return PiecePointsQueen
 }
+
+func (q Queen) GetPieceType() PieceType {
+	return PieceTypeQueen
+}

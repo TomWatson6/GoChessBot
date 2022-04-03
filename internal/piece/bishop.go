@@ -22,3 +22,7 @@ func (b Bishop) GetColour() colour.Colour {
 func (b Bishop) GetPiecePoints() PiecePoints {
 	return PiecePointsBishop
 }
+
+func (b Bishop) GetPieceType() PieceType {
+	return PieceTypeBishop
+}
