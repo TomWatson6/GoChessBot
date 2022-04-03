@@ -26,3 +26,9 @@ func (p Pawn) GetPiecePoints() PiecePoints {
 func (p Pawn) GetPieceType() PieceType {
 	return PieceTypePawn
 }
+
+func (p Pawn) IsValidMove(dest move.Position) bool {
+	y := dest.Rank - p.Position.Rank
+
+	return y == 1 || (!p.HasMoved && y == 2)
+}
