@@ -7,10 +7,12 @@ import (
 )
 
 type Piece interface {
-	GetLetter() rune
+	GetLetter() PieceLetter
 	GetColour() colour.Colour
 	GetPower() power.Power
 	GetThreatLevel() int
+	GetPiecePoints() PiecePoints
+	GetPieceType() PieceType
 	IsValidMove(m move.Move) bool
 }
 
