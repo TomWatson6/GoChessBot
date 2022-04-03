@@ -10,3 +10,7 @@ type Bishop struct {
 	Position move.Position
 	HasMoved bool
 }
+
+func (b Bishop) GetLetter() PieceLetter {
+	return PieceLetterBishop
+}

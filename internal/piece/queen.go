@@ -10,3 +10,7 @@ type Queen struct {
 	Position move.Position
 	HasMoved bool
 }
+
+func (q Queen) GetLetter() PieceLetter {
+	return PieceLetterQueen
+}

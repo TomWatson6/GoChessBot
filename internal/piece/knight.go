@@ -10,3 +10,7 @@ type Knight struct {
 	Position move.Position
 	HasMoved bool
 }
+
+func (k Knight) GetLetter() PieceLetter {
+	return PieceLetterKnight
+}

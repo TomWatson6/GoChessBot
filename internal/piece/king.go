@@ -10,3 +10,7 @@ type King struct {
 	Position move.Position
 	HasMoved bool
 }
+
+func (k King) GetLetter() PieceLetter {
+	return PieceLetterKing
+}

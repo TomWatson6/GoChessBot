@@ -6,8 +6,11 @@ import (
 )
 
 type Pawn struct {
-	Colour    colour.Colour
-	Position  move.Position
-	HasMoved  bool
-	PieceType PieceType
+	Colour   colour.Colour
+	Position move.Position
+	HasMoved bool
+}
+
+func (p Pawn) GetLetter() PieceLetter {
+	return PieceLetterPawn
 }

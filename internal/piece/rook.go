@@ -10,3 +10,7 @@ type Rook struct {
 	Position move.Position
 	HasMoved bool
 }
+
+func (r Rook) GetLetter() PieceLetter {
+	return PieceLetterRook
+}
