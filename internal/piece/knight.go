@@ -1,6 +1,8 @@
 package piece
 
 import (
+	"math"
+
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 )
@@ -25,4 +27,14 @@ func (k Knight) GetPiecePoints() PiecePoints {
 
 func (k Knight) GetPieceType() PieceType {
 	return PieceTypeKnight
+}
+
+func (k Knight) IsValidMove(dest move.Position) bool {
+	if math.Abs(float64(dest.File-k.Position.File)) == 2 {
+		return math.Abs(float64(dest.Rank-k.Position.Rank)) == 1
+	} else if math.Abs(float64(dest.Rank-k.Position.Rank)) == 2 {
+		return math.Abs(float64(dest.File-k.Position.File)) == 1
+	}
+
+	return false
 }
