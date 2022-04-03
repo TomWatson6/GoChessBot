@@ -1,7 +1,7 @@
 package board
 
 import (
-	"github.com/tomwatson6/chessbot/cmd/move"
+	"github.com/tomwatson6/chessbot/internal/move"
 	"github.com/tomwatson6/chessbot/piece"
 )
 

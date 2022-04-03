@@ -1,9 +1,9 @@
 package chess
 
 import (
-	"github.com/tomwatson6/chessbot/cmd/board"
-	"github.com/tomwatson6/chessbot/cmd/move"
 	"github.com/tomwatson6/chessbot/colour"
+	"github.com/tomwatson6/chessbot/internal/board"
+	"github.com/tomwatson6/chessbot/internal/move"
 )
 
 type Chess struct {
