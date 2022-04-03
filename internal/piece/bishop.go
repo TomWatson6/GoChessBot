@@ -5,9 +5,8 @@ import (
 	"github.com/tomwatson6/chessbot/internal/move"
 )
 
-type Pawn struct {
-	Colour    colour.Colour
-	Position  move.Position
-	HasMoved  bool
-	PieceType PieceType
+type Bishop struct {
+	Colour   colour.Colour
+	Position move.Position
+	HasMoved bool
 }
