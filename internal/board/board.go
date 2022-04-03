@@ -2,7 +2,7 @@ package board
 
 import (
 	"github.com/tomwatson6/chessbot/internal/move"
-	"github.com/tomwatson6/chessbot/piece"
+	"github.com/tomwatson6/chessbot/internal/piece"
 )
 
 type Board struct {
