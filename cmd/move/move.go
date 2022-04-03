@@ -1,4 +1,4 @@
-package chess
+package move
 
 type Move struct {
 	From, To Position
