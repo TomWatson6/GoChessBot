@@ -26,3 +26,7 @@ func (r Rook) GetPiecePoints() PiecePoints {
 func (r Rook) GetPieceType() PieceType {
 	return PieceTypeRook
 }
+
+func (r Rook) IsValidMove(dest move.Position) bool {
+	return r.Position.File == dest.File || r.Position.Rank == dest.Rank
+}
