@@ -26,3 +26,9 @@ func (b Bishop) GetPiecePoints() PiecePoints {
 func (b Bishop) GetPieceType() PieceType {
 	return PieceTypeBishop
 }
+
+func (b Bishop) IsValidMove(dest move.Position) bool {
+	x := dest.File - b.Position.File
+	y := dest.Rank - b.Position.Rank
+	return (x == y || x == -y) && (x != 0 && y != 0)
+}
