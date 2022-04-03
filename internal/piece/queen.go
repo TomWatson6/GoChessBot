@@ -18,3 +18,7 @@ func (q Queen) GetLetter() PieceLetter {
 func (q Queen) GetColour() colour.Colour {
 	return q.Colour
 }
+
+func (q Queen) GetPiecePoints() PiecePoints {
+	return PiecePointsQueen
+}

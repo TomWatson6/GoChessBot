@@ -18,3 +18,7 @@ func (k Knight) GetLetter() PieceLetter {
 func (k Knight) GetColour() colour.Colour {
 	return k.Colour
 }
+
+func (k Knight) GetPiecePoints() PiecePoints {
+	return PiecePointsKnight
+}

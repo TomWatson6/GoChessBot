@@ -18,3 +18,7 @@ func (p Pawn) GetLetter() PieceLetter {
 func (p Pawn) GetColour() colour.Colour {
 	return p.Colour
 }
+
+func (p Pawn) GetPiecePoints() PiecePoints {
+	return PiecePointsPawn
+}

@@ -18,3 +18,7 @@ func (b Bishop) GetLetter() PieceLetter {
 func (b Bishop) GetColour() colour.Colour {
 	return b.Colour
 }
+
+func (b Bishop) GetPiecePoints() PiecePoints {
+	return PiecePointsBishop
+}

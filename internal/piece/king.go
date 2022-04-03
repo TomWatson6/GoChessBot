@@ -18,3 +18,7 @@ func (k King) GetLetter() PieceLetter {
 func (k King) GetColour() colour.Colour {
 	return k.Colour
 }
+
+func (k King) GetPiecePoints() PiecePoints {
+	return PiecePointsKing
+}

@@ -18,3 +18,7 @@ func (r Rook) GetLetter() PieceLetter {
 func (r Rook) GetColour() colour.Colour {
 	return r.Colour
 }
+
+func (r Rook) GetPiecePoints() PiecePoints {
+	return PiecePointsRook
+}
