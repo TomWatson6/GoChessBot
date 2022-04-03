@@ -19,6 +19,10 @@ func (b Bishop) GetColour() colour.Colour {
 	return b.Colour
 }
 
+func (b Bishop) GetPosition() move.Position {
+	return b.Position
+}
+
 func (b Bishop) GetPiecePoints() PiecePoints {
 	return PiecePointsBishop
 }

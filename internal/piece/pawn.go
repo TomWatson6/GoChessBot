@@ -19,6 +19,10 @@ func (p Pawn) GetColour() colour.Colour {
 	return p.Colour
 }
 
+func (p Pawn) GetPosition() move.Position {
+	return p.Position
+}
+
 func (p Pawn) GetPiecePoints() PiecePoints {
 	return PiecePointsPawn
 }

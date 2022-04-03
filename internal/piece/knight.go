@@ -21,6 +21,10 @@ func (k Knight) GetColour() colour.Colour {
 	return k.Colour
 }
 
+func (k Knight) GetPosition() move.Position {
+	return k.Position
+}
+
 func (k Knight) GetPiecePoints() PiecePoints {
 	return PiecePointsKnight
 }

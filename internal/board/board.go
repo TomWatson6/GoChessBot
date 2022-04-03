@@ -6,9 +6,9 @@ import (
 )
 
 type Board struct {
-	Pieces [][]piece.Piece
+	Pieces map[move.Position]piece.Piece
 }
 
 func (b Board) GetPiece(pos move.Position) piece.Piece {
-	return b.Pieces[pos.Rank][pos.File]
+	return b.Pieces[pos]
 }

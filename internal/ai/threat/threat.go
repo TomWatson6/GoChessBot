@@ -12,13 +12,13 @@ func (t Threat) Get(pos move.Position) []piece.Piece {
 }
 
 func (t Threat) GetThreatLevel(pos move.Position) int {
-	pieces := t[pos]
+	// pieces := t[pos]
 
 	threatLevel := 0
 
-	for _, piece := range pieces {
-		threatLevel += piece.GetThreatLevel()
-	}
+	// for _, piece := range pieces {
+	// 	threatLevel += piece.GetThreatLevel()
+	// }
 
 	return threatLevel
 }

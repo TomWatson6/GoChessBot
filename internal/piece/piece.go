@@ -1,7 +1,6 @@
 package piece
 
 import (
-	"github.com/tomwatson6/chessbot/internal/ai/power"
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 )
@@ -9,8 +8,9 @@ import (
 type Piece interface {
 	GetLetter() PieceLetter
 	GetColour() colour.Colour
-	GetPower() power.Power
-	GetThreatLevel() int
+	GetPosition() move.Position
+	// GetPower() power.Power
+	// GetThreatLevel() int
 	GetPiecePoints() PiecePoints
 	GetPieceType() PieceType
 	IsValidMove(dest move.Position) bool

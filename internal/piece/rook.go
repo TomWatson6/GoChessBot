@@ -19,6 +19,10 @@ func (r Rook) GetColour() colour.Colour {
 	return r.Colour
 }
 
+func (r Rook) GetPosition() move.Position {
+	return r.Position
+}
+
 func (r Rook) GetPiecePoints() PiecePoints {
 	return PiecePointsRook
 }

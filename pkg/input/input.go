@@ -1,0 +1,62 @@
+package input
+
+import (
+	"github.com/tomwatson6/chessbot/internal/board"
+	"github.com/tomwatson6/chessbot/internal/chess"
+	"github.com/tomwatson6/chessbot/internal/colour"
+	"github.com/tomwatson6/chessbot/internal/move"
+	"github.com/tomwatson6/chessbot/internal/piece"
+)
+
+func Get() chess.Chess {
+	// Make board for standard game of chess
+	pieces := make(map[move.Position]piece.Piece)
+
+	piecesList := []piece.Piece{
+		piece.Rook{Colour: colour.White, Position: move.Position{File: 0, Rank: 0}},
+		piece.Knight{Colour: colour.White, Position: move.Position{File: 0, Rank: 1}},
+		piece.Bishop{Colour: colour.White, Position: move.Position{File: 0, Rank: 2}},
+		piece.Queen{Colour: colour.White, Position: move.Position{File: 0, Rank: 3}},
+		piece.King{Colour: colour.White, Position: move.Position{File: 0, Rank: 4}},
+		piece.Bishop{Colour: colour.White, Position: move.Position{File: 0, Rank: 5}},
+		piece.Knight{Colour: colour.White, Position: move.Position{File: 0, Rank: 6}},
+		piece.Rook{Colour: colour.White, Position: move.Position{File: 0, Rank: 7}},
+		piece.Pawn{Colour: colour.White, Position: move.Position{File: 1, Rank: 0}},
+		piece.Pawn{Colour: colour.White, Position: move.Position{File: 1, Rank: 1}},
+		piece.Pawn{Colour: colour.White, Position: move.Position{File: 1, Rank: 2}},
+		piece.Pawn{Colour: colour.White, Position: move.Position{File: 1, Rank: 3}},
+		piece.Pawn{Colour: colour.White, Position: move.Position{File: 1, Rank: 4}},
+		piece.Pawn{Colour: colour.White, Position: move.Position{File: 1, Rank: 5}},
+		piece.Pawn{Colour: colour.White, Position: move.Position{File: 1, Rank: 6}},
+		piece.Pawn{Colour: colour.White, Position: move.Position{File: 1, Rank: 7}},
+		piece.Rook{Colour: colour.Black, Position: move.Position{File: 7, Rank: 0}},
+		piece.Knight{Colour: colour.Black, Position: move.Position{File: 7, Rank: 1}},
+		piece.Bishop{Colour: colour.Black, Position: move.Position{File: 7, Rank: 2}},
+		piece.Queen{Colour: colour.Black, Position: move.Position{File: 7, Rank: 3}},
+		piece.King{Colour: colour.Black, Position: move.Position{File: 7, Rank: 4}},
+		piece.Bishop{Colour: colour.Black, Position: move.Position{File: 7, Rank: 5}},
+		piece.Knight{Colour: colour.Black, Position: move.Position{File: 7, Rank: 6}},
+		piece.Rook{Colour: colour.Black, Position: move.Position{File: 7, Rank: 7}},
+		piece.Pawn{Colour: colour.Black, Position: move.Position{File: 6, Rank: 0}},
+		piece.Pawn{Colour: colour.Black, Position: move.Position{File: 6, Rank: 1}},
+		piece.Pawn{Colour: colour.Black, Position: move.Position{File: 6, Rank: 2}},
+		piece.Pawn{Colour: colour.Black, Position: move.Position{File: 6, Rank: 3}},
+		piece.Pawn{Colour: colour.Black, Position: move.Position{File: 6, Rank: 4}},
+		piece.Pawn{Colour: colour.Black, Position: move.Position{File: 6, Rank: 5}},
+		piece.Pawn{Colour: colour.Black, Position: move.Position{File: 6, Rank: 6}},
+		piece.Pawn{Colour: colour.Black, Position: move.Position{File: 6, Rank: 7}},
+	}
+
+	for _, p := range piecesList {
+		pieces[p.GetPosition()] = p
+	}
+
+	chess := chess.Chess{
+		Board: board.Board{
+			Pieces: pieces,
+		},
+		Turn: colour.White,
+	}
+
+	return chess
+}

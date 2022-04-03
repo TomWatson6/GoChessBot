@@ -19,6 +19,10 @@ func (q Queen) GetColour() colour.Colour {
 	return q.Colour
 }
 
+func (q Queen) GetPosition() move.Position {
+	return q.Position
+}
+
 func (q Queen) GetPiecePoints() PiecePoints {
 	return PiecePointsQueen
 }
