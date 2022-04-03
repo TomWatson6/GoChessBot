@@ -1,8 +1,8 @@
 package chess
 
 import (
-	"github.com/tomwatson6/chessbot/colour"
 	"github.com/tomwatson6/chessbot/internal/board"
+	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 )
 
