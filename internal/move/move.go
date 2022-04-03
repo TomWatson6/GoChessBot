@@ -5,5 +5,5 @@ type Move struct {
 }
 
 type Position struct {
-	File, Rank byte
+	File, Rank int
 }
