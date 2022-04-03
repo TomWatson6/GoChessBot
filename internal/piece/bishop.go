@@ -14,3 +14,7 @@ type Bishop struct {
 func (b Bishop) GetLetter() PieceLetter {
 	return PieceLetterBishop
 }
+
+func (b Bishop) GetColour() colour.Colour {
+	return b.Colour
+}

@@ -14,3 +14,7 @@ type King struct {
 func (k King) GetLetter() PieceLetter {
 	return PieceLetterKing
 }
+
+func (k King) GetColour() colour.Colour {
+	return k.Colour
+}

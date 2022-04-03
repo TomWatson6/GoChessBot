@@ -14,3 +14,7 @@ type Queen struct {
 func (q Queen) GetLetter() PieceLetter {
 	return PieceLetterQueen
 }
+
+func (q Queen) GetColour() colour.Colour {
+	return q.Colour
+}

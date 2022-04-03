@@ -14,3 +14,7 @@ type Knight struct {
 func (k Knight) GetLetter() PieceLetter {
 	return PieceLetterKnight
 }
+
+func (k Knight) GetColour() colour.Colour {
+	return k.Colour
+}

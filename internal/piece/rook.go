@@ -14,3 +14,7 @@ type Rook struct {
 func (r Rook) GetLetter() PieceLetter {
 	return PieceLetterRook
 }
+
+func (r Rook) GetColour() colour.Colour {
+	return r.Colour
+}

@@ -14,3 +14,7 @@ type Pawn struct {
 func (p Pawn) GetLetter() PieceLetter {
 	return PieceLetterPawn
 }
+
+func (p Pawn) GetColour() colour.Colour {
+	return p.Colour
+}
