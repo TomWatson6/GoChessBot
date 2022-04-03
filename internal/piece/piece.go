@@ -13,7 +13,7 @@ type Piece interface {
 	GetThreatLevel() int
 	GetPiecePoints() PiecePoints
 	GetPieceType() PieceType
-	IsValidMove(m move.Move) bool
+	IsValidMove(dest move.Position) bool
 }
 
 type PieceType byte
