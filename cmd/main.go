@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"github.com/tomwatson6/chessbot/internal/colour"
+	"github.com/tomwatson6/chessbot/pkg/input"
+	"github.com/tomwatson6/chessbot/pkg/output"
+)
 
 func main() {
-	fmt.Println("Hello World")
+	chess := input.Get(colour.White)
+	output.PrintBoard(chess)
 }
