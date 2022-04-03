@@ -28,7 +28,7 @@ func TestBishopValidMoves(t *testing.T) {
 	for _, c := range cases {
 		got := b.IsValidMove(c.dest)
 		if got != c.want {
-			t.Errorf("IsValidMove(%v) == %v, want %v", c.dest, got, c.want)
+			t.Errorf("IsValidMove(%v) from %v == %v, want %v", c.dest, b.Position, got, c.want)
 		}
 	}
 }
@@ -58,7 +58,7 @@ func TestKingValidMoves(t *testing.T) {
 	for _, c := range cases {
 		got := k.IsValidMove(c.dest)
 		if got != c.want {
-			t.Errorf("IsValidMove(%v) == %v, want %v", c.dest, got, c.want)
+			t.Errorf("IsValidMove(%v) from %v == %v, want %v", c.dest, k.Position, got, c.want)
 		}
 	}
 }
@@ -83,7 +83,7 @@ func TestKnightValidMoves(t *testing.T) {
 	for _, c := range cases {
 		got := k.IsValidMove(c.dest)
 		if got != c.want {
-			t.Errorf("IsValidMove(%v) == %v, want %v", c.dest, got, c.want)
+			t.Errorf("IsValidMove(%v) from %v == %v, want %v", c.dest, k.Position, got, c.want)
 		}
 	}
 }
@@ -115,7 +115,7 @@ func TestValidPawnMoves(t *testing.T) {
 	for _, c := range cases {
 		got := c.pawn.IsValidMove(c.dest)
 		if got != c.want {
-			t.Errorf("IsValidMove(%v) == %v, want %v", c.dest, got, c.want)
+			t.Errorf("IsValidMove(%v) from %v == %v, want %v", c.dest, c.pawn.Position, got, c.want)
 		}
 	}
 }
@@ -146,7 +146,7 @@ func TestQueenValidMoves(t *testing.T) {
 	for _, c := range cases {
 		got := q.IsValidMove(c.dest)
 		if got != c.want {
-			t.Errorf("IsValidMove(%v) == %v, want %v", c.dest, got, c.want)
+			t.Errorf("IsValidMove(%v) from %v == %v, want %v", c.dest, q.Position, got, c.want)
 		}
 	}
 }
@@ -174,7 +174,7 @@ func TestRookValidMoves(t *testing.T) {
 	for _, c := range cases {
 		got := r.IsValidMove(c.dest)
 		if got != c.want {
-			t.Errorf("IsValidMove(%v) == %v, want %v", c.dest, got, c.want)
+			t.Errorf("IsValidMove(%v) from %v == %v, want %v", c.dest, r.Position, got, c.want)
 		}
 	}
 }
