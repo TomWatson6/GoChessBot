@@ -36,7 +36,7 @@ func PrintBoard(c chess.Chess) {
 	for rank := lower; rank != upper; rank += step {
 		fmt.Printf("%d ", rank+1)
 
-		for file := lower; file != upper; file += step {
+		for file := 0; file < 8; file++ {
 			if piece := c.Board.GetPiece(move.Position{File: file, Rank: rank}); piece != nil {
 				fmt.Printf("%s ", GetPieceDisplay(piece))
 			} else {
