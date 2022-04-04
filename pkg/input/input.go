@@ -8,7 +8,7 @@ import (
 	"github.com/tomwatson6/chessbot/internal/piece"
 )
 
-func Get(c colour.Colour) chess.Chess {
+func Get(c colour.Colour, alterations map[move.Position]piece.Piece) chess.Chess {
 	// Make board for standard game of chess
 	pieces := make(map[move.Position]piece.Piece)
 
@@ -49,6 +49,10 @@ func Get(c colour.Colour) chess.Chess {
 
 	for _, p := range piecesList {
 		pieces[p.GetPosition()] = p
+	}
+
+	for k, v := range alterations {
+		pieces[k] = v
 	}
 
 	chess := chess.Chess{
