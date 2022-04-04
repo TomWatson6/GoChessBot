@@ -21,6 +21,18 @@ func (b Board) IsValidMove(m move.Move) bool {
 			return true
 		}
 
+		//Get line apart from last position
+		//If line is clear, check that last square has no piece, or piece of opposite colour
+		line := b.GetLine(m.From, m.To)
+		line = line[:len(line)-1]
+
+		if b.IsLineClear(line) {
+			if opp, ok := b.Pieces[m.To]; ok {
+				return opp.GetColour() != p.GetColour()
+			}
+
+			return true
+		}
 	}
 
 	return false
@@ -90,9 +102,7 @@ func (b Board) GetLine(start, end move.Position) []move.Position {
 	return []move.Position{}
 }
 
-func (b Board) IsLineClear(m move.Move) bool {
-	line := b.GetLine(m.From, m.To)
-
+func (b Board) IsLineClear(line []move.Position) bool {
 	for _, pos := range line {
 		if _, ok := b.Pieces[pos]; ok {
 			return false
