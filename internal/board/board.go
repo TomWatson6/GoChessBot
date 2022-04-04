@@ -1,6 +1,8 @@
 package board
 
 import (
+	"fmt"
+
 	"github.com/tomwatson6/chessbot/internal/move"
 	"github.com/tomwatson6/chessbot/internal/piece"
 )
@@ -11,6 +13,16 @@ type Board struct {
 
 func (b Board) GetPiece(pos move.Position) piece.Piece {
 	return b.Pieces[pos]
+}
+
+func (b Board) MovePiece(m move.Move) error {
+	if b.IsValidMove(m) {
+		b.Pieces[m.To] = b.Pieces[m.From]
+		delete(b.Pieces, m.From)
+		return nil
+	}
+
+	return fmt.Errorf("invalid move: %v", m)
 }
 
 func (b Board) IsValidMove(m move.Move) bool {
