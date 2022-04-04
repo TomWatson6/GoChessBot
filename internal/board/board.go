@@ -2,6 +2,7 @@ package board
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/tomwatson6/chessbot/internal/move"
 	"github.com/tomwatson6/chessbot/internal/piece"
@@ -26,6 +27,10 @@ func (b Board) MovePiece(m move.Move) error {
 }
 
 func (b Board) IsValidMove(m move.Move) bool {
+	if m.From == m.To {
+		return false
+	}
+
 	p := b.GetPiece(m.From)
 
 	if valid := p.IsValidMove(m.To); valid {
@@ -36,10 +41,9 @@ func (b Board) IsValidMove(m move.Move) bool {
 		//Get line apart from last position
 		//If line is clear, check that last square has no piece, or piece of opposite colour
 		line := b.GetLine(m.From, m.To)
-		line = line[:len(line)-1]
 
 		if b.IsLineClear(line) {
-			if opp, ok := b.Pieces[m.To]; ok {
+			if opp := b.Pieces[m.To]; opp != nil {
 				return opp.GetColour() != p.GetColour()
 			}
 
@@ -52,7 +56,7 @@ func (b Board) IsValidMove(m move.Move) bool {
 
 func (b Board) GetLine(start, end move.Position) []move.Position {
 	//If line is diagonal
-	if start.File != end.File && start.Rank != end.Rank {
+	if math.Abs(float64(end.File-start.File)) == math.Abs(float64(end.Rank-start.Rank)) {
 		xStep := 1
 		yStep := 1
 
@@ -69,7 +73,7 @@ func (b Board) GetLine(start, end move.Position) []move.Position {
 		y := start.Rank
 
 		for {
-			if start.File == end.File && start.Rank == end.Rank {
+			if x == end.File && y == end.Rank {
 				break
 			}
 
@@ -78,7 +82,7 @@ func (b Board) GetLine(start, end move.Position) []move.Position {
 			y += yStep
 		}
 
-		return line
+		return line[1:]
 	} else {
 		//If line is vertical
 		if start.File == end.File {
@@ -93,7 +97,7 @@ func (b Board) GetLine(start, end move.Position) []move.Position {
 				}
 			}
 
-			return line
+			return line[1 : len(line)-1]
 		} else if start.Rank == end.Rank {
 			//If line is horizontal
 			var line []move.Position
@@ -107,7 +111,7 @@ func (b Board) GetLine(start, end move.Position) []move.Position {
 				}
 			}
 
-			return line
+			return line[1 : len(line)-1]
 		}
 	}
 
@@ -116,7 +120,7 @@ func (b Board) GetLine(start, end move.Position) []move.Position {
 
 func (b Board) IsLineClear(line []move.Position) bool {
 	for _, pos := range line {
-		if _, ok := b.Pieces[pos]; ok {
+		if p := b.Pieces[pos]; p != nil {
 			return false
 		}
 	}
