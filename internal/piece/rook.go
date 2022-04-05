@@ -23,6 +23,11 @@ func (r Rook) GetPosition() move.Position {
 	return r.Position
 }
 
+func (r Rook) SetPosition(pos move.Position) Piece {
+	r.Position = pos
+	return r
+}
+
 func (r Rook) GetPiecePoints() PiecePoints {
 	return PiecePointsRook
 }

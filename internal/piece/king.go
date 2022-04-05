@@ -25,6 +25,11 @@ func (k King) GetPosition() move.Position {
 	return k.Position
 }
 
+func (k King) SetPosition(pos move.Position) Piece {
+	k.Position = pos
+	return k
+}
+
 func (k King) GetPiecePoints() PiecePoints {
 	return PiecePointsKing
 }

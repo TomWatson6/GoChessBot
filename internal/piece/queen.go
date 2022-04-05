@@ -23,6 +23,11 @@ func (q Queen) GetPosition() move.Position {
 	return q.Position
 }
 
+func (q Queen) SetPosition(pos move.Position) Piece {
+	q.Position = pos
+	return q
+}
+
 func (q Queen) GetPiecePoints() PiecePoints {
 	return PiecePointsQueen
 }

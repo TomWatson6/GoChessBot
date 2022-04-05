@@ -9,6 +9,7 @@ type Piece interface {
 	GetLetter() PieceLetter
 	GetColour() colour.Colour
 	GetPosition() move.Position
+	SetPosition(pos move.Position) Piece
 	// GetPower() power.Power
 	// GetThreatLevel() int
 	GetPiecePoints() PiecePoints

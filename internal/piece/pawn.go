@@ -23,6 +23,11 @@ func (p Pawn) GetPosition() move.Position {
 	return p.Position
 }
 
+func (p Pawn) SetPosition(pos move.Position) Piece {
+	p.Position = pos
+	return p
+}
+
 func (p Pawn) GetPiecePoints() PiecePoints {
 	return PiecePointsPawn
 }

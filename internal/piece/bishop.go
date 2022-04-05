@@ -23,6 +23,11 @@ func (b Bishop) GetPosition() move.Position {
 	return b.Position
 }
 
+func (b Bishop) SetPosition(pos move.Position) Piece {
+	b.Position = pos
+	return b
+}
+
 func (b Bishop) GetPiecePoints() PiecePoints {
 	return PiecePointsBishop
 }
