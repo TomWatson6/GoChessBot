@@ -18,6 +18,7 @@ func (b Board) GetPiece(pos move.Position) piece.Piece {
 
 func (b Board) MovePiece(m move.Move) error {
 	if b.IsValidMove(m) {
+		b.Pieces[m.From] = b.Pieces[m.From].SetPosition(m.To)
 		b.Pieces[m.To] = b.Pieces[m.From]
 		delete(b.Pieces, m.From)
 		return nil
