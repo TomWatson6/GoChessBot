@@ -10,5 +10,5 @@ import (
 
 func main() {
 	chess := input.Get(colour.White, make(map[move.Position]piece.Piece))
-	output.PrintBoard(chess)
+	output.PrintBoard(chess.Board, chess.Turn)
 }
