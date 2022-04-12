@@ -9,7 +9,37 @@ import (
 )
 
 type Board struct {
-	Pieces map[move.Position]piece.Piece
+	Pieces    map[move.Position]piece.Piece
+	ThreatMap map[move.Position][]piece.Piece
+}
+
+func (b *Board) GenerateThreatMap() {
+	(*b).ThreatMap = make(map[move.Position][]piece.Piece)
+	pieces := (*b).GetRemainingPieces()
+
+	for pos := range (*b).Pieces {
+		for _, piece := range pieces {
+			if piece.IsValidMove(pos) {
+				(*b).ThreatMap[pos] = append((*b).ThreatMap[pos], piece)
+			}
+		}
+	}
+}
+
+func (b Board) GetRemainingPieces() []piece.Piece {
+	var pieces []piece.Piece
+
+	for _, p := range b.Pieces {
+		if p != nil {
+			pieces = append(pieces, p)
+		}
+	}
+
+	return pieces
+}
+
+func (b Board) GetAttackingPieces(pos move.Position) []piece.Piece {
+	return b.ThreatMap[pos]
 }
 
 func (b Board) GetPiece(pos move.Position) piece.Piece {
