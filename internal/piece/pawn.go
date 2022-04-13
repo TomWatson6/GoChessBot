@@ -1,6 +1,8 @@
 package piece
 
 import (
+	"math"
+
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 )
@@ -38,6 +40,13 @@ func (p Pawn) GetPieceType() PieceType {
 
 func (p Pawn) IsValidMove(dest move.Position) bool {
 	y := dest.Rank - p.Position.Rank
+	x := math.Abs(float64(dest.File - p.Position.File))
 
-	return y == 1 || (!p.HasMoved && y == 2)
+	if y == 1 && x <= 1 {
+		return true
+	} else if y == 2 && !p.HasMoved {
+		return x == 0
+	}
+
+	return false
 }
