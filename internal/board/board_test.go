@@ -65,13 +65,37 @@ func TestMovePiece(t *testing.T) {
 			move.Position{File: 1, Rank: 6},
 			nil,
 		},
+		{
+			move.Move{
+				From: move.Position{File: 0, Rank: 1},
+				To:   move.Position{File: 0, Rank: 3},
+			},
+			move.Position{File: 0, Rank: 3},
+			piece.Pawn{
+				Colour:   colour.White,
+				Position: move.Position{File: 0, Rank: 3},
+			},
+		},
+		{
+			move.Move{
+				From: move.Position{File: 1, Rank: 0},
+				To:   move.Position{File: 3, Rank: 1},
+			},
+			move.Position{File: 3, Rank: 1},
+			piece.Pawn{
+				Colour:   colour.White,
+				Position: move.Position{File: 3, Rank: 1},
+			},
+		},
 	}
 
 	for _, c := range cases {
 		b.MovePiece(c.move)
+
 		got := b.GetPiece(c.check)
 		if got != c.want {
-			t.Errorf("MovePiece(%v) => Piece at position %v == %v, want %v", c.move, c.check, got, c.want)
+			t.Errorf("MovePiece(%v) => Piece at position %v == %#v, want %#v",
+				c.move, c.check, got, c.want)
 		}
 	}
 }
