@@ -104,7 +104,7 @@ func (c Chess) TranslateNotation(n string) ([]move.Move, error) {
 					m.To = move.Position{File: 5, Rank: 7}
 					ms = append(ms, m)
 				}
-			} else {
+			} else if len(runes) == 5 {
 				// If length of notation is 5, then it's a queen side castling move (O-O-O)
 				if c.Turn == colour.White {
 					m.From = move.Position{File: 4, Rank: 0}
@@ -121,6 +121,8 @@ func (c Chess) TranslateNotation(n string) ([]move.Move, error) {
 					m.To = move.Position{File: 3, Rank: 7}
 					ms = append(ms, m)
 				}
+			} else {
+				return ms, fmt.Errorf("invalid move: %s", n)
 			}
 			return ms, nil
 		} else if unicode.IsUpper(runes[0]) {
