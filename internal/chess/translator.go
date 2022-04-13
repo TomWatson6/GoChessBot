@@ -10,15 +10,13 @@ import (
 	"github.com/tomwatson6/chessbot/internal/piece"
 )
 
-func Contains(runes []rune, char rune) bool {
-	for _, r := range runes {
-		if r == char {
-			return true
-		}
-	}
-
-	return false
-}
+// function for handling pawn standard move e.g. e4
+// function for handling piece standard move e.g. Qa3
+// function for handling pawn promotion e.g. e8=Q
+// function for handling captures e.g. Nxe3, e2xf3, e3Nxf5
+// function for each of the above inside the handling of captures
+// function for handling castling e.g. O-O, O-O-O
+// function for handling ambiguous moves e.g. e3Nf5
 
 func (c Chess) TranslateNotation(n string) ([]move.Move, error) {
 	var ms []move.Move
@@ -27,7 +25,7 @@ func (c Chess) TranslateNotation(n string) ([]move.Move, error) {
 	runes := []rune(n)
 
 	// If string contains 'x', it's a capture
-	if Contains(runes, 'x') {
+	if strings.Contains(n, "x") {
 		// Split string into two parts
 		parts := strings.Split(n, "x")
 		left := []rune(parts[0])
@@ -54,29 +52,38 @@ func (c Chess) TranslateNotation(n string) ([]move.Move, error) {
 
 		if instantiated {
 			ms = append(ms, m)
+			return ms, nil
 		} else {
 			return nil, fmt.Errorf("invalid move: %v", n)
 		}
 	} else {
-		// If first character is lower case, then it's a pawn move
+		// If first character is lower case, then it's a pawn move or
+		// a piece other than a pawn that is moving and is ambiguous
 		if unicode.IsLower(runes[0]) {
-			m.To = move.Position{File: FileToNumber(runes[0]), Rank: RankToNumber(runes[1])}
-			attackingPieces := c.Board.GetAttackingPieces(m.To)
-			instantiated := false
+			if len(runes) == 2 {
+				m.To = move.Position{File: FileToNumber(runes[0]), Rank: RankToNumber(runes[1])}
+				movePieces := c.Board.GetMoveMap(m.To)
+				instantiated := false
 
-			for _, p := range attackingPieces {
-				if p.GetPieceType() == piece.PieceTypePawn && p.GetColour() == c.Turn {
-					m.From = p.GetPosition()
-					instantiated = true
-					break
+				for _, p := range movePieces {
+					if p.GetPieceType() == piece.PieceTypePawn && p.GetColour() == c.Turn {
+						m.From = p.GetPosition()
+						instantiated = true
+						break
+					}
 				}
-			}
 
-			if instantiated {
+				if instantiated {
+					ms = append(ms, m)
+					return ms, nil
+				} else {
+					return ms, fmt.Errorf("invalid move: %s", n)
+				}
+			} else {
+				m.From = move.Position{File: FileToNumber(runes[0]), Rank: RankToNumber(runes[1])}
+				m.To = move.Position{File: FileToNumber(runes[3]), Rank: RankToNumber(runes[4])}
 				ms = append(ms, m)
 				return ms, nil
-			} else {
-				return ms, fmt.Errorf("invalid move: %s", n)
 			}
 		} else if runes[0] == 'O' {
 			// If first character is 'O', it's a castling move (O-O)
@@ -119,10 +126,10 @@ func (c Chess) TranslateNotation(n string) ([]move.Move, error) {
 		} else if unicode.IsUpper(runes[0]) {
 			// If first character is upper case, then it's a piece move
 			m.To = move.Position{File: FileToNumber(runes[1]), Rank: RankToNumber(runes[2])}
-			attackingPieces := c.Board.GetAttackingPieces(m.To)
+			movePieces := c.Board.GetMoveMap(m.To)
 			instantiated := false
 
-			for _, p := range attackingPieces {
+			for _, p := range movePieces {
 				if p.GetLetter() == piece.PieceLetter(runes[0]) && p.GetColour() == c.Turn {
 					m.From = p.GetPosition()
 					instantiated = true
