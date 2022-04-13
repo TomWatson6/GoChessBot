@@ -29,7 +29,6 @@ func (b *Board) GenerateMoveMap() {
 	}
 }
 
-// TODO: Exclude Pawns that are moving forward, and make a GenerateMoveMap, where it includes them
 func (b *Board) GenerateThreatMap() {
 	(*b).ThreatMap = make(map[move.Position][]piece.Piece)
 	pieces := (*b).GetRemainingPieces()
