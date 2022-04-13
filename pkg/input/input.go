@@ -10,6 +10,15 @@ import (
 
 func Get(c colour.Colour, alterations map[move.Position]piece.Piece) chess.Chess {
 	// Make board for standard game of chess
+
+	var squares []move.Position
+
+	for r := 0; r < 8; r++ {
+		for f := 0; f < 8; f++ {
+			squares = append(squares, move.Position{File: f, Rank: r})
+		}
+	}
+
 	pieces := make(map[move.Position]piece.Piece)
 
 	piecesList := []piece.Piece{
@@ -57,7 +66,8 @@ func Get(c colour.Colour, alterations map[move.Position]piece.Piece) chess.Chess
 
 	chess := chess.Chess{
 		Board: board.Board{
-			Pieces: pieces,
+			Squares: squares,
+			Pieces:  pieces,
 		},
 		Turn: c,
 	}
