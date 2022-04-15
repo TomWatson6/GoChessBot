@@ -23,6 +23,7 @@ func (c Chess) TranslatePawnMove(n string) (move.Move, error) {
 		if movePiece.GetPieceType() == piece.PieceTypePawn {
 			m.From = movePiece.GetPosition()
 			instantiated = true
+			break
 		}
 	}
 
@@ -47,6 +48,7 @@ func (c Chess) TranslatePieceMove(n string) (move.Move, error) {
 		if movePiece.GetLetter() == piece.PieceLetter(runes[0]) {
 			m.From = movePiece.GetPosition()
 			instantiated = true
+			break
 		}
 	}
 
