@@ -23,10 +23,25 @@ func TestTranslateNotation(t *testing.T) {
 		Colour:   colour.White,
 		Position: move.Position{File: 2, Rank: 4},
 	}
+	alterations[move.Position{File: 5, Rank: 2}] = piece.Bishop{
+		Colour:   colour.Black,
+		Position: move.Position{File: 5, Rank: 2},
+	}
 
 	ch := input.Get(colour.White, alterations)
 	ch.Board.GenerateMoveMap()
 	ch.Board.GenerateThreatMap()
+
+	// Visualisation of the board
+	// 8 bR bN bB bQ bK bB bN bR
+	// 7 bP bP bP bP bP bP bP bP
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## wN ## ## ## wN ##
+	// 4 ## ## ## ## ## ## ## ##
+	// 3 ## ## bQ ## ## ## ## ##
+	// 2 wP wP wP wP wP wP wP wP
+	// 1 wR wN wB wQ wK wB wN wR
+	//    A  B  C  D  E  F  G  H
 
 	cases := []struct {
 		notation string
