@@ -1,7 +1,6 @@
 package chess_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/tomwatson6/chessbot/internal/colour"
@@ -27,7 +26,7 @@ func TestTranslateNotation(t *testing.T) {
 
 	ch := input.Get(colour.White, alterations)
 	ch.Board.GenerateMoveMap()
-	fmt.Printf("%#v\n", ch.Board.MoveMap)
+	ch.Board.GenerateThreatMap()
 
 	cases := []struct {
 		notation string
