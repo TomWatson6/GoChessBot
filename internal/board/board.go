@@ -3,6 +3,7 @@ package board
 import (
 	"fmt"
 	"math"
+	"sync"
 
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
@@ -17,40 +18,85 @@ type Board struct {
 }
 
 func (b *Board) GenerateMoveMap() {
-	(*b).MoveMap = make(map[move.Position][]piece.Piece)
-	pieces := (*b).GetRemainingPieces()
+	b.MoveMap = make(map[move.Position][]piece.Piece)
+	pieces := b.GetRemainingPieces()
+	wg := &sync.WaitGroup{}
+	mu := &sync.Mutex{}
 
-	for _, pos := range (*b).Squares {
-		for _, piece := range pieces {
-			if (*b).IsValidMove(move.Move{From: piece.GetPosition(), To: pos}) {
-				(*b).MoveMap[pos] = append((*b).MoveMap[pos], piece)
-			}
+	wg.Add(len(b.Squares) * len(pieces))
+	for _, pos := range b.Squares {
+		for _, p := range pieces {
+			go func(pos move.Position, p piece.Piece) {
+				defer wg.Done()
+				if b.IsValidMove(move.Move{From: p.GetPosition(), To: pos}) {
+					mu.Lock()
+					b.MoveMap[pos] = append(b.MoveMap[pos], p)
+					mu.Unlock()
+				}
+			}(pos, p)
 		}
 	}
+
+	wg.Wait()
+
+	// for _, pos := range b.Squares {
+	// 	for _, piece := range pieces {
+	// 		if b.IsValidMove(move.Move{From: piece.GetPosition(), To: pos}) {
+	// 			b.MoveMap[pos] = append(b.MoveMap[pos], piece)
+	// 		}
+	// 	}
+	// }
 }
 
 func (b *Board) GenerateThreatMap() {
-	(*b).ThreatMap = make(map[move.Position][]piece.Piece)
-	pieces := (*b).GetRemainingPieces()
+	b.ThreatMap = make(map[move.Position][]piece.Piece)
+	pieces := b.GetRemainingPieces()
+	wg := &sync.WaitGroup{}
+	mu := &sync.Mutex{}
 
-	for _, pos := range (*b).Squares {
+	wg.Add(len(b.Squares) * len(pieces))
+	for _, pos := range b.Squares {
 		for _, p := range pieces {
-			if (*b).IsValidMove(move.Move{From: p.GetPosition(), To: pos}) {
-				if p.GetPieceType() == piece.PieceTypePawn {
-					x := math.Abs(float64(p.GetPosition().File - pos.File))
-					y := math.Abs(float64(p.GetPosition().Rank - pos.Rank))
+			go func(pos move.Position, p piece.Piece) {
+				defer wg.Done()
+				if b.IsValidMove(move.Move{From: p.GetPosition(), To: pos}) {
+					if p.GetPieceType() == piece.PieceTypePawn {
+						x := math.Abs(float64(p.GetPosition().File - pos.File))
+						y := math.Abs(float64(p.GetPosition().Rank - pos.Rank))
 
-					// Diagonal move means attacking move
-					// Horizontal & Vertical moves aren't attacking moves
-					if x == 0 && (y == 1 || y == 2) {
-						continue
+						// Diagonal move means attacking move
+						// Horizontal & Vertical moves aren't attacking moves
+						if x == 0 && (y == 1 || y == 2) {
+							return
+						}
 					}
-				}
 
-				(*b).ThreatMap[pos] = append((*b).ThreatMap[pos], p)
-			}
+					mu.Lock()
+					b.ThreatMap[pos] = append(b.ThreatMap[pos], p)
+					mu.Unlock()
+				}
+			}(pos, p)
 		}
 	}
+
+	// for _, pos := range b.Squares {
+	// 	for _, p := range pieces {
+	// 		if b.IsValidMove(move.Move{From: p.GetPosition(), To: pos}) {
+	// 			if p.GetPieceType() == piece.PieceTypePawn {
+	// 				x := math.Abs(float64(p.GetPosition().File - pos.File))
+	// 				y := math.Abs(float64(p.GetPosition().Rank - pos.Rank))
+
+	// 				// Diagonal move means attacking move
+	// 				// Horizontal & Vertical moves aren't attacking moves
+	// 				if x == 0 && (y == 1 || y == 2) {
+	// 					continue
+	// 				}
+	// 			}
+
+	// 			b.ThreatMap[pos] = append(b.ThreatMap[pos], p)
+	// 		}
+	// 	}
+	// }
 }
 
 func (b Board) GetRemainingPieces() []piece.Piece {
