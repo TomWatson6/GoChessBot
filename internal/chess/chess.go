@@ -21,10 +21,11 @@ func (c *Chess) MakeMove(m move.Move) error {
 		return fmt.Errorf("invalid move: %v", m)
 	}
 
+	c.nextTurn()
 	return nil
 }
 
-func (c *Chess) NextTurn() {
+func (c *Chess) nextTurn() {
 	if c.Turn == colour.White {
 		c.Turn = colour.Black
 	} else {
