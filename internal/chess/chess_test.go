@@ -11,21 +11,25 @@ import (
 
 func TestTranslateNotation(t *testing.T) {
 	alterations := make(map[move.Position]piece.Piece)
-	alterations[move.Position{File: 2, Rank: 2}] = piece.Queen{
-		Colour:   colour.Black,
-		Position: move.Position{File: 2, Rank: 2},
+	alterations[move.Position{File: 2, Rank: 2}] = piece.Piece{
+		Colour:       colour.Black,
+		Position:     move.Position{File: 2, Rank: 2},
+		PieceDetails: piece.Queen{},
 	}
-	alterations[move.Position{File: 6, Rank: 4}] = piece.Knight{
-		Colour:   colour.White,
-		Position: move.Position{File: 6, Rank: 4},
+	alterations[move.Position{File: 6, Rank: 4}] = piece.Piece{
+		Colour:       colour.White,
+		Position:     move.Position{File: 6, Rank: 4},
+		PieceDetails: piece.Knight{},
 	}
-	alterations[move.Position{File: 2, Rank: 4}] = piece.Knight{
-		Colour:   colour.White,
-		Position: move.Position{File: 2, Rank: 4},
+	alterations[move.Position{File: 2, Rank: 4}] = piece.Piece{
+		Colour:       colour.White,
+		Position:     move.Position{File: 2, Rank: 4},
+		PieceDetails: piece.Knight{},
 	}
-	alterations[move.Position{File: 5, Rank: 2}] = piece.Bishop{
-		Colour:   colour.Black,
-		Position: move.Position{File: 5, Rank: 2},
+	alterations[move.Position{File: 5, Rank: 2}] = piece.Piece{
+		Colour:       colour.Black,
+		Position:     move.Position{File: 5, Rank: 2},
+		PieceDetails: piece.Bishop{},
 	}
 
 	ch := input.Get(colour.White, alterations)

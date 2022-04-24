@@ -14,7 +14,7 @@ type Chess struct {
 }
 
 func (c *Chess) MakeMove(m move.Move) error {
-	if c.Board.Pieces[m.From].GetColour() != c.Turn {
+	if c.Board.Pieces[m.From].Colour != c.Turn {
 		return fmt.Errorf("invalid move for current turn: %v", m)
 	}
 	if err := c.Board.MovePiece(m); err != nil {

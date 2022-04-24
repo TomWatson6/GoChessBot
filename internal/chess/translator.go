@@ -21,7 +21,7 @@ func (c Chess) TranslatePawnMove(n string) (move.Move, error) {
 
 	for _, movePiece := range movePieces {
 		if movePiece.GetPieceType() == piece.PieceTypePawn {
-			m.From = movePiece.GetPosition()
+			m.From = movePiece.Position
 			instantiated = true
 			break
 		}
@@ -45,8 +45,8 @@ func (c Chess) TranslatePieceMove(n string) (move.Move, error) {
 	instantiated := false
 
 	for _, movePiece := range movePieces {
-		if movePiece.GetLetter() == piece.PieceLetter(runes[0]) {
-			m.From = movePiece.GetPosition()
+		if movePiece.GetPieceLetter() == piece.PieceLetter(runes[0]) {
+			m.From = movePiece.Position
 			instantiated = true
 			break
 		}
@@ -96,8 +96,8 @@ func (c Chess) TranslatePieceCapture(n string) (move.Move, error) {
 	instantiated := false
 
 	for _, p := range attackingPieces {
-		if p.GetLetter() == piece.PieceLetter(left[0]) {
-			m.From = p.GetPosition()
+		if p.GetPieceLetter() == piece.PieceLetter(left[0]) {
+			m.From = p.Position
 			instantiated = true
 			break
 		}

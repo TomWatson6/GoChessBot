@@ -5,19 +5,46 @@ import (
 	"github.com/tomwatson6/chessbot/internal/move"
 )
 
-// Needs to be simplified at some point, getting way too big!
-type Piece interface {
-	GetLetter() PieceLetter
-	GetColour() colour.Colour
-	GetPosition() move.Position
-	SetPosition(pos move.Position) Piece
-	GetPiecePoints() PiecePoints
+type PieceDetails interface {
 	GetPieceType() PieceType
-	IsValidMove(dest move.Position) bool
-	AppendValidMove(dest move.Position) Piece
-	ResetValidMoves() Piece
-	GetValidMoves() []move.Position
+	GetPiecePoints() PiecePoints
+	GetPieceLetter() PieceLetter
+	IsValidMove(m move.Move) bool
 }
+
+type Piece struct {
+	Position   move.Position
+	Colour     colour.Colour
+	ValidMoves []move.Position
+	PieceDetails
+}
+
+func (p Piece) Equals(p2 Piece) bool {
+	if p.GetPieceType() != p2.GetPieceType() {
+		return false
+	}
+	if p.Position != p2.Position {
+		return false
+	}
+	if p.Colour != p2.Colour {
+		return false
+	}
+	return true
+}
+
+// Needs to be simplified at some point, getting way too big!
+// type Piece interface {
+// 	GetLetter() PieceLetter
+// 	GetColour() colour.Colour
+// 	GetPosition() move.Position
+// 	SetPosition(pos move.Position) Piece
+// 	GetPiecePoints() PiecePoints
+// 	GetPieceType() PieceType
+// 	IsValidMove(dest move.Position) bool
+// 	AppendValidMove(dest move.Position) Piece
+// 	ResetValidMoves() Piece
+// 	GetValidMoves() []move.Position
+// }
 
 type PieceType byte
 

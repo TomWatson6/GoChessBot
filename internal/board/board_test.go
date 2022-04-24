@@ -11,9 +11,10 @@ import (
 
 func TestMovePiece(t *testing.T) {
 	alterations := make(map[move.Position]piece.Piece)
-	alterations[move.Position{File: 0, Rank: 2}] = piece.Queen{
-		Colour:   colour.White,
-		Position: move.Position{File: 0, Rank: 2},
+	alterations[move.Position{File: 0, Rank: 2}] = piece.Piece{
+		Colour:       colour.White,
+		Position:     move.Position{File: 0, Rank: 2},
+		PieceDetails: piece.Queen{},
 	}
 
 	game := input.Get(colour.White, alterations)
@@ -41,9 +42,10 @@ func TestMovePiece(t *testing.T) {
 				To:   move.Position{File: 1, Rank: 3},
 			},
 			move.Position{File: 1, Rank: 3},
-			piece.Queen{
-				Colour:   colour.White,
-				Position: move.Position{File: 1, Rank: 3},
+			piece.Piece{
+				Colour:       colour.White,
+				Position:     move.Position{File: 1, Rank: 3},
+				PieceDetails: piece.Queen{},
 			},
 		},
 		{
@@ -52,9 +54,10 @@ func TestMovePiece(t *testing.T) {
 				To:   move.Position{File: 1, Rank: 6},
 			},
 			move.Position{File: 1, Rank: 6},
-			piece.Queen{
-				Colour:   colour.White,
-				Position: move.Position{File: 1, Rank: 6},
+			piece.Piece{
+				Colour:       colour.White,
+				Position:     move.Position{File: 1, Rank: 6},
+				PieceDetails: piece.Queen{},
 			},
 		},
 		{
@@ -63,7 +66,7 @@ func TestMovePiece(t *testing.T) {
 				To:   move.Position{File: 1, Rank: 5},
 			},
 			move.Position{File: 1, Rank: 6},
-			nil,
+			piece.Piece{},
 		},
 		{
 			move.Move{
@@ -71,9 +74,10 @@ func TestMovePiece(t *testing.T) {
 				To:   move.Position{File: 0, Rank: 3},
 			},
 			move.Position{File: 0, Rank: 3},
-			piece.Pawn{
-				Colour:   colour.White,
-				Position: move.Position{File: 0, Rank: 3},
+			piece.Piece{
+				Colour:       colour.White,
+				Position:     move.Position{File: 0, Rank: 3},
+				PieceDetails: piece.Pawn{},
 			},
 		},
 		{
@@ -82,9 +86,10 @@ func TestMovePiece(t *testing.T) {
 				To:   move.Position{File: 3, Rank: 1},
 			},
 			move.Position{File: 3, Rank: 1},
-			piece.Pawn{
-				Colour:   colour.White,
-				Position: move.Position{File: 3, Rank: 1},
+			piece.Piece{
+				Colour:       colour.White,
+				Position:     move.Position{File: 3, Rank: 1},
+				PieceDetails: piece.Pawn{},
 			},
 		},
 	}
@@ -92,19 +97,26 @@ func TestMovePiece(t *testing.T) {
 	for _, c := range cases {
 		b.MovePiece(c.move)
 
-		got := b.GetPiece(c.check)
-		if got != c.want {
-			t.Errorf("MovePiece(%v) => Piece at position %v == %#v, want %#v",
-				c.move, c.check, got, c.want)
+		if got, ok := b.Pieces[c.check]; ok {
+			if !got.Equals(c.want) {
+				t.Errorf("MovePiece(%v) => Piece at position %v == %#v, want %#v",
+					c.move, c.check, got, c.want)
+			}
+		} else {
+			if c.want.PieceDetails != nil {
+				t.Errorf("MovePiece(%v) => Piece at position %v == %#v, want %#v",
+					c.move, c.check, got, c.want)
+			}
 		}
 	}
 }
 
 func TestIsValidMove(t *testing.T) {
 	alterations := make(map[move.Position]piece.Piece)
-	alterations[move.Position{File: 0, Rank: 2}] = piece.Queen{
-		Colour:   colour.White,
-		Position: move.Position{File: 0, Rank: 2},
+	alterations[move.Position{File: 0, Rank: 2}] = piece.Piece{
+		Colour:       colour.White,
+		Position:     move.Position{File: 0, Rank: 2},
+		PieceDetails: piece.Queen{},
 	}
 
 	game := input.Get(colour.White, alterations)

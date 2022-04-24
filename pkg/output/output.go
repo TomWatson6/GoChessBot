@@ -9,15 +9,15 @@ import (
 	"github.com/tomwatson6/chessbot/internal/piece"
 )
 
-func GetPieceDisplay(p piece.Piece) string {
+func getPieceDisplay(p piece.Piece) string {
 	output := ""
-	if p.GetColour() == colour.White {
+	if p.Colour == colour.White {
 		output += "w"
 	} else {
 		output += "b"
 	}
 
-	output += string(p.GetLetter())
+	output += string(p.GetPieceLetter())
 
 	return output
 }
@@ -33,12 +33,12 @@ func PrintBoard(b board.Board, c colour.Colour) {
 		step = -1
 	}
 
-	for rank := lower; rank != upper; rank += step {
-		fmt.Printf("%d ", rank+1)
+	for r := lower; r != upper; r += step {
+		fmt.Printf("%d ", r+1)
 
-		for file := 0; file < 8; file++ {
-			if piece := b.GetPiece(move.Position{File: file, Rank: rank}); piece != nil {
-				fmt.Printf("%s ", GetPieceDisplay(piece))
+		for f := 0; f < 8; f++ {
+			if p, ok := b.Pieces[move.Position{File: f, Rank: r}]; ok {
+				fmt.Printf("%s ", getPieceDisplay(p))
 			} else {
 				fmt.Printf("## ")
 			}
