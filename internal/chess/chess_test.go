@@ -29,8 +29,6 @@ func TestTranslateNotation(t *testing.T) {
 	}
 
 	ch := input.Get(colour.White, alterations)
-	ch.Board.GenerateMoveMap()
-	ch.Board.GenerateThreatMap()
 
 	// Visualisation of the board
 	// 8 bR bN bB bQ bK bB bN bR

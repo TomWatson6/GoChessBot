@@ -127,6 +127,10 @@ func (b Board) MovePiece(m move.Move) error {
 		b.Pieces[m.From] = b.Pieces[m.From].SetPosition(m.To)
 		b.Pieces[m.To] = b.Pieces[m.From]
 		delete(b.Pieces, m.From)
+
+		b.GenerateMoveMap()
+		b.GenerateThreatMap()
+
 		return nil
 	}
 

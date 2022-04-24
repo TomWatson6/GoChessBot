@@ -72,5 +72,8 @@ func Get(c colour.Colour, alterations map[move.Position]piece.Piece) chess.Chess
 		Turn: c,
 	}
 
+	chess.Board.GenerateMoveMap()
+	chess.Board.GenerateThreatMap()
+
 	return chess
 }
