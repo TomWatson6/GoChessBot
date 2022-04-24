@@ -165,6 +165,14 @@ func (b Board) IsValidMove(m move.Move) bool {
 }
 
 func (b Board) GetLine(start, end move.Position) []move.Position {
+	// If x and y not equal to 0 (not horiz or vert), then if abs(x) != abs(y) (also not diagonal), return
+	// Only side case is Knight, and you would never check a line for a Knight
+	if end.File-start.File != 0 && end.Rank-start.Rank != 0 {
+		if math.Abs(float64(end.File-start.File)) != math.Abs(float64(end.Rank-start.Rank)) {
+			return []move.Position{}
+		}
+	}
+
 	//If line is diagonal
 	if math.Abs(float64(end.File-start.File)) == math.Abs(float64(end.Rank-start.Rank)) {
 		xStep := 1
