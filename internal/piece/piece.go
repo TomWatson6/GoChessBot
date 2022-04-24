@@ -32,20 +32,6 @@ func (p Piece) Equals(p2 Piece) bool {
 	return true
 }
 
-// Needs to be simplified at some point, getting way too big!
-// type Piece interface {
-// 	GetLetter() PieceLetter
-// 	GetColour() colour.Colour
-// 	GetPosition() move.Position
-// 	SetPosition(pos move.Position) Piece
-// 	GetPiecePoints() PiecePoints
-// 	GetPieceType() PieceType
-// 	IsValidMove(dest move.Position) bool
-// 	AppendValidMove(dest move.Position) Piece
-// 	ResetValidMoves() Piece
-// 	GetValidMoves() []move.Position
-// }
-
 type PieceType byte
 
 const (
