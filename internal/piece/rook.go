@@ -6,9 +6,10 @@ import (
 )
 
 type Rook struct {
-	Colour   colour.Colour
-	Position move.Position
-	HasMoved bool
+	Colour     colour.Colour
+	Position   move.Position
+	HasMoved   bool
+	ValidMoves []move.Position
 }
 
 func (r Rook) GetLetter() PieceLetter {
@@ -38,4 +39,18 @@ func (r Rook) GetPieceType() PieceType {
 
 func (r Rook) IsValidMove(dest move.Position) bool {
 	return r.Position.File == dest.File || r.Position.Rank == dest.Rank
+}
+
+func (r Rook) AppendValidMove(dest move.Position) Piece {
+	r.ValidMoves = append(r.ValidMoves, dest)
+	return r
+}
+
+func (r Rook) ResetValidMoves() Piece {
+	r.ValidMoves = []move.Position{}
+	return r
+}
+
+func (r Rook) GetValidMoves() []move.Position {
+	return r.ValidMoves
 }

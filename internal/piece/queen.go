@@ -6,9 +6,10 @@ import (
 )
 
 type Queen struct {
-	Colour   colour.Colour
-	Position move.Position
-	HasMoved bool
+	Colour     colour.Colour
+	Position   move.Position
+	HasMoved   bool
+	ValidMoves []move.Position
 }
 
 func (q Queen) GetLetter() PieceLetter {
@@ -51,4 +52,18 @@ func (q Queen) IsValidMove(dest move.Position) bool {
 	}
 
 	return false
+}
+
+func (q Queen) AppendValidMove(dest move.Position) Piece {
+	q.ValidMoves = append(q.ValidMoves, dest)
+	return q
+}
+
+func (q Queen) ResetValidMoves() Piece {
+	q.ValidMoves = []move.Position{}
+	return q
+}
+
+func (q Queen) GetValidMoves() []move.Position {
+	return q.ValidMoves
 }

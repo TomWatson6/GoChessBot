@@ -8,9 +8,10 @@ import (
 )
 
 type Pawn struct {
-	Colour   colour.Colour
-	Position move.Position
-	HasMoved bool
+	Colour     colour.Colour
+	Position   move.Position
+	HasMoved   bool
+	ValidMoves []move.Position
 }
 
 func (p Pawn) GetLetter() PieceLetter {
@@ -49,4 +50,18 @@ func (p Pawn) IsValidMove(dest move.Position) bool {
 	}
 
 	return false
+}
+
+func (p Pawn) AppendValidMove(dest move.Position) Piece {
+	p.ValidMoves = append(p.ValidMoves, dest)
+	return p
+}
+
+func (p Pawn) ResetValidMoves() Piece {
+	p.ValidMoves = []move.Position{}
+	return p
+}
+
+func (p Pawn) GetValidMoves() []move.Position {
+	return p.ValidMoves
 }

@@ -8,9 +8,10 @@ import (
 )
 
 type Knight struct {
-	Colour   colour.Colour
-	Position move.Position
-	HasMoved bool
+	Colour     colour.Colour
+	Position   move.Position
+	HasMoved   bool
+	ValidMoves []move.Position
 }
 
 func (k Knight) GetLetter() PieceLetter {
@@ -46,4 +47,18 @@ func (k Knight) IsValidMove(dest move.Position) bool {
 	}
 
 	return false
+}
+
+func (k Knight) AppendValidMove(dest move.Position) Piece {
+	k.ValidMoves = append(k.ValidMoves, dest)
+	return k
+}
+
+func (k Knight) ResetValidMoves() Piece {
+	k.ValidMoves = []move.Position{}
+	return k
+}
+
+func (k Knight) GetValidMoves() []move.Position {
+	return k.ValidMoves
 }

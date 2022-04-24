@@ -8,9 +8,10 @@ import (
 )
 
 type King struct {
-	Colour   colour.Colour
-	Position move.Position
-	HasMoved bool
+	Colour     colour.Colour
+	Position   move.Position
+	HasMoved   bool
+	ValidMoves []move.Position
 }
 
 func (k King) GetLetter() PieceLetter {
@@ -41,4 +42,18 @@ func (k King) GetPieceType() PieceType {
 func (k King) IsValidMove(dest move.Position) bool {
 	return math.Abs(float64(dest.File-k.Position.File)) <= 1 &&
 		math.Abs(float64(dest.Rank-k.Position.Rank)) <= 1
+}
+
+func (k King) AppendValidMove(dest move.Position) Piece {
+	k.ValidMoves = append(k.ValidMoves, dest)
+	return k
+}
+
+func (k King) ResetValidMoves() Piece {
+	k.ValidMoves = []move.Position{}
+	return k
+}
+
+func (k King) GetValidMoves() []move.Position {
+	return k.ValidMoves
 }
