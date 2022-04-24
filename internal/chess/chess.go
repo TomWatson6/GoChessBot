@@ -14,11 +14,14 @@ type Chess struct {
 }
 
 func (c *Chess) MakeMove(m move.Move) error {
+	if c.Board.Pieces[m.From].GetColour() != c.Turn {
+		return fmt.Errorf("invalid move for current turn: %v", m)
+	}
 	if err := c.Board.MovePiece(m); err != nil {
 		return fmt.Errorf("invalid move: %v", m)
-	} else {
-		return nil
 	}
+
+	return nil
 }
 
 func (c *Chess) NextTurn() {
