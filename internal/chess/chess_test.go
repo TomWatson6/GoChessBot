@@ -38,7 +38,7 @@ func TestTranslateNotation(t *testing.T) {
 	// 6 ## ## ## ## ## ## ## ##
 	// 5 ## ## wN ## ## ## wN ##
 	// 4 ## ## ## ## ## ## ## ##
-	// 3 ## ## bQ ## ## ## ## ##
+	// 3 ## ## bQ ## ## bB ## ##
 	// 2 wP wP wP wP wP wP wP wP
 	// 1 wR wN wB wQ wK wB wN wR
 	//    A  B  C  D  E  F  G  H
