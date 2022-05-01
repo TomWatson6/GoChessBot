@@ -148,9 +148,13 @@ func TestIsValidMove(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		got := b.IsValidMove(c.move)
-		if got != c.want {
-			t.Errorf("IsValidMove(%v) == %v, want %v", c.move, got, c.want)
-		}
+		c := c // rebind c into this lexical scope
+		t.Run(c.move.String(), func(t *testing.T) {
+			t.Parallel()
+			got := b.IsValidMove(c.move)
+			if got != c.want {
+				t.Errorf("IsValidMove(%v) => %v, want %v", c.move, got, c.want)
+			}
+		})
 	}
 }
