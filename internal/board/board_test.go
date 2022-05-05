@@ -9,15 +9,166 @@ import (
 	"github.com/tomwatson6/chessbot/pkg/input"
 )
 
+func TestIsCheck(t *testing.T) {
+	// Alter board to setup check scenario
+	alterations := make(map[move.Position]piece.Piece)
+	alterations[move.Position{File: 7, Rank: 3}] = piece.Piece{
+		Colour:       colour.Black,
+		Position:     move.Position{File: 7, Rank: 3},
+		ValidMoves:   make(map[move.Position]bool),
+		PieceDetails: piece.Bishop{},
+	}
+
+	deletions := []move.Position{
+		{File: 5, Rank: 1},
+		{File: 4, Rank: 1},
+	}
+
+	game := input.Get(colour.White, alterations, deletions)
+	b := game.Board
+	b.Update()
+
+	// Visualisation of the board
+	// 8 bR bN bB bQ bK bB bN bR
+	// 7 bP bP bP bP bP bP bP bP
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## ## ## ## ##
+	// 4 ## ## ## ## ## ## ## bB
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 wP wP wP wP ## ## wP wP
+	// 1 wR wN wB wQ wK wB wN wR
+	//    A  B  C  D  E  F  G  H
+
+	cases := []struct {
+		colour colour.Colour
+		want   bool
+		// Add error case to test when king doesn't exist
+	}{
+		{colour.White, true},
+		{colour.Black, false},
+	}
+
+	for _, c := range cases {
+		c := c // rebind c into this lexical scope
+		t.Run(c.colour.String(), func(t *testing.T) {
+			t.Parallel()
+			got := b.IsCheck(c.colour)
+			if got != c.want {
+				t.Errorf("IsCheck(%v) => %v, want %v", c.colour, got, c.want)
+			}
+		})
+	}
+}
+
+func TestIsCheckMate(t *testing.T) {
+	// Alter board to setup checkmate scenario
+	alterations := make(map[move.Position]piece.Piece)
+	alterations[move.Position{File: 7, Rank: 3}] = piece.Piece{
+		Colour:       colour.Black,
+		Position:     move.Position{File: 7, Rank: 3},
+		ValidMoves:   make(map[move.Position]bool),
+		PieceDetails: piece.Bishop{},
+	}
+
+	deletions := []move.Position{
+		{File: 5, Rank: 1},
+	}
+
+	game := input.Get(colour.White, alterations, deletions)
+	b := game.Board
+	b.Update()
+
+	// Visualisation of the board
+	// 8 bR bN bB bQ bK bB bN bR
+	// 7 bP bP bP bP bP bP bP bP
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## ## ## ## ##
+	// 4 ## ## ## ## ## ## ## bB
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 wP wP wP wP wP ## wP wP
+	// 1 wR wN wB wQ wK wB wN wR
+	//    A  B  C  D  E  F  G  H
+
+	cases := []struct {
+		colour colour.Colour
+		want   bool
+	}{
+		{colour.White, true},
+		{colour.Black, false},
+	}
+
+	for _, c := range cases {
+		c := c // rebind c into this lexical scope
+		t.Run(c.colour.String(), func(t *testing.T) {
+			t.Parallel()
+			got := b.IsCheckMate(c.colour)
+			if got != c.want {
+				t.Errorf("IsCheckMate(%v) => %v, want %v", c.colour, got, c.want)
+			}
+		})
+	}
+}
+
+func TestIsNotCheckMate(t *testing.T) {
+	// Alter board to setup non-checkmate scenario
+	alterations := make(map[move.Position]piece.Piece)
+	alterations[move.Position{File: 7, Rank: 3}] = piece.Piece{
+		Colour:       colour.Black,
+		Position:     move.Position{File: 7, Rank: 3},
+		ValidMoves:   make(map[move.Position]bool),
+		PieceDetails: piece.Bishop{},
+	}
+
+	deletions := []move.Position{
+		{File: 5, Rank: 1},
+		{File: 4, Rank: 1},
+	}
+
+	game := input.Get(colour.White, alterations, deletions)
+	b := game.Board
+	b.Update()
+
+	// Visualisation of the board
+	// 8 bR bN bB bQ bK bB bN bR
+	// 7 bP bP bP bP bP bP bP bP
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## ## ## ## ##
+	// 4 ## ## ## ## ## ## ## bB
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 wP wP wP wP wP ## wP wP
+	// 1 wR wN wB wQ wK wB wN wR
+	//    A  B  C  D  E  F  G  H
+
+	cases := []struct {
+		colour colour.Colour
+		want   bool
+	}{
+		{colour.White, false},
+		{colour.Black, false},
+	}
+
+	for _, c := range cases {
+		c := c // rebind c into this lexical scope
+		t.Run(c.colour.String(), func(t *testing.T) {
+			t.Parallel()
+			got := b.IsCheckMate(c.colour)
+			if got != c.want {
+				t.Errorf("IsCheckMate(%v) => %v, want %v", c.colour, got, c.want)
+			}
+		})
+	}
+}
+
 func TestMovePiece(t *testing.T) {
 	alterations := make(map[move.Position]piece.Piece)
 	alterations[move.Position{File: 0, Rank: 2}] = piece.Piece{
 		Colour:       colour.White,
 		Position:     move.Position{File: 0, Rank: 2},
+		ValidMoves:   make(map[move.Position]bool),
 		PieceDetails: piece.Queen{},
 	}
 
-	game := input.Get(colour.White, alterations)
+	game := input.Get(colour.White, alterations, []move.Position{})
 	b := game.Board
 
 	// Visualisation of the board
@@ -116,10 +267,11 @@ func TestIsValidMove(t *testing.T) {
 	alterations[move.Position{File: 0, Rank: 2}] = piece.Piece{
 		Colour:       colour.White,
 		Position:     move.Position{File: 0, Rank: 2},
+		ValidMoves:   make(map[move.Position]bool),
 		PieceDetails: piece.Queen{},
 	}
 
-	game := input.Get(colour.White, alterations)
+	game := input.Get(colour.White, alterations, []move.Position{})
 	b := game.Board
 
 	// Visualisation of the board
