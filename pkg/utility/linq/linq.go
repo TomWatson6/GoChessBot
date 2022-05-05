@@ -1,4 +1,4 @@
-package utility
+package linq
 
 func Any[T any](xs []T, f func(T) bool) bool {
 	for _, x := range xs {
