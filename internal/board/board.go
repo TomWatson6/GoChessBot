@@ -51,7 +51,7 @@ func (b Board) getKing(c colour.Colour) (piece.Piece, error) {
 		}
 	}
 
-	return piece.Piece{}, fmt.Errorf("Cannot find king")
+	return piece.Piece{}, fmt.Errorf("cannot find king")
 }
 
 func (b *Board) GenerateMoveMap() {
