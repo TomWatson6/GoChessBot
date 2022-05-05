@@ -9,6 +9,9 @@ import (
 )
 
 func main() {
-	chess := input.Get(colour.White, make(map[move.Position]piece.Piece))
+	chess := input.Get(colour.White,
+		make(map[move.Position]piece.Piece),
+		[]move.Position{},
+	)
 	output.PrintBoard(chess.Board, chess.Turn)
 }
