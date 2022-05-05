@@ -37,9 +37,11 @@ func (b Board) IsCheckMate(c colour.Colour) bool {
 					}
 					return false
 				}
+				return true
 			}
 		}
 	}
+	return false
 }
 
 func (b Board) getKing(c colour.Colour) (piece.Piece, error) {
