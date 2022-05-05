@@ -61,7 +61,11 @@ func Get(c colour.Colour, alterations map[move.Position]piece.Piece) chess.Chess
 	}
 
 	for k, v := range alterations {
-		pieces[k] = v
+		if v.Equals(piece.Piece{}) {
+			delete(pieces, k)
+		} else {
+			pieces[k] = v
+		}
 	}
 
 	chess := chess.Chess{
