@@ -17,8 +17,13 @@ type Board struct {
 	ThreatMap map[move.Position][]piece.Piece
 }
 
+func (b *Board) Update() {
+	b.GenerateMoveMap()
+	b.GenerateThreatMap()
+}
+
 func (b Board) IsCheck(c colour.Colour) bool {
-	if king, err := b.getKing(c); err != nil {
+	if king, err := b.getKing(c); err == nil {
 		return len(b.ThreatMap[king.Position]) > 0
 	}
 
@@ -27,18 +32,19 @@ func (b Board) IsCheck(c colour.Colour) bool {
 
 // TODO: Look into making this concurrent
 func (b Board) IsCheckMate(c colour.Colour) bool {
-	if king, err := b.getKing(c); err != nil {
+	if king, err := b.getKing(c); err == nil {
 		if b.IsCheck(c) {
-			for _, pos := range king.ValidMoves {
-				threat := b.ThreatMap[pos]
-				for _, p := range threat {
-					if p.Colour != c {
-						continue
-					}
+			for pos := range king.ValidMoves {
+				opp := colour.White
+				if c == colour.White {
+					opp = colour.Black
+				}
+				threat := b.GetAttackingPiecesForColour(pos, opp)
+				if len(threat) == 0 {
 					return false
 				}
-				return true
 			}
+			return true
 		}
 	}
 	return false
@@ -57,24 +63,32 @@ func (b Board) getKing(c colour.Colour) (piece.Piece, error) {
 func (b *Board) GenerateMoveMap() {
 	b.MoveMap = make(map[move.Position][]piece.Piece)
 	pieces := b.GetRemainingPieces()
-	wg := &sync.WaitGroup{}
-	mu := &sync.Mutex{}
+	// wg := &sync.WaitGroup{}
+	// mu := &sync.Mutex{}
 
-	wg.Add(len(b.Squares) * len(pieces))
+	// wg.Add(len(b.Squares) * len(pieces))
 	for _, pos := range b.Squares {
-		for _, p := range pieces {
-			go func(pos move.Position, p piece.Piece) {
-				defer wg.Done()
-				if b.IsValidMove(move.Move{From: p.Position, To: pos}) {
-					mu.Lock()
-					b.MoveMap[pos] = append(b.MoveMap[pos], p)
-					mu.Unlock()
-				}
-			}(pos, p)
+		for i := range pieces {
+			if b.IsValidMove(move.Move{From: pieces[i].Position, To: pos}) {
+				b.MoveMap[pos] = append(b.MoveMap[pos], pieces[i])
+				p := pieces[i]
+				p.ValidMoves[pos] = true
+				b.Pieces[p.Position] = p
+			}
+			// go func(pos move.Position, pieces []piece.Piece, i int) {
+			// 	if b.IsValidMove(move.Move{From: pieces[i].Position, To: pos}) {
+			// 		mu.Lock()
+			// 		b.MoveMap[pos] = append(b.MoveMap[pos], pieces[i])
+			// 		p := pieces[i]
+			// 		p.ValidMoves = append(p.ValidMoves, pos)
+			// 		b.Pieces[p.Position] = p
+			// 		mu.Unlock()
+			// 	}
+			// 	wg.Done()
+			// }(pos, pieces, i)
 		}
 	}
-
-	wg.Wait()
+	// wg.Wait()
 }
 
 func (b *Board) GenerateThreatMap() {
