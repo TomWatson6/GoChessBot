@@ -25,13 +25,22 @@ func (b Board) IsCheck(c colour.Colour) bool {
 	return false
 }
 
-// func (b Board) IsCheckMate(c colour.Colour) bool {
-// 	if king, err := b.getKing(c); err != nil {
-// 		// Get list of valid moves for king
-// 		// Iterate through moves and check threatmap for destination
-// 		// If there are no destinations that are safe - check mate
-// 	}
-// }
+// TODO: Look into making this concurrent
+func (b Board) IsCheckMate(c colour.Colour) bool {
+	if king, err := b.getKing(c); err != nil {
+		if b.IsCheck(c) {
+			for _, pos := range king.ValidMoves {
+				threat := b.ThreatMap[pos]
+				for _, p := range threat {
+					if p.Colour != c {
+						continue
+					}
+					return false
+				}
+			}
+		}
+	}
+}
 
 func (b Board) getKing(c colour.Colour) (piece.Piece, error) {
 	for _, p := range b.Pieces {
