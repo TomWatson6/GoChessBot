@@ -14,25 +14,29 @@ func TestTranslateNotation(t *testing.T) {
 	alterations[move.Position{File: 2, Rank: 2}] = piece.Piece{
 		Colour:       colour.Black,
 		Position:     move.Position{File: 2, Rank: 2},
+		ValidMoves:   make(map[move.Position]bool),
 		PieceDetails: piece.Queen{},
 	}
 	alterations[move.Position{File: 6, Rank: 4}] = piece.Piece{
 		Colour:       colour.White,
 		Position:     move.Position{File: 6, Rank: 4},
+		ValidMoves:   make(map[move.Position]bool),
 		PieceDetails: piece.Knight{},
 	}
 	alterations[move.Position{File: 2, Rank: 4}] = piece.Piece{
 		Colour:       colour.White,
 		Position:     move.Position{File: 2, Rank: 4},
+		ValidMoves:   make(map[move.Position]bool),
 		PieceDetails: piece.Knight{},
 	}
 	alterations[move.Position{File: 5, Rank: 2}] = piece.Piece{
 		Colour:       colour.Black,
 		Position:     move.Position{File: 5, Rank: 2},
+		ValidMoves:   make(map[move.Position]bool),
 		PieceDetails: piece.Bishop{},
 	}
 
-	ch := input.Get(colour.White, alterations)
+	ch := input.Get(colour.White, alterations, []move.Position{})
 
 	// Visualisation of the board
 	// 8 bR bN bB bQ bK bB bN bR
