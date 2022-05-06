@@ -167,15 +167,27 @@ func TestMovePiece(t *testing.T) {
 		ValidMoves:   make(map[move.Position]bool),
 		PieceDetails: piece.Queen{},
 	}
+	alterations[move.Position{File: 4, Rank: 4}] = piece.Piece{
+		Colour:       colour.White,
+		Position:     move.Position{File: 4, Rank: 4},
+		ValidMoves:   make(map[move.Position]bool),
+		PieceDetails: piece.Queen{},
+	}
+	alterations[move.Position{File: 4, Rank: 6}] = piece.Piece{
+		Colour:       colour.Black,
+		Position:     move.Position{File: 4, Rank: 6},
+		ValidMoves:   make(map[move.Position]bool),
+		PieceDetails: piece.Bishop{},
+	}
 
 	game := input.Get(colour.White, alterations, []move.Position{})
 	b := game.Board
 
 	// Visualisation of the board
 	// 8 bR bN bB bQ bK bB bN bR
-	// 7 bP bP bP bP bP bP bP bP
+	// 7 bP bP bP bP bB bP bP bP
 	// 6 ## ## ## ## ## ## ## ##
-	// 5 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## wQ ## ## ##
 	// 4 ## ## ## ## ## ## ## ##
 	// 3 wQ ## ## ## ## ## ## ##
 	// 2 wP wP wP wP wP wP wP wP
@@ -241,6 +253,30 @@ func TestMovePiece(t *testing.T) {
 				Colour:       colour.White,
 				Position:     move.Position{File: 3, Rank: 1},
 				PieceDetails: piece.Pawn{},
+			},
+		},
+		{
+			move.Move{
+				From: move.Position{File: 4, Rank: 6},
+				To:   move.Position{File: 3, Rank: 5},
+			},
+			move.Position{File: 4, Rank: 6},
+			piece.Piece{
+				Colour:       colour.Black,
+				Position:     move.Position{File: 4, Rank: 6},
+				PieceDetails: piece.Bishop{},
+			},
+		},
+		{
+			move.Move{
+				From: move.Position{File: 4, Rank: 6},
+				To:   move.Position{File: 0, Rank: 2},
+			},
+			move.Position{File: 4, Rank: 6},
+			piece.Piece{
+				Colour:       colour.Black,
+				Position:     move.Position{File: 4, Rank: 6},
+				PieceDetails: piece.Bishop{},
 			},
 		},
 	}
