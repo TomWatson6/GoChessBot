@@ -22,6 +22,7 @@ func getPieceDisplay(p piece.Piece) string {
 	return output
 }
 
+// Need to fix board printing!!
 func PrintBoard(b board.Board, c colour.Colour) {
 	lower := 0
 	upper := 8
@@ -36,7 +37,7 @@ func PrintBoard(b board.Board, c colour.Colour) {
 	for r := lower; r != upper; r += step {
 		fmt.Printf("%d ", r+1)
 
-		for f := 0; f < 8; f++ {
+		for f := upper - 1; f != lower-1; f -= step {
 			if p, ok := b.Pieces[move.Position{File: f, Rank: r}]; ok {
 				fmt.Printf("%s ", getPieceDisplay(p))
 			} else {
