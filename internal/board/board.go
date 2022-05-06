@@ -135,10 +135,6 @@ func (b Board) GetRemainingPieces() []piece.Piece {
 	return pieces
 }
 
-func (b Board) GetMoveMap(pos move.Position) []piece.Piece {
-	return b.MoveMap[pos]
-}
-
 func (b Board) GetMoveMapForColour(pos move.Position, c colour.Colour) []piece.Piece {
 	var pieces []piece.Piece
 
@@ -149,10 +145,6 @@ func (b Board) GetMoveMapForColour(pos move.Position, c colour.Colour) []piece.P
 	}
 
 	return pieces
-}
-
-func (b Board) GetAttackingPieces(pos move.Position) []piece.Piece {
-	return b.ThreatMap[pos]
 }
 
 func (b Board) GetAttackingPiecesForColour(pos move.Position, c colour.Colour) []piece.Piece {
@@ -167,21 +159,37 @@ func (b Board) GetAttackingPiecesForColour(pos move.Position, c colour.Colour) [
 	return pieces
 }
 
-func (b Board) MovePiece(m move.Move) error {
-	if b.IsValidMove(m) {
-		p := b.Pieces[m.From]
-		p.Position = m.To
-		b.Pieces[m.From] = p
-		b.Pieces[m.To] = b.Pieces[m.From]
-		delete(b.Pieces, m.From)
-
-		b.GenerateMoveMap()
-		b.GenerateThreatMap()
-
-		return nil
+func (b *Board) MovePiece(m move.Move) error {
+	p := b.Pieces[m.From]
+	if _, ok := p.ValidMoves[m.To]; ok {
+		if b2, err := b.isPinned(m); err == nil {
+			*b = b2
+			return nil
+		} else {
+			return fmt.Errorf("failed to move piece: %w", err)
+		}
 	}
 
 	return fmt.Errorf("invalid move: %v", m)
+}
+
+func (b Board) isPinned(m move.Move) (Board, error) {
+	p := b.Pieces[m.From]
+
+	p.Position = m.To
+	b.Pieces[m.From] = p
+	b.Pieces[m.To] = b.Pieces[m.From]
+	delete(b.Pieces, m.From)
+
+	b.Update()
+
+	if !b.IsCheck(p.Colour) {
+		return b, nil
+	}
+
+	p.Position = m.From
+	b.Pieces[m.From] = p
+	return Board{}, fmt.Errorf("%v is pinned", p)
 }
 
 func (b Board) IsValidMove(m move.Move) bool {
@@ -191,11 +199,12 @@ func (b Board) IsValidMove(m move.Move) bool {
 
 	p := b.Pieces[m.From]
 
-	if valid := p.IsValidMove(m); valid {
+	if p.IsValidMove(m) {
 		if p.GetPieceType() == piece.PieceTypeKnight {
 			if p2, ok := b.Pieces[m.To]; ok {
 				return p2.Colour != p.Colour
 			}
+
 			return true
 		}
 
