@@ -16,7 +16,7 @@ func (c Chess) translatePawnMove(n string) (move.Move, error) {
 	runes := []rune(n)
 
 	m.To = move.Position{File: fileToNumber(runes[0]), Rank: rankToNumber(runes[1])}
-	movePieces := c.Board.GetMoveMap(m.To)
+	movePieces := c.Board.MoveMap[m.To]
 	instantiated := false
 
 	for _, movePiece := range movePieces {
@@ -41,7 +41,7 @@ func (c Chess) translatePieceMove(n string) (move.Move, error) {
 	runes := []rune(n)
 
 	m.To = move.Position{File: fileToNumber(runes[1]), Rank: rankToNumber(runes[2])}
-	movePieces := c.Board.GetMoveMap(m.To)
+	movePieces := c.Board.MoveMap[m.To]
 	instantiated := false
 
 	for _, movePiece := range movePieces {
@@ -92,7 +92,7 @@ func (c Chess) translatePieceCapture(n string) (move.Move, error) {
 	left := []rune(parts[0])
 	right := []rune(parts[1])
 	m.To = move.Position{File: fileToNumber(right[0]), Rank: rankToNumber(right[1])}
-	attackingPieces := c.Board.GetAttackingPieces(m.To)
+	attackingPieces := c.Board.ThreatMap[m.To]
 	instantiated := false
 
 	for _, p := range attackingPieces {
