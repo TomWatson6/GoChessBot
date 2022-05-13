@@ -70,8 +70,6 @@ func (c Chess) translateAmbiguousPieceMove(n string) move.Move {
 	return m
 }
 
-// function for handling pawn promotion e.g. e8=Q - HANDLE PROMOTION IN TRANSLATEMOVE()
-
 // function for handling captures e.g. Nxe3, e2xf3, e3Nxf5
 func (c Chess) translatePawnCapture(n string) move.Move {
 	var m move.Move
@@ -172,7 +170,27 @@ func (c Chess) translateCastlingMove(n string) ([]move.Move, error) {
 	return ms, nil
 }
 
+// function for handling pawn promotion e.g. e8=Q, dxe8=Q
+func (c Chess) translatePawnPromotionMove(n string) (move.Move, error) {
+	parts := strings.Split(n, "=")
+	from := parts[0]
+
+	if len(from) == 2 {
+		m, err := c.translatePawnMove(from)
+		if err != nil {
+			return m, err
+		}
+		return m, nil
+	} else {
+		m := c.translatePawnCapture(from)
+		return m, nil
+	}
+}
+
 func (c Chess) TranslateNotation(n string) ([]move.Move, error) {
+	// TODO: Pawn promotion could be all of the following:
+	// e8=Q, dxe8=Q
+
 	var ms []move.Move
 
 	if strings.Contains(n, "x") {
@@ -189,9 +207,19 @@ func (c Chess) TranslateNotation(n string) ([]move.Move, error) {
 			ms = append(ms, n)
 			return ms, nil
 		} else if len(n) == 6 {
-			n := c.translateAmbiguousPieceCapture(n)
-			ms = append(ms, n)
-			return ms, nil
+			if strings.Contains(n, "=") {
+				//Pawn capture into promotion
+				m, err := c.translatePawnPromotionMove(n)
+				if err != nil {
+					return ms, err
+				}
+				ms = append(ms, m)
+				return ms, nil
+			} else {
+				n := c.translateAmbiguousPieceCapture(n)
+				ms = append(ms, n)
+				return ms, nil
+			}
 		}
 		return ms, fmt.Errorf("invalid move: %s", n)
 	} else {
@@ -213,7 +241,12 @@ func (c Chess) TranslateNotation(n string) ([]move.Move, error) {
 			return append(ms, m), nil
 		} else if len(n) == 4 {
 			// Pawn promotion e.g. e8=Q
-			return ms, fmt.Errorf("pawn promotion not yet implemented: %s", n)
+			m, err := c.translatePawnPromotionMove(n)
+			if err != nil {
+				return ms, err
+			}
+			ms = append(ms, m)
+			return ms, nil
 		} else if len(n) == 5 {
 			m := c.translateAmbiguousPieceMove(n)
 			ms = append(ms, m)

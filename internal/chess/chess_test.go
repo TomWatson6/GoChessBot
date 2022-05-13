@@ -36,6 +36,23 @@ func TestTranslateNotation(t *testing.T) {
 			ValidMoves:   make(map[move.Position]bool),
 			PieceDetails: piece.Bishop{},
 		}),
+		payloads.BoardWithPiece(piece.Piece{
+			Colour:     colour.White,
+			Position:   move.Position{File: 2, Rank: 6},
+			ValidMoves: make(map[move.Position]bool),
+			PieceDetails: piece.Pawn{
+				HasMoved: true,
+			},
+		}),
+		payloads.BoardWithPiece(piece.Piece{
+			Colour:     colour.White,
+			Position:   move.Position{File: 7, Rank: 6},
+			ValidMoves: make(map[move.Position]bool),
+			PieceDetails: piece.Pawn{
+				HasMoved: true,
+			},
+		}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 2, Rank: 7}),
 	)
 
 	ch := payloads.NewStandardChessGame(
@@ -44,8 +61,8 @@ func TestTranslateNotation(t *testing.T) {
 	)
 
 	// Visualisation of the board
-	// 8 bR bN bB bQ bK bB bN bR
-	// 7 bP bP bP bP bP bP bP bP
+	// 8 bR bN ## bQ bK bB bN bR
+	// 7 bP bP wP bP bP bP bP ##
 	// 6 ## ## ## ## ## ## ## ##
 	// 5 ## ## wN ## ## ## wN ##
 	// 4 ## ## ## ## ## ## ## ##
@@ -100,6 +117,24 @@ func TestTranslateNotation(t *testing.T) {
 				{
 					From: move.Position{File: 2, Rank: 4},
 					To:   move.Position{File: 4, Rank: 3},
+				},
+			},
+		},
+		{
+			notation: "c8=Q",
+			want: []move.Move{
+				{
+					From: move.Position{File: 2, Rank: 6},
+					To:   move.Position{File: 2, Rank: 7},
+				},
+			},
+		},
+		{
+			notation: "hxg8=Q",
+			want: []move.Move{
+				{
+					From: move.Position{File: 7, Rank: 6},
+					To:   move.Position{File: 6, Rank: 7},
 				},
 			},
 		},

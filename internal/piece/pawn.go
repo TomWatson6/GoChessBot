@@ -23,7 +23,7 @@ func (p Pawn) GetPieceType() PieceType {
 }
 
 func (p Pawn) IsValidMove(m move.Move) bool {
-	y := m.To.Rank - m.From.Rank
+	y := math.Abs(float64(m.To.Rank - m.From.Rank))
 	x := math.Abs(float64(m.To.File - m.From.File))
 
 	if y == 1 && x <= 1 {

@@ -38,6 +38,7 @@ func New() Board {
 	return b
 }
 
+// Needs updating to include colour parameter, pawns can only move in 1 direction
 func (b *Board) Update() {
 	b.GenerateMoveMap()
 	b.GenerateThreatMap()
@@ -81,6 +82,7 @@ func (b Board) getKing(c colour.Colour) (piece.Piece, error) {
 	return piece.Piece{}, fmt.Errorf("cannot find king")
 }
 
+// Needs updating to include colour parameter, pawns can only move in 1 direction
 func (b *Board) GenerateMoveMap() {
 	b.MoveMap = make(map[move.Position][]piece.Piece)
 	pieces := b.GetRemainingPieces()
@@ -112,6 +114,7 @@ func (b *Board) GenerateMoveMap() {
 	// wg.Wait()
 }
 
+// Needs updating to include colour parameter, pawns can only move in 1 direction
 func (b *Board) GenerateThreatMap() {
 	b.ThreatMap = make(map[move.Position][]piece.Piece)
 	pieces := b.GetRemainingPieces()
@@ -220,6 +223,7 @@ func (b Board) IsValidMove(m move.Move) bool {
 
 	p := b.Pieces[m.From]
 
+	// TODO: Update to check for constraints of the board size (8x8)
 	if p.IsValidMove(m) {
 		if p.GetPieceType() == piece.PieceTypeKnight {
 			if p2, ok := b.Pieces[m.To]; ok {
