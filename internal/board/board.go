@@ -11,8 +11,6 @@ import (
 	"github.com/tomwatson6/chessbot/internal/piece"
 )
 
-type BoardOptions func(board *Board) error
-
 type Board struct {
 	Squares   []move.Position
 	Pieces    map[move.Position]piece.Piece
