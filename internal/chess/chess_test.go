@@ -3,6 +3,7 @@ package chess_test
 import (
 	"testing"
 
+	"github.com/tomwatson6/chessbot/internal/chess"
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 	"github.com/tomwatson6/chessbot/internal/piece"
@@ -145,5 +146,37 @@ func TestTranslateNotation(t *testing.T) {
 				t.Errorf("TranslateNotation(%v) returned %v, want %v", c.notation, g, c.want[i])
 			}
 		}
+	}
+}
+
+func TestNextTurn(t *testing.T) {
+	tcs := []struct {
+		game chess.Chess
+		want colour.Colour
+	}{
+		{
+			game: payloads.NewStandardChessGame(
+				payloads.ChessGameWithTurn(colour.White),
+			),
+			want: colour.Black,
+		},
+		{
+			game: payloads.NewStandardChessGame(
+				payloads.ChessGameWithTurn(colour.Black),
+			),
+			want: colour.White,
+		},
+	}
+
+	for _, tc := range tcs {
+		tc := tc // Rebind tc to this lexical scope
+		t.Run(tc.game.Turn.String(), func(t *testing.T) {
+			t.Parallel()
+			tc.game.NextTurn()
+
+			if tc.game.Turn != tc.want {
+				t.Errorf("NextTurn() returned %s, want %s", tc.game.Turn.String(), tc.want.String())
+			}
+		})
 	}
 }
