@@ -5,6 +5,7 @@ import (
 	"math"
 	"sync"
 
+	"github.com/tomwatson6/chessbot/cmd/config"
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 	"github.com/tomwatson6/chessbot/internal/piece"
@@ -28,8 +29,13 @@ func New() Board {
 		}
 	}
 
-	b.GenerateMoveMap()
-	b.GenerateThreatMap()
+	b.Pieces = make(map[move.Position]piece.Piece)
+
+	for _, p := range config.GetStandardPieces() {
+		b.Pieces[p.Position] = p
+	}
+
+	b.Update()
 
 	return b
 }
