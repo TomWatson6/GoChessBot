@@ -6,27 +6,20 @@ import (
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 	"github.com/tomwatson6/chessbot/internal/piece"
-	"github.com/tomwatson6/chessbot/pkg/input"
+	"github.com/tomwatson6/chessbot/testing/payloads"
 )
 
 func TestIsCheck(t *testing.T) {
-	// Alter board to setup check scenario
-	alterations := make(map[move.Position]piece.Piece)
-	alterations[move.Position{File: 7, Rank: 3}] = piece.Piece{
-		Colour:       colour.Black,
-		Position:     move.Position{File: 7, Rank: 3},
-		ValidMoves:   make(map[move.Position]bool),
-		PieceDetails: piece.Bishop{},
-	}
-
-	deletions := []move.Position{
-		{File: 5, Rank: 1},
-		{File: 4, Rank: 1},
-	}
-
-	game := input.Get(colour.White, alterations, deletions)
-	b := game.Board
-	b.Update()
+	b := payloads.NewStandardBoard(
+		payloads.BoardWithPiece(piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 7, Rank: 3},
+			ValidMoves:   make(map[move.Position]bool),
+			PieceDetails: piece.Bishop{},
+		}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 4, Rank: 1}),
+	)
 
 	// Visualisation of the board
 	// 8 bR bN bB bQ bK bB bN bR
@@ -61,22 +54,15 @@ func TestIsCheck(t *testing.T) {
 }
 
 func TestIsCheckMate(t *testing.T) {
-	// Alter board to setup checkmate scenario
-	alterations := make(map[move.Position]piece.Piece)
-	alterations[move.Position{File: 7, Rank: 3}] = piece.Piece{
-		Colour:       colour.Black,
-		Position:     move.Position{File: 7, Rank: 3},
-		ValidMoves:   make(map[move.Position]bool),
-		PieceDetails: piece.Bishop{},
-	}
-
-	deletions := []move.Position{
-		{File: 5, Rank: 1},
-	}
-
-	game := input.Get(colour.White, alterations, deletions)
-	b := game.Board
-	b.Update()
+	b := payloads.NewStandardBoard(
+		payloads.BoardWithPiece(piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 7, Rank: 3},
+			ValidMoves:   make(map[move.Position]bool),
+			PieceDetails: piece.Bishop{},
+		}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
+	)
 
 	// Visualisation of the board
 	// 8 bR bN bB bQ bK bB bN bR
@@ -110,23 +96,16 @@ func TestIsCheckMate(t *testing.T) {
 }
 
 func TestIsNotCheckMate(t *testing.T) {
-	// Alter board to setup non-checkmate scenario
-	alterations := make(map[move.Position]piece.Piece)
-	alterations[move.Position{File: 7, Rank: 3}] = piece.Piece{
-		Colour:       colour.Black,
-		Position:     move.Position{File: 7, Rank: 3},
-		ValidMoves:   make(map[move.Position]bool),
-		PieceDetails: piece.Bishop{},
-	}
-
-	deletions := []move.Position{
-		{File: 5, Rank: 1},
-		{File: 4, Rank: 1},
-	}
-
-	game := input.Get(colour.White, alterations, deletions)
-	b := game.Board
-	b.Update()
+	b := payloads.NewStandardBoard(
+		payloads.BoardWithPiece(piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 7, Rank: 3},
+			ValidMoves:   make(map[move.Position]bool),
+			PieceDetails: piece.Bishop{},
+		}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 4, Rank: 1}),
+	)
 
 	// Visualisation of the board
 	// 8 bR bN bB bQ bK bB bN bR
@@ -160,28 +139,26 @@ func TestIsNotCheckMate(t *testing.T) {
 }
 
 func TestMovePiece(t *testing.T) {
-	alterations := make(map[move.Position]piece.Piece)
-	alterations[move.Position{File: 0, Rank: 2}] = piece.Piece{
-		Colour:       colour.White,
-		Position:     move.Position{File: 0, Rank: 2},
-		ValidMoves:   make(map[move.Position]bool),
-		PieceDetails: piece.Queen{},
-	}
-	alterations[move.Position{File: 4, Rank: 4}] = piece.Piece{
-		Colour:       colour.White,
-		Position:     move.Position{File: 4, Rank: 4},
-		ValidMoves:   make(map[move.Position]bool),
-		PieceDetails: piece.Queen{},
-	}
-	alterations[move.Position{File: 4, Rank: 6}] = piece.Piece{
-		Colour:       colour.Black,
-		Position:     move.Position{File: 4, Rank: 6},
-		ValidMoves:   make(map[move.Position]bool),
-		PieceDetails: piece.Bishop{},
-	}
-
-	game := input.Get(colour.White, alterations, []move.Position{})
-	b := game.Board
+	b := payloads.NewStandardBoard(
+		payloads.BoardWithPiece(piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 0, Rank: 2},
+			ValidMoves:   make(map[move.Position]bool),
+			PieceDetails: piece.Queen{},
+		}),
+		payloads.BoardWithPiece(piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 4, Rank: 4},
+			ValidMoves:   make(map[move.Position]bool),
+			PieceDetails: piece.Queen{},
+		}),
+		payloads.BoardWithPiece(piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 4, Rank: 6},
+			ValidMoves:   make(map[move.Position]bool),
+			PieceDetails: piece.Bishop{},
+		}),
+	)
 
 	// Visualisation of the board
 	// 8 bR bN bB bQ bK bB bN bR
@@ -299,16 +276,14 @@ func TestMovePiece(t *testing.T) {
 }
 
 func TestIsValidMove(t *testing.T) {
-	alterations := make(map[move.Position]piece.Piece)
-	alterations[move.Position{File: 0, Rank: 2}] = piece.Piece{
-		Colour:       colour.White,
-		Position:     move.Position{File: 0, Rank: 2},
-		ValidMoves:   make(map[move.Position]bool),
-		PieceDetails: piece.Queen{},
-	}
-
-	game := input.Get(colour.White, alterations, []move.Position{})
-	b := game.Board
+	b := payloads.NewStandardBoard(
+		payloads.BoardWithPiece(piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 0, Rank: 2},
+			ValidMoves:   make(map[move.Position]bool),
+			PieceDetails: piece.Queen{},
+		}),
+	)
 
 	// Visualisation of the board
 	// 8 bR bN bB bQ bK bB bN bR

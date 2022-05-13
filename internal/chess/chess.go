@@ -13,6 +13,15 @@ type Chess struct {
 	Turn  colour.Colour
 }
 
+func New(col colour.Colour) Chess {
+	var c Chess
+
+	c.Board = board.New()
+	c.Turn = col
+
+	return c
+}
+
 func (c *Chess) MakeMove(m move.Move) error {
 	if c.Board.Pieces[m.From].Colour != c.Turn {
 		return fmt.Errorf("invalid move for current turn: %v", m)

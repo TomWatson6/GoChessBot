@@ -10,11 +10,28 @@ import (
 	"github.com/tomwatson6/chessbot/internal/piece"
 )
 
+type BoardOptions func(board *Board) error
+
 type Board struct {
 	Squares   []move.Position
 	Pieces    map[move.Position]piece.Piece
 	MoveMap   map[move.Position][]piece.Piece
 	ThreatMap map[move.Position][]piece.Piece
+}
+
+func New() Board {
+	var b Board
+
+	for r := 0; r < 8; r++ {
+		for f := 0; f < 8; f++ {
+			b.Squares = append(b.Squares, move.Position{File: f, Rank: r})
+		}
+	}
+
+	b.GenerateMoveMap()
+	b.GenerateThreatMap()
+
+	return b
 }
 
 func (b *Board) Update() {

@@ -6,37 +6,41 @@ import (
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 	"github.com/tomwatson6/chessbot/internal/piece"
-	"github.com/tomwatson6/chessbot/pkg/input"
+	"github.com/tomwatson6/chessbot/testing/payloads"
 )
 
 func TestTranslateNotation(t *testing.T) {
-	alterations := make(map[move.Position]piece.Piece)
-	alterations[move.Position{File: 2, Rank: 2}] = piece.Piece{
-		Colour:       colour.Black,
-		Position:     move.Position{File: 2, Rank: 2},
-		ValidMoves:   make(map[move.Position]bool),
-		PieceDetails: piece.Queen{},
-	}
-	alterations[move.Position{File: 6, Rank: 4}] = piece.Piece{
-		Colour:       colour.White,
-		Position:     move.Position{File: 6, Rank: 4},
-		ValidMoves:   make(map[move.Position]bool),
-		PieceDetails: piece.Knight{},
-	}
-	alterations[move.Position{File: 2, Rank: 4}] = piece.Piece{
-		Colour:       colour.White,
-		Position:     move.Position{File: 2, Rank: 4},
-		ValidMoves:   make(map[move.Position]bool),
-		PieceDetails: piece.Knight{},
-	}
-	alterations[move.Position{File: 5, Rank: 2}] = piece.Piece{
-		Colour:       colour.Black,
-		Position:     move.Position{File: 5, Rank: 2},
-		ValidMoves:   make(map[move.Position]bool),
-		PieceDetails: piece.Bishop{},
-	}
+	b := payloads.NewStandardBoard(
+		payloads.BoardWithPiece(piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 2, Rank: 2},
+			ValidMoves:   make(map[move.Position]bool),
+			PieceDetails: piece.Queen{},
+		}),
+		payloads.BoardWithPiece(piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 6, Rank: 4},
+			ValidMoves:   make(map[move.Position]bool),
+			PieceDetails: piece.Knight{},
+		}),
+		payloads.BoardWithPiece(piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 2, Rank: 4},
+			ValidMoves:   make(map[move.Position]bool),
+			PieceDetails: piece.Knight{},
+		}),
+		payloads.BoardWithPiece(piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 5, Rank: 2},
+			ValidMoves:   make(map[move.Position]bool),
+			PieceDetails: piece.Bishop{},
+		}),
+	)
 
-	ch := input.Get(colour.White, alterations, []move.Position{})
+	ch := payloads.NewStandardChessGame(
+		payloads.ChessGameWithTurn(colour.White),
+		payloads.ChessGameWithBoard(b),
+	)
 
 	// Visualisation of the board
 	// 8 bR bN bB bQ bK bB bN bR
