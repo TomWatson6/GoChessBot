@@ -321,3 +321,29 @@ func TestIsValidMove(t *testing.T) {
 		})
 	}
 }
+
+func TestPawnHasMoved(t *testing.T) {
+	t.Parallel()
+
+	b := payloads.NewStandardBoard()
+
+	hasMoved := b.Pieces[move.Position{File: 0, Rank: 1}].PieceDetails.(piece.Pawn).HasMoved
+	if hasMoved {
+		t.Errorf("HasMoved is %t, expected %t", hasMoved, false)
+	}
+
+	from := move.Position{File: 0, Rank: 1}
+	to := move.Position{File: 0, Rank: 3}
+
+	move := move.Move{From: from, To: to}
+
+	err := b.MovePiece(move)
+	if err != nil {
+		t.Errorf("MovePiece with move %v failed", move)
+	}
+
+	hasMoved = b.Pieces[to].PieceDetails.(piece.Pawn).HasMoved
+	if !hasMoved {
+		t.Errorf("HasMoved is %t, expected %t", hasMoved, true)
+	}
+}
