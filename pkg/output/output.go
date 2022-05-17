@@ -24,32 +24,33 @@ func getPieceDisplay(p piece.Piece) string {
 
 // Need to fix board printing!!
 func PrintBoard(b board.Board, c colour.Colour) {
-	lower := 0
-	upper := 8
-	step := 1
-
 	if c == colour.White {
-		lower = 7
-		upper = -1
-		step = -1
-	}
+		for r := 7; r >= 0; r-- {
+			fmt.Printf("%d ", r+1)
 
-	for r := lower; r != upper; r += step {
-		fmt.Printf("%d ", r+1)
-
-		for f := upper - 1; f != lower-1; f -= step {
-			if p, ok := b.Pieces[move.Position{File: f, Rank: r}]; ok {
-				fmt.Printf("%s ", getPieceDisplay(p))
-			} else {
-				fmt.Printf("## ")
+			for f := 0; f < 8; f++ {
+				if p, ok := b.Pieces[move.Position{File: f, Rank: r}]; ok {
+					fmt.Printf("%s ", getPieceDisplay(p))
+				} else {
+					fmt.Printf("## ")
+				}
 			}
-		}
-		fmt.Println()
-	}
 
-	if c == colour.White {
-		fmt.Printf("   A  B  C  D  E  F  G  H\n")
+			fmt.Println()
+		}
 	} else {
-		fmt.Printf("   H  G  F  E  D  C  B  A\n")
+		for r := 0; r < 8; r++ {
+			fmt.Printf("%d ", r+1)
+
+			for f := 7; f >= 0; f-- {
+				if p, ok := b.Pieces[move.Position{File: f, Rank: r}]; ok {
+					fmt.Printf("%s ", getPieceDisplay(p))
+				} else {
+					fmt.Printf("## ")
+				}
+			}
+
+			fmt.Println()
+		}
 	}
 }
