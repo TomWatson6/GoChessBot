@@ -71,16 +71,27 @@ func (c Chess) translateAmbiguousPieceMove(n string) move.Move {
 }
 
 // function for handling captures e.g. Nxe3, e2xf3, e3Nxf5
-func (c Chess) translatePawnCapture(n string) move.Move {
+func (c Chess) translatePawnCapture(n string) (move.Move, error) {
 	var m move.Move
 
 	parts := strings.Split(n, "x")
 	left := []rune(parts[0])
 	right := []rune(parts[1])
-	m.From = move.Position{File: fileToNumber(left[0]), Rank: rankToNumber(left[1])}
+
 	m.To = move.Position{File: fileToNumber(right[0]), Rank: rankToNumber(right[1])}
 
-	return m
+	attacked := c.Board.Pieces[m.To]
+
+	movePieces := c.Board.MoveMap[m.To]
+
+	for _, movePiece := range movePieces {
+		if movePiece.Colour != attacked.Colour && movePiece.Position.File == fileToNumber(left[0]) {
+			m.From = movePiece.Position
+			return m, nil
+		}
+	}
+
+	return m, fmt.Errorf("invalid move: %s", n)
 }
 
 func (c Chess) translatePieceCapture(n string) (move.Move, error) {
@@ -173,16 +184,19 @@ func (c Chess) translateCastlingMove(n string) ([]move.Move, error) {
 // function for handling pawn promotion e.g. e8=Q, dxe8=Q
 func (c Chess) translatePawnPromotionMove(n string) (move.Move, error) {
 	parts := strings.Split(n, "=")
-	from := parts[0]
+	to := parts[0]
 
-	if len(from) == 2 {
-		m, err := c.translatePawnMove(from)
+	if len(to) == 2 {
+		m, err := c.translatePawnMove(to)
 		if err != nil {
 			return m, err
 		}
 		return m, nil
 	} else {
-		m := c.translatePawnCapture(from)
+		m, err := c.translatePawnCapture(to)
+		if err != nil {
+			return m, err
+		}
 		return m, nil
 	}
 }
@@ -203,7 +217,10 @@ func (c Chess) TranslateNotation(n string) ([]move.Move, error) {
 			ms = append(ms, n)
 			return ms, nil
 		} else if len(n) == 5 {
-			n := c.translatePawnCapture(n)
+			n, err := c.translatePawnCapture(n)
+			if err != nil {
+				return ms, err
+			}
 			ms = append(ms, n)
 			return ms, nil
 		} else if len(n) == 6 {
