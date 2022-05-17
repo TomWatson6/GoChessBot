@@ -208,6 +208,13 @@ func (b Board) isPinned(m move.Move) (Board, error) {
 	b.Update()
 
 	if !b.IsCheck(p.Colour) {
+		if p.GetPieceType() == piece.PieceTypePawn {
+			details := p.PieceDetails.(piece.Pawn)
+			details.HasMoved = true
+			p.PieceDetails = details
+			b.Pieces[m.To] = p
+		}
+
 		return b, nil
 	}
 
