@@ -247,6 +247,8 @@ func (b Board) IsValidMove(m move.Move) bool {
 		if b.IsLineClear(line) {
 			if opp, ok := b.Pieces[m.To]; ok {
 				return opp.Colour != p.Colour
+			} else if m.From.File != m.To.File && p.GetPieceType() == piece.PieceTypePawn {
+				return false
 			}
 
 			return true

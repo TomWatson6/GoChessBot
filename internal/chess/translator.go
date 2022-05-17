@@ -3,6 +3,7 @@ package chess
 import (
 	"fmt"
 	"strings"
+	"unicode"
 
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
@@ -210,18 +211,19 @@ func (c Chess) TranslateNotation(n string) ([]move.Move, error) {
 	if strings.Contains(n, "x") {
 		// Piece capture e.g. Nxf3, e2xf3, e3Nxf5
 		if len(n) == 4 {
-			n, err := c.translatePieceCapture(n)
-			if err != nil {
-				return ms, err
+			if unicode.IsUpper([]rune(n)[0]) {
+				n, err := c.translatePieceCapture(n)
+				if err != nil {
+					return ms, err
+				}
+				ms = append(ms, n)
+			} else {
+				n, err := c.translatePawnCapture(n)
+				if err != nil {
+					return ms, err
+				}
+				ms = append(ms, n)
 			}
-			ms = append(ms, n)
-			return ms, nil
-		} else if len(n) == 5 {
-			n, err := c.translatePawnCapture(n)
-			if err != nil {
-				return ms, err
-			}
-			ms = append(ms, n)
 			return ms, nil
 		} else if len(n) == 6 {
 			if strings.Contains(n, "=") {

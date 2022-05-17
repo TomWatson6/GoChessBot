@@ -76,6 +76,15 @@ func TestTranslateNotation(t *testing.T) {
 		want     []move.Move
 	}{
 		{
+			notation: "h3",
+			want: []move.Move{
+				{
+					From: move.Position{File: 7, Rank: 1},
+					To:   move.Position{File: 7, Rank: 2},
+				},
+			},
+		},
+		{
 			notation: "e4",
 			want: []move.Move{
 				{
@@ -85,7 +94,7 @@ func TestTranslateNotation(t *testing.T) {
 			},
 		},
 		{
-			notation: "d2xc3",
+			notation: "dxc3",
 			want: []move.Move{
 				{
 					From: move.Position{File: 3, Rank: 1},
