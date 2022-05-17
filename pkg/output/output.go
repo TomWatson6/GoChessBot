@@ -38,6 +38,8 @@ func PrintBoard(b board.Board, c colour.Colour) {
 
 			fmt.Println()
 		}
+
+		fmt.Printf("   A  B  C  D  E  F  G  H\n")
 	} else {
 		for r := 0; r < 8; r++ {
 			fmt.Printf("%d ", r+1)
@@ -52,5 +54,7 @@ func PrintBoard(b board.Board, c colour.Colour) {
 
 			fmt.Println()
 		}
+
+		fmt.Printf("   H  G  F  E  D  C  B  A\n")
 	}
 }
