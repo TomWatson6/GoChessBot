@@ -11,28 +11,49 @@ import (
 	"github.com/tomwatson6/chessbot/pkg/output"
 )
 
+func getUserInput(c colour.Colour) (string, error) {
+	fmt.Printf("%s's move: ", c)
+
+	reader := bufio.NewReader(os.Stdin)
+	text, err := reader.ReadString('\n')
+
+	if err != nil {
+		return "", err
+	}
+
+	// convert CRLF to LF
+	text = strings.Replace(text, "\n", "", -1)
+
+	return text, nil
+}
+
 func main() {
 	c := chess.New(colour.White)
 
-	reader := bufio.NewReader(os.Stdin)
-
 	for {
 		output.PrintBoard(c.Board, c.Turn)
-		text, _ := reader.ReadString('\n')
-		// convert CRLF to LF
-		text = strings.Replace(text, "\n", "", -1)
-		ms, err := c.TranslateNotation(text)
-		fmt.Printf("%v\n", ms)
-		if err == nil {
-			for _, m := range ms {
-				if err := c.MakeMove(m); err != nil {
-					fmt.Println(err)
-				}
-			}
-			c.NextTurn()
-		} else {
+		input, err := getUserInput(c.Turn)
+		if err != nil {
 			fmt.Println(err)
-			break
+			continue
 		}
+
+		ms, err := c.TranslateNotation(input)
+
+		fmt.Printf("%v\n", ms)
+
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		for _, m := range ms {
+			if err := c.MakeMove(m); err != nil {
+				fmt.Println(err)
+				continue
+			}
+		}
+
+		c.NextTurn()
 	}
 }
