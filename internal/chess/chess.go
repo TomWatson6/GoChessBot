@@ -27,7 +27,7 @@ func (c *Chess) MakeMove(m move.Move) error {
 		return fmt.Errorf("invalid move for current turn: %v", m)
 	}
 	if err := c.Board.MovePiece(m); err != nil {
-		return fmt.Errorf("invalid move: %v", m)
+		return fmt.Errorf("invalid move: %v, err: %w", m, err)
 	}
 
 	return nil
