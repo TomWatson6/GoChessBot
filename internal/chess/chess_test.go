@@ -10,6 +10,38 @@ import (
 	"github.com/tomwatson6/chessbot/testing/payloads"
 )
 
+func TestSimpleMoves(t *testing.T) {
+	b := payloads.NewStandardBoard()
+	c := payloads.NewStandardChessGame(
+		payloads.ChessGameWithBoard(b),
+		payloads.ChessGameWithTurn(colour.White),
+	)
+
+	tcs := []struct {
+		m move.Move
+	}{
+		{
+			move.Move{
+				From: move.Position{File: 0, Rank: 1},
+				To:   move.Position{File: 0, Rank: 3},
+			},
+		},
+		{
+			move.Move{
+				From: move.Position{File: 1, Rank: 6},
+				To:   move.Position{File: 1, Rank: 4},
+			},
+		},
+	}
+
+	for _, tc := range tcs {
+		if err := c.MakeMove(tc.m); err != nil {
+			t.Fatalf("MakeMove() returned error: %s", err)
+		}
+		c.NextTurn()
+	}
+}
+
 func TestTranslateNotation(t *testing.T) {
 	b := payloads.NewStandardBoard(
 		payloads.BoardWithPiece(piece.Piece{
