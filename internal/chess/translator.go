@@ -83,11 +83,18 @@ func (c Chess) translatePawnCapture(n string) (move.Move, error) {
 
 	attacked := c.Board.Pieces[m.To]
 
-	movePieces := c.Board.MoveMap[m.To]
+	opp := colour.White
 
-	for _, movePiece := range movePieces {
-		if movePiece.Colour != attacked.Colour && movePiece.Position.File == fileToNumber(left[0]) {
-			m.From = movePiece.Position
+	if attacked.Colour == colour.White {
+		opp = colour.Black
+	}
+
+	attackingPieces := c.Board.GetAttackingPiecesForColour(m.To, opp)
+
+	for _, attackingPiece := range attackingPieces {
+		if attackingPiece.Position.File == fileToNumber(left[0]) &&
+			attackingPiece.GetPieceType() == piece.PieceTypePawn {
+			m.From = attackingPiece.Position
 			return m, nil
 		}
 	}
