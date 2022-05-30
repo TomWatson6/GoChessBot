@@ -16,6 +16,7 @@ type Board struct {
 	Pieces    map[move.Position]piece.Piece
 	MoveMap   map[move.Position][]piece.Piece
 	ThreatMap map[move.Position][]piece.Piece
+	EnPassant map[move.Position]colour.Colour
 }
 
 func New() Board {
@@ -32,6 +33,8 @@ func New() Board {
 	for _, p := range config.GetStandardPieces() {
 		b.Pieces[p.Position] = p
 	}
+
+	b.EnPassant = make(map[move.Position]colour.Colour)
 
 	b.Update()
 

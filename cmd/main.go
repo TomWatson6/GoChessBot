@@ -27,6 +27,11 @@ func getUserInput(c colour.Colour) (string, error) {
 	return text, nil
 }
 
+// Known bugs:
+// - pawn promotion to queen
+// - en passant
+// -
+
 func main() {
 	c := chess.New(colour.White)
 
@@ -47,11 +52,17 @@ func main() {
 			continue
 		}
 
+		hasError := false
+
 		for _, m := range ms {
 			if err := c.MakeMove(m); err != nil {
 				fmt.Println(err)
-				continue
+				hasError = true
 			}
+		}
+
+		if hasError {
+			continue
 		}
 
 		c.NextTurn()
