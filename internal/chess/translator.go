@@ -17,7 +17,7 @@ func (c Chess) translatePawnMove(n string) (move.Move, error) {
 	runes := []rune(n)
 
 	m.To = move.Position{File: fileToNumber(runes[0]), Rank: rankToNumber(runes[1])}
-	movePieces := c.Board.MoveMap[m.To]
+	movePieces := c.Board.GetMoveMapForColour(m.To, c.Turn)
 	instantiated := false
 
 	for _, movePiece := range movePieces {
