@@ -226,6 +226,8 @@ func (b *Board) MovePiece(m move.Move) error {
 func (b Board) isPinned(m move.Move) (Board, error) {
 	p := b.Pieces[m.From]
 
+	_, isAttacking := b.Pieces[m.To]
+
 	p.Position = m.To
 	b.Pieces[m.From] = p
 	b.Pieces[m.To] = b.Pieces[m.From]
@@ -242,6 +244,10 @@ func (b Board) isPinned(m move.Move) (Board, error) {
 		}
 
 		return b, nil
+	}
+
+	if isAttacking {
+		delete(b.Pieces, m.To)
 	}
 
 	p.Position = m.From
