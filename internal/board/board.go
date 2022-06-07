@@ -200,6 +200,29 @@ func (b *Board) MovePiece(m move.Move) error {
 	return fmt.Errorf("invalid move: %v", m)
 }
 
+// CHECK WHAT IS HAPPENING BELOW
+// 1 wR wN wB wK ## wB wN wR
+// 2 wP wP wP ## ## wP wP wP
+// 3 ## ## ## ## ## ## ## ##
+// 4 ## ## ## wQ ## ## ## ##
+// 5 ## ## ## ## ## ## ## ##
+// 6 ## bQ ## ## bP ## ## ##
+// 7 bP bP bP ## ## bP bP bP
+// 8 bR bN bB bK ## bB bN bR
+//    H  G  F  E  D  C  B  A
+// Black's move: Ke7
+// [(4,7)->(4,6)]
+// invalid move: (4,7)->(4,6), err: failed to move piece: {(4,7) Black map[(3,6):true (3,7):true (4,5):true (4,6):true (4,7):true (5,5):true] {}} is pinned
+// 1 wR wN wB wK ## wB wN wR
+// 2 wP wP wP ## ## wP wP wP
+// 3 ## ## ## ## ## ## ## ##
+// 4 ## ## ## wQ ## ## ## ##
+// 5 ## ## ## ## ## ## ## ##
+// 6 ## bQ ## ## bP ## ## ##
+// 7 bP bP bP bK ## bP bP bP
+// 8 bR bN bB bK ## bB bN bR
+//    H  G  F  E  D  C  B  A
+
 func (b Board) isPinned(m move.Move) (Board, error) {
 	p := b.Pieces[m.From]
 
@@ -243,9 +266,14 @@ func (b Board) IsValidMove(m move.Move) bool {
 			return true
 		}
 
+		// if p.GetPieceType() == piece.PieceTypePawn && m.From.File == m.To.File {
+		// 	m.To = move.Position{File: m.To.File, Rank: m.To.Rank + 1}
+		// }
+
 		//Get line apart from last position
 		//If line is clear, check that last square has no piece, or piece of opposite colour
-		line := b.GetLine(m.From, m.To)
+		// line := b.GetLine(m.From, m.To, false)
+		line := b.GetLine(m.From, m.To, p.GetPieceType() == piece.PieceTypePawn && m.From.File == m.To.File)
 
 		if b.IsLineClear(line) {
 			if opp, ok := b.Pieces[m.To]; ok {
@@ -261,7 +289,7 @@ func (b Board) IsValidMove(m move.Move) bool {
 	return false
 }
 
-func (b Board) GetLine(start, end move.Position) []move.Position {
+func (b Board) GetLine(start, end move.Position, includingLast bool) []move.Position {
 	// If x and y not equal to 0 (not horiz or vert), then if abs(x) != abs(y) (also not diagonal), return
 	// Only side case is Knight, and you would never check a line for a Knight
 	if end.File-start.File != 0 && end.Rank-start.Rank != 0 {
@@ -269,6 +297,8 @@ func (b Board) GetLine(start, end move.Position) []move.Position {
 			return []move.Position{}
 		}
 	}
+
+	var line []move.Position
 
 	//If line is diagonal
 	if math.Abs(float64(end.File-start.File)) == math.Abs(float64(end.Rank-start.Rank)) {
@@ -283,25 +313,23 @@ func (b Board) GetLine(start, end move.Position) []move.Position {
 			yStep = -1
 		}
 
-		var line []move.Position
 		x := start.File
 		y := start.Rank
 
-		for {
-			if x == end.File && y == end.Rank {
-				break
-			}
+		line = append(line, move.Position{File: x, Rank: y})
 
-			line = append(line, move.Position{File: x, Rank: y})
+		for x != end.File || y != end.Rank {
+			// if x == end.File && y == end.Rank {
+			// 	break
+			// }
+
 			x += xStep
 			y += yStep
+			line = append(line, move.Position{File: x, Rank: y})
 		}
-
-		return line[1:]
 	} else {
 		//If line is vertical
 		if start.File == end.File {
-			var line []move.Position
 			if start.Rank < end.Rank {
 				for i := start.Rank; i <= end.Rank; i++ {
 					line = append(line, move.Position{File: start.File, Rank: i})
@@ -311,11 +339,8 @@ func (b Board) GetLine(start, end move.Position) []move.Position {
 					line = append(line, move.Position{File: start.File, Rank: i})
 				}
 			}
-
-			return line[1 : len(line)-1]
 		} else if start.Rank == end.Rank {
 			//If line is horizontal
-			var line []move.Position
 			if start.File < end.File {
 				for i := start.File; i <= end.File; i++ {
 					line = append(line, move.Position{File: i, Rank: start.Rank})
@@ -325,12 +350,14 @@ func (b Board) GetLine(start, end move.Position) []move.Position {
 					line = append(line, move.Position{File: i, Rank: start.Rank})
 				}
 			}
-
-			return line[1 : len(line)-1]
 		}
 	}
 
-	return []move.Position{}
+	if includingLast {
+		return line[1:]
+	} else {
+		return line[1 : len(line)-1]
+	}
 }
 
 func (b Board) IsLineClear(line []move.Position) bool {
