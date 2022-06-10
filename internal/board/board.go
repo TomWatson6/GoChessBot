@@ -200,33 +200,10 @@ func (b *Board) MovePiece(m move.Move) error {
 	return fmt.Errorf("invalid move: %v", m)
 }
 
-// CHECK WHAT IS HAPPENING BELOW
-// 1 wR wN wB wK ## wB wN wR
-// 2 wP wP wP ## ## wP wP wP
-// 3 ## ## ## ## ## ## ## ##
-// 4 ## ## ## wQ ## ## ## ##
-// 5 ## ## ## ## ## ## ## ##
-// 6 ## bQ ## ## bP ## ## ##
-// 7 bP bP bP ## ## bP bP bP
-// 8 bR bN bB bK ## bB bN bR
-//    H  G  F  E  D  C  B  A
-// Black's move: Ke7
-// [(4,7)->(4,6)]
-// invalid move: (4,7)->(4,6), err: failed to move piece: {(4,7) Black map[(3,6):true (3,7):true (4,5):true (4,6):true (4,7):true (5,5):true] {}} is pinned
-// 1 wR wN wB wK ## wB wN wR
-// 2 wP wP wP ## ## wP wP wP
-// 3 ## ## ## ## ## ## ## ##
-// 4 ## ## ## wQ ## ## ## ##
-// 5 ## ## ## ## ## ## ## ##
-// 6 ## bQ ## ## bP ## ## ##
-// 7 bP bP bP bK ## bP bP bP
-// 8 bR bN bB bK ## bB bN bR
-//    H  G  F  E  D  C  B  A
-
 func (b Board) isPinned(m move.Move) (Board, error) {
 	p := b.Pieces[m.From]
 
-	_, isAttacking := b.Pieces[m.To]
+	attackedPiece, isAttacking := b.Pieces[m.To]
 
 	p.Position = m.To
 	b.Pieces[m.From] = p
@@ -247,12 +224,13 @@ func (b Board) isPinned(m move.Move) (Board, error) {
 	}
 
 	if isAttacking {
-		delete(b.Pieces, m.To)
+		b.Pieces[m.To] = attackedPiece
 	}
 
 	p.Position = m.From
 	b.Pieces[m.From] = p
-	return Board{}, fmt.Errorf("%v is pinned", p)
+	delete(b.Pieces, m.To)
+	return Board{}, fmt.Errorf("cannot make move: %v, as you are putting the king in check", m)
 }
 
 func (b Board) IsValidMove(m move.Move) bool {
