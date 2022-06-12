@@ -66,6 +66,11 @@ func main() {
 			continue
 		}
 
+		if c.Board.IsCheckMate(c.Turn.Opposite()) {
+			fmt.Printf("Checkmate! %s wins!\n", c.Turn)
+			break
+		}
+
 		c.NextTurn()
 	}
 }
