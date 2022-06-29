@@ -3,12 +3,12 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/tomwatson6/chessbot/internal/output"
 	"os"
 	"strings"
 
 	"github.com/tomwatson6/chessbot/internal/chess"
 	"github.com/tomwatson6/chessbot/internal/colour"
-	"github.com/tomwatson6/chessbot/pkg/output"
 )
 
 func getUserInput(c colour.Colour) (string, error) {
