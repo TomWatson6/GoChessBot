@@ -57,21 +57,25 @@ func (b Board) IsCheck(c colour.Colour) bool {
 
 // TODO: Look into making this concurrent
 func (b Board) IsCheckMate(c colour.Colour) bool {
-	if king, err := b.getKing(c); err == nil {
-		if b.IsCheck(c) {
-			for pos := range king.ValidMoves {
-				opp := colour.White
-				if c == colour.White {
-					opp = colour.Black
-				}
-				threat := b.GetAttackingPiecesForColour(pos, opp)
-				if len(threat) == 0 {
-					return false
-				}
-			}
-			return true
-		}
+	king, err := b.getKing(c)
+	if err != nil {
+		return false
 	}
+
+	if b.IsCheck(c) {
+		for pos := range king.ValidMoves {
+			opp := colour.White
+			if c == colour.White {
+				opp = colour.Black
+			}
+			threat := b.GetAttackingPiecesForColour(pos, opp)
+			if len(threat) == 0 {
+				return false
+			}
+		}
+		return true
+	}
+
 	return false
 }
 
