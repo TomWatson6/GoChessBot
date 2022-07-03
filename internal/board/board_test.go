@@ -265,10 +265,7 @@ func TestMovePiece(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		err := b.MovePiece(c.move)
-		if err != nil {
-			t.Fatalf("failed to move the piece with error: %s", err)
-		}
+		b.MovePiece(c.move)
 
 		if got, ok := b.Pieces[c.check]; ok {
 			if !got.Equals(c.want) {
