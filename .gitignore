@@ -1,1 +1,4 @@
 Makefile
+/.idea/vcs.xml
+/.idea/modules.xml
+/.idea/chessbot.iml
