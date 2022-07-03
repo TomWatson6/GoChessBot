@@ -4,8 +4,6 @@ import (
 	"github.com/tomwatson6/chessbot/internal/piece"
 )
 
-// TODO: Rethink how rules are structured, there must be a better way to do this...
-
 type Rules []Rule
 
 type Rule interface {
