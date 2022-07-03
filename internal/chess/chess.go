@@ -2,7 +2,6 @@ package chess
 
 import (
 	"fmt"
-
 	"github.com/tomwatson6/chessbot/internal/board"
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"

@@ -22,7 +22,6 @@ func getPieceDisplay(p piece.Piece) string {
 	return output
 }
 
-// Need to fix board printing!!
 func PrintBoard(b board.Board, c colour.Colour) {
 	if c == colour.White {
 		for r := 7; r >= 0; r-- {

@@ -15,6 +15,7 @@ func TestIsCheck(t *testing.T) {
 			Colour:       colour.Black,
 			Position:     move.Position{File: 7, Rank: 3},
 			ValidMoves:   make(map[move.Position]bool),
+			History:      make(map[int]move.Position),
 			PieceDetails: piece.Bishop{},
 		}),
 		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
@@ -35,7 +36,7 @@ func TestIsCheck(t *testing.T) {
 	cases := []struct {
 		colour colour.Colour
 		want   bool
-		// Add error case to test when king doesn't exist
+		// TODO: Add error case to test when king doesn't exist
 	}{
 		{colour.White, true},
 		{colour.Black, false},
@@ -59,6 +60,7 @@ func TestIsCheckMate(t *testing.T) {
 			Colour:       colour.Black,
 			Position:     move.Position{File: 7, Rank: 3},
 			ValidMoves:   make(map[move.Position]bool),
+			History:      make(map[int]move.Position),
 			PieceDetails: piece.Bishop{},
 		}),
 		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
@@ -101,6 +103,7 @@ func TestIsNotCheckMate(t *testing.T) {
 			Colour:       colour.Black,
 			Position:     move.Position{File: 7, Rank: 3},
 			ValidMoves:   make(map[move.Position]bool),
+			History:      make(map[int]move.Position),
 			PieceDetails: piece.Bishop{},
 		}),
 		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
@@ -144,18 +147,21 @@ func TestMovePiece(t *testing.T) {
 			Colour:       colour.White,
 			Position:     move.Position{File: 0, Rank: 2},
 			ValidMoves:   make(map[move.Position]bool),
+			History:      make(map[int]move.Position),
 			PieceDetails: piece.Queen{},
 		}),
 		payloads.BoardWithPiece(piece.Piece{
 			Colour:       colour.White,
 			Position:     move.Position{File: 4, Rank: 4},
 			ValidMoves:   make(map[move.Position]bool),
+			History:      make(map[int]move.Position),
 			PieceDetails: piece.Queen{},
 		}),
 		payloads.BoardWithPiece(piece.Piece{
 			Colour:       colour.Black,
 			Position:     move.Position{File: 4, Rank: 6},
 			ValidMoves:   make(map[move.Position]bool),
+			History:      make(map[int]move.Position),
 			PieceDetails: piece.Bishop{},
 		}),
 	)
@@ -259,7 +265,10 @@ func TestMovePiece(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		b.MovePiece(c.move)
+		err := b.MovePiece(c.move)
+		if err != nil {
+			t.Fatalf("failed to move the piece with error: %s", err)
+		}
 
 		if got, ok := b.Pieces[c.check]; ok {
 			if !got.Equals(c.want) {
@@ -281,18 +290,62 @@ func TestIsValidMove(t *testing.T) {
 			Colour:       colour.White,
 			Position:     move.Position{File: 0, Rank: 2},
 			ValidMoves:   make(map[move.Position]bool),
+			History:      make(map[int]move.Position),
 			PieceDetails: piece.Queen{},
 		}),
+		payloads.BoardWithPiece(piece.Piece{
+			Colour:     colour.White,
+			Position:   move.Position{File: 6, Rank: 4},
+			ValidMoves: make(map[move.Position]bool),
+			History:    make(map[int]move.Position),
+			PieceDetails: piece.Pawn{
+				HasMoved: true,
+			},
+		}),
+		payloads.BoardWithPiece(piece.Piece{
+			Colour:     colour.White,
+			Position:   move.Position{File: 7, Rank: 4},
+			ValidMoves: make(map[move.Position]bool),
+			History: map[int]move.Position{
+				0: {7, 6},
+				1: {7, 4},
+			},
+			PieceDetails: piece.Pawn{
+				HasMoved: true,
+			},
+		}),
+		payloads.BoardWithPiece(piece.Piece{
+			Colour:     colour.White,
+			Position:   move.Position{File: 5, Rank: 4},
+			ValidMoves: make(map[move.Position]bool),
+			History:    make(map[int]move.Position),
+			PieceDetails: piece.Pawn{
+				HasMoved: true,
+			},
+		}),
+		payloads.BoardWithDeletedPiece(move.Position{
+			File: 6,
+			Rank: 1,
+		}),
+		payloads.BoardWithDeletedPiece(move.Position{
+			File: 7,
+			Rank: 6,
+		}),
+		payloads.BoardWithDeletedPiece(move.Position{
+			File: 5,
+			Rank: 6,
+		}),
+		payloads.BoardWithMoveNumber(1),
 	)
 
 	// Visualisation of the board
 	// 8 bR bN bB bQ bK bB bN bR
-	// 7 bP bP bP bP bP bP bP bP
+	// 7 bP bP bP bP bP ## bP ##
 	// 6 ## ## ## ## ## ## ## ##
-	// 5 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## ## bP wP bP
 	// 4 ## ## ## ## ## ## ## ##
 	// 3 wQ ## ## ## ## ## ## ##
-	// 2 wP wP wP wP wP wP wP wP
+	// 2 wP wP wP wP wP wP ## wP
 	// 1 wR wN wB wQ wK wB wN wR
 	//    A  B  C  D  E  F  G  H
 
@@ -308,6 +361,8 @@ func TestIsValidMove(t *testing.T) {
 		{move.Move{From: move.Position{File: 0, Rank: 2}, To: move.Position{File: 0, Rank: 1}}, false},
 		{move.Move{From: move.Position{File: 1, Rank: 0}, To: move.Position{File: 2, Rank: 0}}, false},
 		{move.Move{From: move.Position{File: 1, Rank: 0}, To: move.Position{File: 2, Rank: 2}}, true},
+		{move.Move{From: move.Position{File: 6, Rank: 4}, To: move.Position{File: 7, Rank: 5}}, true},
+		{move.Move{From: move.Position{File: 6, Rank: 4}, To: move.Position{File: 5, Rank: 5}}, false},
 	}
 
 	for _, c := range cases {
@@ -335,11 +390,11 @@ func TestPawnHasMoved(t *testing.T) {
 	from := move.Position{File: 0, Rank: 1}
 	to := move.Position{File: 0, Rank: 3}
 
-	move := move.Move{From: from, To: to}
+	m := move.Move{From: from, To: to}
 
-	err := b.MovePiece(move)
+	err := b.MovePiece(m)
 	if err != nil {
-		t.Errorf("MovePiece with move %v failed", move)
+		t.Errorf("MovePiece with move %v failed", m)
 	}
 
 	hasMoved = b.Pieces[to].PieceDetails.(piece.Pawn).HasMoved

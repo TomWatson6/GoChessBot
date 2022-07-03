@@ -2,6 +2,7 @@ package board
 
 import (
 	"fmt"
+	"github.com/tomwatson6/chessbot/internal/rules"
 	"math"
 	"sync"
 
@@ -11,14 +12,17 @@ import (
 	"github.com/tomwatson6/chessbot/internal/piece"
 )
 
+// Board is a struct to hold the current state of the chess game board
 type Board struct {
-	Squares   []move.Position
-	Pieces    map[move.Position]piece.Piece
-	MoveMap   map[move.Position][]piece.Piece
-	ThreatMap map[move.Position][]piece.Piece
-	EnPassant map[move.Position]colour.Colour
+	Squares    []move.Position
+	Pieces     map[move.Position]piece.Piece
+	MoveMap    map[move.Position][]piece.Piece
+	ThreatMap  map[move.Position][]piece.Piece
+	EnPassant  map[move.Position]colour.Colour
+	MoveNumber int
 }
 
+// New makes a new instance of a board with a default state
 func New() Board {
 	var b Board
 
@@ -36,165 +40,22 @@ func New() Board {
 
 	b.EnPassant = make(map[move.Position]colour.Colour)
 
+	b.MoveNumber = 0
+	b.updatePieceHistory()
+
 	b.Update()
 
 	return b
 }
 
-// Needs updating to include colour parameter, pawns can only move in 1 direction
-func (b *Board) Update() {
-	b.GenerateMoveMap()
-	b.GenerateThreatMap()
-}
-
-func (b Board) IsCheck(c colour.Colour) bool {
-	if king, err := b.getKing(c); err == nil {
-		return len(b.ThreatMap[king.Position]) > 0
-	}
-
-	return false
-}
-
-// TODO: Look into making this concurrent
-func (b Board) IsCheckMate(c colour.Colour) bool {
-	king, err := b.getKing(c)
-	if err != nil {
-		return false
-	}
-
-	if b.IsCheck(c) {
-		for pos := range king.ValidMoves {
-			opp := colour.White
-			if c == colour.White {
-				opp = colour.Black
-			}
-			threat := b.GetAttackingPiecesForColour(pos, opp)
-			if len(threat) == 0 {
-				return false
-			}
-		}
-		return true
-	}
-
-	return false
-}
-
-func (b Board) getKing(c colour.Colour) (piece.Piece, error) {
-	for _, p := range b.Pieces {
-		if p.Colour == c && p.GetPieceType() == piece.PieceTypeKing {
-			return p, nil
-		}
-	}
-
-	return piece.Piece{}, fmt.Errorf("cannot find king")
-}
-
-// Needs updating to include colour parameter, pawns can only move in 1 direction
-func (b *Board) GenerateMoveMap() {
-	b.MoveMap = make(map[move.Position][]piece.Piece)
-	pieces := b.GetRemainingPieces()
-	// wg := &sync.WaitGroup{}
-	// mu := &sync.Mutex{}
-
-	// wg.Add(len(b.Squares) * len(pieces))
-	for _, pos := range b.Squares {
-		for i := range pieces {
-			if b.IsValidMove(move.Move{From: pieces[i].Position, To: pos}) {
-				b.MoveMap[pos] = append(b.MoveMap[pos], pieces[i])
-				p := pieces[i]
-				p.ValidMoves[pos] = true
-				b.Pieces[p.Position] = p
-			}
-			// go func(pos move.Position, pieces []piece.Piece, i int) {
-			// 	if b.IsValidMove(move.Move{From: pieces[i].Position, To: pos}) {
-			// 		mu.Lock()
-			// 		b.MoveMap[pos] = append(b.MoveMap[pos], pieces[i])
-			// 		p := pieces[i]
-			// 		p.ValidMoves = append(p.ValidMoves, pos)
-			// 		b.Pieces[p.Position] = p
-			// 		mu.Unlock()
-			// 	}
-			// 	wg.Done()
-			// }(pos, pieces, i)
-		}
-	}
-	// wg.Wait()
-}
-
-// Needs updating to include colour parameter, pawns can only move in 1 direction
-func (b *Board) GenerateThreatMap() {
-	b.ThreatMap = make(map[move.Position][]piece.Piece)
-	pieces := b.GetRemainingPieces()
-	wg := &sync.WaitGroup{}
-	mu := &sync.Mutex{}
-
-	wg.Add(len(b.Squares) * len(pieces))
-	for _, pos := range b.Squares {
-		for _, p := range pieces {
-			go func(pos move.Position, p piece.Piece) {
-				defer wg.Done()
-				if b.IsValidMove(move.Move{From: p.Position, To: pos}) {
-					if p.GetPieceType() == piece.PieceTypePawn {
-						x := math.Abs(float64(p.Position.File - pos.File))
-						y := math.Abs(float64(p.Position.Rank - pos.Rank))
-
-						// Diagonal move means attacking move
-						// Horizontal & Vertical moves aren't attacking moves
-						if x == 0 && (y == 1 || y == 2) {
-							return
-						}
-					}
-
-					mu.Lock()
-					b.ThreatMap[pos] = append(b.ThreatMap[pos], p)
-					mu.Unlock()
-				}
-			}(pos, p)
-		}
-	}
-
-	wg.Wait()
-}
-
-func (b Board) GetRemainingPieces() []piece.Piece {
-	var pieces []piece.Piece
-
-	for _, p := range b.Pieces {
-		pieces = append(pieces, p)
-	}
-
-	return pieces
-}
-
-func (b Board) GetMoveMapForColour(pos move.Position, c colour.Colour) []piece.Piece {
-	var pieces []piece.Piece
-
-	for _, p := range b.MoveMap[pos] {
-		if p.Colour == c {
-			pieces = append(pieces, p)
-		}
-	}
-
-	return pieces
-}
-
-func (b Board) GetAttackingPiecesForColour(pos move.Position, c colour.Colour) []piece.Piece {
-	var pieces []piece.Piece
-
-	for _, p := range b.ThreatMap[pos] {
-		if p.Colour == c {
-			pieces = append(pieces, p)
-		}
-	}
-
-	return pieces
-}
-
+// MovePiece moves a piece on the board if possible, else it returns an error stating why it cannot
 func (b *Board) MovePiece(m move.Move) error {
 	p := b.Pieces[m.From]
-	if _, ok := p.ValidMoves[m.To]; ok {
+	if p.ValidMoves[m.To] {
 		if b2, err := b.isPinned(m); err == nil {
 			*b = b2
+			b.updatePieceHistory()
+
 			return nil
 		} else {
 			return fmt.Errorf("failed to move piece: %w", err)
@@ -204,39 +65,7 @@ func (b *Board) MovePiece(m move.Move) error {
 	return fmt.Errorf("invalid move: %v", m)
 }
 
-func (b Board) isPinned(m move.Move) (Board, error) {
-	p := b.Pieces[m.From]
-
-	attackedPiece, isAttacking := b.Pieces[m.To]
-
-	p.Position = m.To
-	b.Pieces[m.From] = p
-	b.Pieces[m.To] = b.Pieces[m.From]
-	delete(b.Pieces, m.From)
-
-	b.Update()
-
-	if !b.IsCheck(p.Colour) {
-		if p.GetPieceType() == piece.PieceTypePawn {
-			details := p.PieceDetails.(piece.Pawn)
-			details.HasMoved = true
-			p.PieceDetails = details
-			b.Pieces[m.To] = p
-		}
-
-		return b, nil
-	}
-
-	if isAttacking {
-		b.Pieces[m.To] = attackedPiece
-	}
-
-	p.Position = m.From
-	b.Pieces[m.From] = p
-	delete(b.Pieces, m.To)
-	return Board{}, fmt.Errorf("cannot make move: %v, as you are putting the king in check", m)
-}
-
+// IsValidMove checks to see that the move specified is valid given the current state of the board
 func (b Board) IsValidMove(m move.Move) bool {
 	if m.From == m.To {
 		return false
@@ -246,6 +75,9 @@ func (b Board) IsValidMove(m move.Move) bool {
 
 	// TODO: Update to check for constraints of the board size (8x8)
 	if p.IsValidMove(m) {
+		// With the knight being the only piece that does not move in a straight line,
+		// you need to check explicitly if there is a piece where it is trying to move to,
+		// as this logic is normally done in the IsLineClear function
 		if p.GetPieceType() == piece.PieceTypeKnight {
 			if p2, ok := b.Pieces[m.To]; ok {
 				return p2.Colour != p.Colour
@@ -254,19 +86,34 @@ func (b Board) IsValidMove(m move.Move) bool {
 			return true
 		}
 
-		// if p.GetPieceType() == piece.PieceTypePawn && m.From.File == m.To.File {
-		// 	m.To = move.Position{File: m.To.File, Rank: m.To.Rank + 1}
-		// }
+		// Pawns cannot take when moving forward, so we must include p.GetPieceType() == piece.PieceTypePawn && not diagonal move for includingLast
+		line := b.getLine(m.From, m.To, p.GetPieceType() == piece.PieceTypePawn && m.From.File == m.To.File)
 
-		//Get line apart from last position
-		//If line is clear, check that last square has no piece, or piece of opposite colour
-		// line := b.GetLine(m.From, m.To, false)
-		line := b.GetLine(m.From, m.To, p.GetPieceType() == piece.PieceTypePawn && m.From.File == m.To.File)
-
-		if b.IsLineClear(line) {
+		if b.isLineClear(line) {
 			if opp, ok := b.Pieces[m.To]; ok {
 				return opp.Colour != p.Colour
 			} else if m.From.File != m.To.File && p.GetPieceType() == piece.PieceTypePawn {
+				// Check for en passant
+				if attacked, ok := b.Pieces[move.Position{File: m.To.File, Rank: m.From.Rank}]; ok {
+					fileDiff := attacked.Position.File - attacked.History[b.MoveNumber-1].File
+					rankDiff := attacked.Position.Rank - attacked.History[b.MoveNumber-1].Rank
+
+					attackedRules := rules.Rules{
+						rules.FirstMoveRule{},
+						rules.MovedLastTurnRule{},
+						rules.LastTurnPositionChangeRule{
+							Diff: move.Position{
+								File: int(math.Abs(float64(fileDiff))),
+								Rank: int(math.Abs(float64(rankDiff))),
+							},
+						},
+					}
+
+					if attackedRules.All(attacked) {
+						return true
+					}
+				}
+
 				return false
 			}
 
@@ -277,83 +124,17 @@ func (b Board) IsValidMove(m move.Move) bool {
 	return false
 }
 
-func (b Board) GetLine(start, end move.Position, includingLast bool) []move.Position {
-	// If x and y not equal to 0 (not horiz or vert), then if abs(x) != abs(y) (also not diagonal), return
-	// Only side case is Knight, and you would never check a line for a Knight
-	if end.File-start.File != 0 && end.Rank-start.Rank != 0 {
-		if math.Abs(float64(end.File-start.File)) != math.Abs(float64(end.Rank-start.Rank)) {
-			return []move.Position{}
-		}
+// updatePieceHistory updates all pieces to keep a track of their moves throughout the current game
+func (b *Board) updatePieceHistory() {
+	wg := &sync.WaitGroup{}
+	wg.Add(len(b.Pieces))
+
+	for _, p := range b.Pieces {
+		go func(wg *sync.WaitGroup, p piece.Piece) {
+			p.History[b.MoveNumber] = p.Position
+			wg.Done()
+		}(wg, p)
 	}
 
-	var line []move.Position
-
-	//If line is diagonal
-	if math.Abs(float64(end.File-start.File)) == math.Abs(float64(end.Rank-start.Rank)) {
-		xStep := 1
-		yStep := 1
-
-		if start.File > end.File {
-			xStep = -1
-		}
-
-		if start.Rank > end.Rank {
-			yStep = -1
-		}
-
-		x := start.File
-		y := start.Rank
-
-		line = append(line, move.Position{File: x, Rank: y})
-
-		for x != end.File || y != end.Rank {
-			// if x == end.File && y == end.Rank {
-			// 	break
-			// }
-
-			x += xStep
-			y += yStep
-			line = append(line, move.Position{File: x, Rank: y})
-		}
-	} else {
-		//If line is vertical
-		if start.File == end.File {
-			if start.Rank < end.Rank {
-				for i := start.Rank; i <= end.Rank; i++ {
-					line = append(line, move.Position{File: start.File, Rank: i})
-				}
-			} else {
-				for i := start.Rank; i >= end.Rank; i-- {
-					line = append(line, move.Position{File: start.File, Rank: i})
-				}
-			}
-		} else if start.Rank == end.Rank {
-			//If line is horizontal
-			if start.File < end.File {
-				for i := start.File; i <= end.File; i++ {
-					line = append(line, move.Position{File: i, Rank: start.Rank})
-				}
-			} else {
-				for i := start.File; i >= end.File; i-- {
-					line = append(line, move.Position{File: i, Rank: start.Rank})
-				}
-			}
-		}
-	}
-
-	if includingLast {
-		return line[1:]
-	} else {
-		return line[1 : len(line)-1]
-	}
-}
-
-func (b Board) IsLineClear(line []move.Position) bool {
-	for _, pos := range line {
-		if _, ok := b.Pieces[pos]; ok {
-			return false
-		}
-	}
-
-	return true
+	wg.Wait()
 }

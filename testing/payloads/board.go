@@ -35,3 +35,10 @@ func BoardWithDeletedPiece(pos move.Position) BoardOption {
 		return nil
 	})
 }
+
+func BoardWithMoveNumber(number int) BoardOption {
+	return BoardOption(func(b *board.Board) error {
+		b.MoveNumber = number
+		return nil
+	})
+}

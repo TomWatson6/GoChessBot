@@ -16,6 +16,7 @@ type Piece struct {
 	Position   move.Position
 	Colour     colour.Colour
 	ValidMoves map[move.Position]bool
+	History    map[int]move.Position
 	PieceDetails
 }
 
