@@ -78,53 +78,7 @@ func (b *Board) GenerateThreatMap() {
 						x := math.Abs(float64(file))
 						y := math.Abs(float64(rank))
 
-						// TODO: Remove complexity by adding this to it's own method
-						// TODO: Look into moving this into the b.IsValidMove(move) method in this file
-						// TODO: Look into separating this large file into separate files based on functionality
-						// Check for en passant
-
-						// Make set of rules to loop through, and if returns true, then passes rules for en-passant move, and adds to the threat map
-						// TODO: Rules are the following:
-						// 	Pawn to the left or right - check both for potentially 2 additional moves
-						// 	Pawn history having 2 unique moves (means that it's only moved once)
-						// 	MoveA == MoveB where difference in y == 2
-						// 	MoveA -> MoveB was the last move made (end of history)
-						//pieceRules := rules.Rules{
-						//	rules.PawnCaptureMoveRule{
-						//		Dest: pos,
-						//	},
-						//}
-
-						//adjRules := rules.Rules{
-						//	rules.FirstMoveRule{},
-						//	rules.MovedLastTurnRule{},
-						//	rules.LastTurnPositionChangeRule{
-						//		Diff: move.Position{
-						//			File: 0,
-						//			Rank: 2,
-						//		},
-						//	},
-						//}
-
-						// Check to see if the move being made is a pawn capture
-						// TODO: This needs some looking into, make sure we don't remove unnecessary pawn moves
-
-						// Check on left side of pawn
-						//if adj, ok := b.Pieces[move.Position{File: file - 1, Rank: rank}]; ok {
-						//	if !adjRules.All(adj) {
-						//		return
-						//	}
-						//}
-
-						// Check on right side of pawn
-						//if adj, ok := b.Pieces[move.Position{File: file + 1, Rank: rank}]; ok {
-						//	if !adjRules.All(adj) {
-						//		return
-						//	}
-						//}
-
-						// Diagonal move means attacking move
-						// Horizontal & Vertical moves aren't attacking moves
+						// Only diagonal moves for a pawn are an attack, therefore forward move is not a threat
 						if x == 0 && (y == 1 || y == 2) {
 							return
 						}
