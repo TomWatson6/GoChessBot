@@ -1,6 +1,7 @@
 package board_test
 
 import (
+	"github.com/tomwatson6/chessbot/internal/board"
 	"testing"
 
 	"github.com/tomwatson6/chessbot/internal/colour"
@@ -11,11 +12,9 @@ import (
 
 func TestIsCheck(t *testing.T) {
 	b := payloads.NewStandardBoard(
-		payloads.BoardWithPiece(piece.Piece{
+		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.Black,
 			Position:     move.Position{File: 7, Rank: 3},
-			ValidMoves:   make(map[move.Position]bool),
-			History:      make(map[int]move.Position),
 			PieceDetails: piece.Bishop{},
 		}),
 		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
@@ -56,11 +55,9 @@ func TestIsCheck(t *testing.T) {
 
 func TestIsCheckMate(t *testing.T) {
 	b := payloads.NewStandardBoard(
-		payloads.BoardWithPiece(piece.Piece{
+		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.Black,
 			Position:     move.Position{File: 7, Rank: 3},
-			ValidMoves:   make(map[move.Position]bool),
-			History:      make(map[int]move.Position),
 			PieceDetails: piece.Bishop{},
 		}),
 		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
@@ -99,11 +96,9 @@ func TestIsCheckMate(t *testing.T) {
 
 func TestIsNotCheckMate(t *testing.T) {
 	b := payloads.NewStandardBoard(
-		payloads.BoardWithPiece(piece.Piece{
+		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.Black,
 			Position:     move.Position{File: 7, Rank: 3},
-			ValidMoves:   make(map[move.Position]bool),
-			History:      make(map[int]move.Position),
 			PieceDetails: piece.Bishop{},
 		}),
 		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
@@ -143,25 +138,19 @@ func TestIsNotCheckMate(t *testing.T) {
 
 func TestMovePiece(t *testing.T) {
 	b := payloads.NewStandardBoard(
-		payloads.BoardWithPiece(piece.Piece{
+		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.White,
 			Position:     move.Position{File: 0, Rank: 2},
-			ValidMoves:   make(map[move.Position]bool),
-			History:      make(map[int]move.Position),
 			PieceDetails: piece.Queen{},
 		}),
-		payloads.BoardWithPiece(piece.Piece{
+		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.White,
 			Position:     move.Position{File: 4, Rank: 4},
-			ValidMoves:   make(map[move.Position]bool),
-			History:      make(map[int]move.Position),
 			PieceDetails: piece.Queen{},
 		}),
-		payloads.BoardWithPiece(piece.Piece{
+		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.Black,
 			Position:     move.Position{File: 4, Rank: 6},
-			ValidMoves:   make(map[move.Position]bool),
-			History:      make(map[int]move.Position),
 			PieceDetails: piece.Bishop{},
 		}),
 	)
@@ -178,85 +167,80 @@ func TestMovePiece(t *testing.T) {
 	//    A  B  C  D  E  F  G  H
 
 	cases := []struct {
+		name  string
 		move  move.Move
 		check move.Position
 		want  piece.Piece
 	}{
 		{
-			move.Move{
+			name: "WhiteQueenDiagonalMove",
+			move: move.Move{
 				From: move.Position{File: 0, Rank: 2},
 				To:   move.Position{File: 1, Rank: 3},
 			},
-			move.Position{File: 1, Rank: 3},
-			piece.Piece{
+			check: move.Position{File: 1, Rank: 3},
+			want: piece.Piece{
 				Colour:       colour.White,
 				Position:     move.Position{File: 1, Rank: 3},
 				PieceDetails: piece.Queen{},
 			},
 		},
 		{
-			move.Move{
+			name: "WhiteQueenCapturesBlackPawn",
+			move: move.Move{
 				From: move.Position{File: 1, Rank: 3},
 				To:   move.Position{File: 1, Rank: 6},
 			},
-			move.Position{File: 1, Rank: 6},
-			piece.Piece{
+			check: move.Position{File: 1, Rank: 6},
+			want: piece.Piece{
 				Colour:       colour.White,
 				Position:     move.Position{File: 1, Rank: 6},
 				PieceDetails: piece.Queen{},
 			},
 		},
 		{
-			move.Move{
+			name: "WhiteQueenStandardMoveBackwards",
+			move: move.Move{
 				From: move.Position{File: 1, Rank: 6},
 				To:   move.Position{File: 1, Rank: 5},
 			},
-			move.Position{File: 1, Rank: 6},
-			piece.Piece{},
+			check: move.Position{File: 1, Rank: 6},
+			want:  piece.Piece{},
 		},
 		{
-			move.Move{
+			name: "WhitePawnDoubleMove",
+			move: move.Move{
 				From: move.Position{File: 0, Rank: 1},
 				To:   move.Position{File: 0, Rank: 3},
 			},
-			move.Position{File: 0, Rank: 3},
-			piece.Piece{
+			check: move.Position{File: 0, Rank: 3},
+			want: piece.Piece{
 				Colour:       colour.White,
 				Position:     move.Position{File: 0, Rank: 3},
 				PieceDetails: piece.Pawn{},
 			},
 		},
 		{
-			move.Move{
+			name: "InvalidWhiteKnightMove",
+			move: move.Move{
 				From: move.Position{File: 1, Rank: 0},
 				To:   move.Position{File: 3, Rank: 1},
 			},
-			move.Position{File: 3, Rank: 1},
-			piece.Piece{
+			check: move.Position{File: 3, Rank: 1},
+			want: piece.Piece{
 				Colour:       colour.White,
 				Position:     move.Position{File: 3, Rank: 1},
 				PieceDetails: piece.Pawn{},
 			},
 		},
 		{
-			move.Move{
+			name: "InvalidBishopMoveWhenPinned",
+			move: move.Move{
 				From: move.Position{File: 4, Rank: 6},
 				To:   move.Position{File: 3, Rank: 5},
 			},
-			move.Position{File: 4, Rank: 6},
-			piece.Piece{
-				Colour:       colour.Black,
-				Position:     move.Position{File: 4, Rank: 6},
-				PieceDetails: piece.Bishop{},
-			},
-		},
-		{
-			move.Move{
-				From: move.Position{File: 4, Rank: 6},
-				To:   move.Position{File: 0, Rank: 2},
-			},
-			move.Position{File: 4, Rank: 6},
-			piece.Piece{
+			check: move.Position{File: 4, Rank: 6},
+			want: piece.Piece{
 				Colour:       colour.Black,
 				Position:     move.Position{File: 4, Rank: 6},
 				PieceDetails: piece.Bishop{},
@@ -265,57 +249,57 @@ func TestMovePiece(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		b.MovePiece(c.move)
+		t.Run(c.name, func(t *testing.T) {
+			b.Move(c.move)
 
-		if got, ok := b.Pieces[c.check]; ok {
-			if !got.Equals(c.want) {
-				t.Errorf("MovePiece(%v) => Piece at position %v == %#v, want %#v",
-					c.move, c.check, got, c.want)
+			if got, ok := b.Pieces[c.check]; ok {
+				if !got.Equals(c.want) {
+					t.Errorf("MovePiece(%v) => Piece at position %v == %#v, want %#v",
+						c.move, c.check, got, c.want)
+				}
+			} else {
+				if c.want.PieceDetails != nil {
+					t.Errorf("MovePiece(%v) => Piece at position %v == %#v, want %#v",
+						c.move, c.check, got, c.want)
+				}
 			}
-		} else {
-			if c.want.PieceDetails != nil {
-				t.Errorf("MovePiece(%v) => Piece at position %v == %#v, want %#v",
-					c.move, c.check, got, c.want)
-			}
-		}
+		})
 	}
 }
 
 func TestIsValidMove(t *testing.T) {
+	history := []board.Turn{
+		{
+			colour.White: move.Move{
+				From: move.Position{File: 7, Rank: 6},
+				To:   move.Position{File: 7, Rank: 4},
+			},
+		},
+	}
+
 	b := payloads.NewStandardBoard(
-		payloads.BoardWithPiece(piece.Piece{
+		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.White,
 			Position:     move.Position{File: 0, Rank: 2},
-			ValidMoves:   make(map[move.Position]bool),
-			History:      make(map[int]move.Position),
 			PieceDetails: piece.Queen{},
 		}),
-		payloads.BoardWithPiece(piece.Piece{
-			Colour:     colour.White,
-			Position:   move.Position{File: 6, Rank: 4},
-			ValidMoves: make(map[move.Position]bool),
-			History:    make(map[int]move.Position),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:   colour.White,
+			Position: move.Position{File: 6, Rank: 4},
 			PieceDetails: piece.Pawn{
 				HasMoved: true,
 			},
 		}),
-		payloads.BoardWithPiece(piece.Piece{
-			Colour:     colour.White,
-			Position:   move.Position{File: 7, Rank: 4},
-			ValidMoves: make(map[move.Position]bool),
-			History: map[int]move.Position{
-				0: {7, 6},
-				1: {7, 4},
-			},
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:   colour.White,
+			Position: move.Position{File: 7, Rank: 4},
 			PieceDetails: piece.Pawn{
 				HasMoved: true,
 			},
 		}),
-		payloads.BoardWithPiece(piece.Piece{
-			Colour:     colour.White,
-			Position:   move.Position{File: 5, Rank: 4},
-			ValidMoves: make(map[move.Position]bool),
-			History:    make(map[int]move.Position),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:   colour.White,
+			Position: move.Position{File: 5, Rank: 4},
 			PieceDetails: piece.Pawn{
 				HasMoved: true,
 			},
@@ -332,7 +316,7 @@ func TestIsValidMove(t *testing.T) {
 			File: 5,
 			Rank: 6,
 		}),
-		payloads.BoardWithMoveNumber(1),
+		payloads.BoardWithHistory(history),
 	)
 
 	// Visualisation of the board
@@ -347,8 +331,8 @@ func TestIsValidMove(t *testing.T) {
 	//    A  B  C  D  E  F  G  H
 
 	cases := []struct {
-		move move.Move
-		want bool
+		move  move.Move
+		valid bool
 	}{
 		{move.Move{From: move.Position{File: 0, Rank: 2}, To: move.Position{File: 1, Rank: 3}}, true},
 		{move.Move{From: move.Position{File: 0, Rank: 2}, To: move.Position{File: 1, Rank: 4}}, false},
@@ -366,9 +350,10 @@ func TestIsValidMove(t *testing.T) {
 		c := c // rebind c into this lexical scope
 		t.Run(c.move.String(), func(t *testing.T) {
 			t.Parallel()
-			got := b.IsValidMove(c.move)
-			if got != c.want {
-				t.Errorf("IsValidMove(%v) => %v, want %v", c.move, got, c.want)
+			err := b.IsValidMove(c.move)
+
+			if (err == nil && !c.valid) || (err != nil && c.valid) {
+				t.Errorf("IsValidMove(%v) => %v, want %v", c.move, err == nil, c.valid)
 			}
 		})
 	}
@@ -389,7 +374,7 @@ func TestPawnHasMoved(t *testing.T) {
 
 	m := move.Move{From: from, To: to}
 
-	err := b.MovePiece(m)
+	err := b.Move(m)
 	if err != nil {
 		t.Errorf("MovePiece with move %v failed", m)
 	}
@@ -399,3 +384,6 @@ func TestPawnHasMoved(t *testing.T) {
 		t.Errorf("HasMoved is %t, expected %t", hasMoved, true)
 	}
 }
+
+// TODO: In random chess game, pieces can capture other pieces of their own colour
+// TODO: When in check, it doesn't realise it can take the threatening piece

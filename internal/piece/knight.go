@@ -1,12 +1,21 @@
 package piece
 
 import (
+	"github.com/tomwatson6/chessbot/internal/piece/rules"
 	"math"
 
 	"github.com/tomwatson6/chessbot/internal/move"
 )
 
-type Knight struct{}
+type Knight struct {
+	maxRange int
+}
+
+func NewKnight() *Knight {
+	return &Knight{
+		maxRange: 2,
+	}
+}
 
 func (k Knight) GetPieceLetter() PieceLetter {
 	return PieceLetterKnight
@@ -18,6 +27,18 @@ func (k Knight) GetPiecePoints() PiecePoints {
 
 func (k Knight) GetPieceType() PieceType {
 	return PieceTypeKnight
+}
+
+func (k *Knight) Move(m move.Move) error {
+	rs := rules.Assert(
+		rules.IsValidKnightsMove(m),
+	)
+
+	if err := rs(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (k Knight) IsValidMove(m move.Move) bool {

@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/tomwatson6/chessbot/internal/output"
 	"os"
 	"strings"
 
@@ -34,43 +33,47 @@ func getUserInput(c colour.Colour) (string, error) {
 // -
 
 func main() {
-	c := chess.New(colour.White)
+	c := chess.NewRandom()
 
-	for {
-		output.PrintBoard(c.Board, c.Turn)
-		input, err := getUserInput(c.Turn)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
+	c.Play()
 
-		ms, err := c.TranslateNotation(input)
+	//c := chess.New(colour.White)
 
-		fmt.Printf("%v\n", ms)
-
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-
-		hasError := false
-
-		for _, m := range ms {
-			if err := c.MakeMove(m); err != nil {
-				fmt.Println(err)
-				hasError = true
-			}
-		}
-
-		if hasError {
-			continue
-		}
-
-		if c.Board.IsCheckMate(c.Turn.Opposite()) {
-			fmt.Printf("Checkmate! %s wins!\n", c.Turn)
-			break
-		}
-
-		c.NextTurn()
-	}
+	//for {
+	//	output.PrintBoard(c.Board, c.Turn)
+	//	input, err := getUserInput(c.Turn)
+	//	if err != nil {
+	//		fmt.Println(err)
+	//		continue
+	//	}
+	//
+	//	ms, err := c.TranslateNotation(input)
+	//
+	//	fmt.Printf("%v\n", ms)
+	//
+	//	if err != nil {
+	//		fmt.Println(err)
+	//		continue
+	//	}
+	//
+	//	hasError := false
+	//
+	//	for _, m := range ms {
+	//		if err := c.MakeMove(m); err != nil {
+	//			fmt.Println(err)
+	//			hasError = true
+	//		}
+	//	}
+	//
+	//	if hasError {
+	//		continue
+	//	}
+	//
+	//	if c.Board.IsCheckMate(c.Turn.Opposite()) {
+	//		fmt.Printf("Checkmate! %s wins!\n", c.Turn)
+	//		break
+	//	}
+	//
+	//	c.NextTurn()
+	//}
 }

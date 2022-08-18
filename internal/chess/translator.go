@@ -2,13 +2,88 @@ package chess
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"unicode"
 
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 	"github.com/tomwatson6/chessbot/internal/piece"
+	"github.com/tomwatson6/chessbot/pkg/utility/linq"
 )
+
+func (c Chess) TranslateNotation(n string) ([]move.Move, error) {
+	// TODO: Pawn promotion could be all of the following:
+	// e8=Q, dxe8=Q
+
+	var ms []move.Move
+
+	if strings.Contains(n, "x") {
+		// Piece capture e.g. Nxf3, e2xf3, e3Nxf5
+		if len(n) == 4 {
+			if unicode.IsUpper([]rune(n)[0]) {
+				n, err := c.translatePieceCapture(n)
+				if err != nil {
+					return ms, err
+				}
+				ms = append(ms, n)
+			} else {
+				n, err := c.translatePawnCapture(n)
+				if err != nil {
+					return ms, err
+				}
+				ms = append(ms, n)
+			}
+			return ms, nil
+		} else if len(n) == 6 {
+			if strings.Contains(n, "=") {
+				//Pawn capture into promotion
+				m, err := c.translatePawnPromotionMove(n)
+				if err != nil {
+					return ms, err
+				}
+				ms = append(ms, m)
+				return ms, nil
+			} else {
+				n := c.translateAmbiguousPieceCapture(n)
+				ms = append(ms, n)
+				return ms, nil
+			}
+		}
+		return ms, fmt.Errorf("invalid move: %s", n)
+	} else {
+		if []rune(n)[0] == 'O' {
+			return c.translateCastlingMove(n)
+		} else if len(n) == 2 {
+			// Pawn move e.g. e4
+			m, err := c.translatePawnMove(n)
+			if err != nil {
+				return ms, err
+			}
+			return append(ms, m), nil
+		} else if len(n) == 3 {
+			// Piece move e.g. Nf3
+			m, err := c.translatePieceMove(n)
+			if err != nil {
+				return ms, err
+			}
+			return append(ms, m), nil
+		} else if len(n) == 4 {
+			// Pawn promotion e.g. e8=Q
+			m, err := c.translatePawnPromotionMove(n)
+			if err != nil {
+				return ms, err
+			}
+			ms = append(ms, m)
+			return ms, nil
+		} else if len(n) == 5 {
+			m := c.translateAmbiguousPieceMove(n)
+			ms = append(ms, m)
+			return ms, nil
+		}
+	}
+	return ms, fmt.Errorf("invalid move: %s", n)
+}
 
 // function for handling pawn standard move e.g. e4
 func (c Chess) translatePawnMove(n string) (move.Move, error) {
@@ -209,77 +284,75 @@ func (c Chess) translatePawnPromotionMove(n string) (move.Move, error) {
 	}
 }
 
-func (c Chess) TranslateNotation(n string) ([]move.Move, error) {
-	// TODO: Pawn promotion could be all of the following:
-	// e8=Q, dxe8=Q
+func (c Chess) ToChessNotation(ms []move.Move) (string, error) {
+	if len(ms) == 2 {
+		// Castling move
+		var pieces []piece.Piece
 
-	var ms []move.Move
-
-	if strings.Contains(n, "x") {
-		// Piece capture e.g. Nxf3, e2xf3, e3Nxf5
-		if len(n) == 4 {
-			if unicode.IsUpper([]rune(n)[0]) {
-				n, err := c.translatePieceCapture(n)
-				if err != nil {
-					return ms, err
-				}
-				ms = append(ms, n)
-			} else {
-				n, err := c.translatePawnCapture(n)
-				if err != nil {
-					return ms, err
-				}
-				ms = append(ms, n)
-			}
-			return ms, nil
-		} else if len(n) == 6 {
-			if strings.Contains(n, "=") {
-				//Pawn capture into promotion
-				m, err := c.translatePawnPromotionMove(n)
-				if err != nil {
-					return ms, err
-				}
-				ms = append(ms, m)
-				return ms, nil
-			} else {
-				n := c.translateAmbiguousPieceCapture(n)
-				ms = append(ms, n)
-				return ms, nil
+		for _, m := range ms {
+			if p, ok := c.Board.Pieces[m.From]; ok {
+				pieces = append(pieces, p)
 			}
 		}
-		return ms, fmt.Errorf("invalid move: %s", n)
+
+		rook, err := linq.Find(pieces,
+			func(p piece.Piece) bool {
+				return p.GetPieceType() == piece.PieceTypeRook
+			})
+		if err != nil {
+			return "", err
+		}
+
+		if rook.Position.File == 0 {
+			return "O-O-O", nil
+		} else {
+			return "O-O", nil
+		}
 	} else {
-		if []rune(n)[0] == 'O' {
-			return c.translateCastlingMove(n)
-		} else if len(n) == 2 {
-			// Pawn move e.g. e4
-			m, err := c.translatePawnMove(n)
-			if err != nil {
-				return ms, err
+		// Normal move
+		m := ms[0]
+		notation := ""
+
+		if p, ok := c.Board.Pieces[m.From]; ok {
+			attackers := c.Board.GetAttackingPiecesForColour(m.To, p.Colour)
+			var temp []piece.Piece
+
+			for _, a := range attackers {
+				if !a.Equals(*p) {
+					temp = append(temp, a)
+				}
 			}
-			return append(ms, m), nil
-		} else if len(n) == 3 {
-			// Piece move e.g. Nf3
-			m, err := c.translatePieceMove(n)
-			if err != nil {
-				return ms, err
+
+			attackers = temp
+
+			if linq.Any(attackers,
+				func(p2 piece.Piece) bool {
+					return p.GetPieceType() == p2.GetPieceType()
+				}) {
+				// Needs specific from location in the notation
+				file := numberToFile(m.From.File)
+				rank := numberToRank(m.From.Rank)
+				notation = notation + file + rank
 			}
-			return append(ms, m), nil
-		} else if len(n) == 4 {
-			// Pawn promotion e.g. e8=Q
-			m, err := c.translatePawnPromotionMove(n)
-			if err != nil {
-				return ms, err
+
+			if p.GetPieceType() != piece.PieceTypePawn {
+				notation = notation + string(p.GetPieceLetter())
 			}
-			ms = append(ms, m)
-			return ms, nil
-		} else if len(n) == 5 {
-			m := c.translateAmbiguousPieceMove(n)
-			ms = append(ms, m)
-			return ms, nil
+
+			if _, ok := c.Board.Pieces[m.To]; ok {
+				notation = notation + "x"
+			}
+
+			file := numberToFile(m.To.File)
+			rank := numberToRank(m.To.Rank)
+
+			notation = notation + file + rank
+
+			return notation, nil
 		}
 	}
-	return ms, fmt.Errorf("invalid move: %s", n)
+
+	return "", fmt.Errorf("cannot convert move to notation")
 }
 
 func fileToNumber(file rune) int {
@@ -288,4 +361,12 @@ func fileToNumber(file rune) int {
 
 func rankToNumber(rank rune) int {
 	return int(rank - '1')
+}
+
+func numberToFile(number int) string {
+	return string(rune('a' + number))
+}
+
+func numberToRank(number int) string {
+	return strconv.Itoa(number + 1)
 }

@@ -29,7 +29,7 @@ func PrintBoard(b board.Board, c colour.Colour) {
 
 			for f := 0; f < 8; f++ {
 				if p, ok := b.Pieces[move.Position{File: f, Rank: r}]; ok {
-					fmt.Printf("%s ", getPieceDisplay(p))
+					fmt.Printf("%s ", getPieceDisplay(*p))
 				} else {
 					fmt.Printf("## ")
 				}
@@ -45,7 +45,7 @@ func PrintBoard(b board.Board, c colour.Colour) {
 
 			for f := 7; f >= 0; f-- {
 				if p, ok := b.Pieces[move.Position{File: f, Rank: r}]; ok {
-					fmt.Printf("%s ", getPieceDisplay(p))
+					fmt.Printf("%s ", getPieceDisplay(*p))
 				} else {
 					fmt.Printf("## ")
 				}

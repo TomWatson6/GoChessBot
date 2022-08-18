@@ -21,15 +21,15 @@ func NewStandardChessGame(opts ...ChessOption) chess.Chess {
 }
 
 func ChessGameWithTurn(turn colour.Colour) ChessOption {
-	return ChessOption(func(c *chess.Chess) error {
+	return func(c *chess.Chess) error {
 		c.Turn = turn
 		return nil
-	})
+	}
 }
 
 func ChessGameWithBoard(b board.Board) ChessOption {
-	return ChessOption(func(c *chess.Chess) error {
+	return func(c *chess.Chess) error {
 		c.Board = b
 		return nil
-	})
+	}
 }

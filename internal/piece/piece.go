@@ -13,10 +13,8 @@ type PieceDetails interface {
 }
 
 type Piece struct {
-	Position   move.Position
-	Colour     colour.Colour
-	ValidMoves map[move.Position]bool
-	History    map[int]move.Position
+	Position move.Position
+	Colour   colour.Colour
 	PieceDetails
 }
 

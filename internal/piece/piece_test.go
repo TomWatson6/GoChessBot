@@ -12,7 +12,6 @@ func TestBishopValidMoves(t *testing.T) {
 	b := piece.Piece{
 		Colour:       colour.White,
 		Position:     move.Position{File: 3, Rank: 3},
-		ValidMoves:   make(map[move.Position]bool),
 		PieceDetails: piece.Bishop{},
 	}
 
@@ -39,7 +38,6 @@ func TestKingValidMoves(t *testing.T) {
 	k := piece.Piece{
 		Colour:       colour.White,
 		Position:     move.Position{File: 3, Rank: 3},
-		ValidMoves:   make(map[move.Position]bool),
 		PieceDetails: piece.King{},
 	}
 
@@ -71,7 +69,6 @@ func TestKnightValidMoves(t *testing.T) {
 	k := piece.Piece{
 		Colour:       colour.White,
 		Position:     move.Position{File: 3, Rank: 3},
-		ValidMoves:   make(map[move.Position]bool),
 		PieceDetails: piece.Knight{},
 	}
 
@@ -98,14 +95,12 @@ func TestValidPawnMoves(t *testing.T) {
 	movedPawn := piece.Piece{
 		Colour:       colour.White,
 		Position:     move.Position{File: 3, Rank: 3},
-		ValidMoves:   make(map[move.Position]bool),
 		PieceDetails: piece.Pawn{HasMoved: true},
 	}
 
 	unmovedPawn := piece.Piece{
 		Colour:       colour.White,
 		Position:     move.Position{File: 3, Rank: 2},
-		ValidMoves:   make(map[move.Position]bool),
 		PieceDetails: piece.Pawn{},
 	}
 
@@ -133,7 +128,6 @@ func TestQueenValidMoves(t *testing.T) {
 	q := piece.Piece{
 		Colour:       colour.White,
 		Position:     move.Position{File: 3, Rank: 3},
-		ValidMoves:   make(map[move.Position]bool),
 		PieceDetails: piece.Queen{},
 	}
 
@@ -166,7 +160,6 @@ func TestRookValidMoves(t *testing.T) {
 	r := piece.Piece{
 		Colour:       colour.White,
 		Position:     move.Position{File: 3, Rank: 3},
-		ValidMoves:   make(map[move.Position]bool),
 		PieceDetails: piece.Rook{},
 	}
 

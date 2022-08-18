@@ -15,7 +15,7 @@ type Chess struct {
 func New(col colour.Colour) Chess {
 	var c Chess
 
-	c.Board = board.New()
+	c.Board = board.New(8, 8)
 	c.Turn = col
 
 	return c
@@ -25,8 +25,8 @@ func (c *Chess) MakeMove(m move.Move) error {
 	if c.Board.Pieces[m.From].Colour != c.Turn {
 		return fmt.Errorf("invalid move for current turn: %v", m)
 	}
-	if err := c.Board.MovePiece(m); err != nil {
-		return fmt.Errorf("invalid move: %v, err: %w", m, err)
+	if err := c.Board.Move(m); err != nil {
+		return fmt.Errorf("failed validation of move: %v, err: %w", m, err)
 	}
 
 	return nil

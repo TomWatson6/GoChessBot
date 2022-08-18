@@ -1,3 +1,10 @@
-- Fix issue where a pawn standard move (not a capture) can take a piece of the opposite colour
-- Implement En Passant checks with the map that's been made already
+Main:
+- Add IsCheck functionality to the board
+- Add IsCheckMate functionality to the board
+- Remake the translator in an internal translation package
+- Refactor the generation package to use the new structure changes
+- Refactor the random game play to use all the new stuff
+
+Extra:
 - Maybe add validation to make sure you can't use standard moving notation to capture a piece (needs to have 'x' in the notation to work)
+- Externalise the config by adding it to a terraform file? (Learn terraform)

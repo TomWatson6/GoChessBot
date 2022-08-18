@@ -1,6 +1,10 @@
 package chess_test
 
 import (
+	"log"
+	"os"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/tomwatson6/chessbot/internal/chess"
@@ -44,42 +48,36 @@ func TestSimpleMoves(t *testing.T) {
 
 func TestTranslateNotation(t *testing.T) {
 	b := payloads.NewStandardBoard(
-		payloads.BoardWithPiece(piece.Piece{
+		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.Black,
 			Position:     move.Position{File: 2, Rank: 2},
-			ValidMoves:   make(map[move.Position]bool),
 			PieceDetails: piece.Queen{},
 		}),
-		payloads.BoardWithPiece(piece.Piece{
+		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.White,
 			Position:     move.Position{File: 6, Rank: 4},
-			ValidMoves:   make(map[move.Position]bool),
 			PieceDetails: piece.Knight{},
 		}),
-		payloads.BoardWithPiece(piece.Piece{
+		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.White,
 			Position:     move.Position{File: 2, Rank: 4},
-			ValidMoves:   make(map[move.Position]bool),
 			PieceDetails: piece.Knight{},
 		}),
-		payloads.BoardWithPiece(piece.Piece{
+		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.Black,
 			Position:     move.Position{File: 5, Rank: 2},
-			ValidMoves:   make(map[move.Position]bool),
 			PieceDetails: piece.Bishop{},
 		}),
-		payloads.BoardWithPiece(piece.Piece{
-			Colour:     colour.White,
-			Position:   move.Position{File: 2, Rank: 6},
-			ValidMoves: make(map[move.Position]bool),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:   colour.White,
+			Position: move.Position{File: 2, Rank: 6},
 			PieceDetails: piece.Pawn{
 				HasMoved: true,
 			},
 		}),
-		payloads.BoardWithPiece(piece.Piece{
-			Colour:     colour.White,
-			Position:   move.Position{File: 7, Rank: 6},
-			ValidMoves: make(map[move.Position]bool),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:   colour.White,
+			Position: move.Position{File: 7, Rank: 6},
 			PieceDetails: piece.Pawn{
 				HasMoved: true,
 			},
@@ -254,5 +252,155 @@ func TestNextTurn(t *testing.T) {
 				t.Errorf("NextTurn() returned %s, want %s", tc.game.Turn.String(), tc.want.String())
 			}
 		})
+	}
+}
+
+func TestMoveToNotation(t *testing.T) {
+	b := payloads.NewStandardBoard(
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 3, Rank: 3},
+			PieceDetails: piece.Knight{},
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 3, Rank: 2},
+			PieceDetails: piece.Pawn{},
+		}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 1, Rank: 7}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 2, Rank: 7}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 3, Rank: 7}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 7}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 6, Rank: 7}),
+	)
+
+	c := payloads.NewStandardChessGame(
+		payloads.ChessGameWithBoard(b),
+	)
+
+	// Visualisation of the board
+	// 8 bR ## ## ## bK ## ## bR
+	// 7 bP bP bP bP bP bP bP bP
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## ## ## ## ##
+	// 4 ## ## ## wN ## ## ## ##
+	// 3 ## ## ## bP ## ## ## ##
+	// 2 wP wP wP wP wP wP wP wP
+	// 1 wR wN wB wQ wK wB wN wR
+	//    A  B  C  D  E  F  G  H
+
+	tcs := []struct {
+		ms   []move.Move
+		want string
+	}{
+		{
+			[]move.Move{
+				{
+					From: move.Position{File: 0, Rank: 1},
+					To:   move.Position{File: 0, Rank: 2},
+				},
+			},
+			"a3",
+		},
+		{
+			[]move.Move{
+				{
+					From: move.Position{File: 1, Rank: 0},
+					To:   move.Position{File: 2, Rank: 2},
+				},
+			},
+			"Nc3",
+		},
+		{
+			[]move.Move{
+				{
+					From: move.Position{File: 6, Rank: 0},
+					To:   move.Position{File: 5, Rank: 2},
+				},
+			},
+			"g1Nf3",
+		},
+		{
+			[]move.Move{
+				{
+					From: move.Position{File: 4, Rank: 1},
+					To:   move.Position{File: 3, Rank: 2},
+				},
+			},
+			"e2xd3",
+		},
+		{
+			[]move.Move{
+				{
+					From: move.Position{File: 4, Rank: 7},
+					To:   move.Position{File: 6, Rank: 7},
+				},
+				{
+					From: move.Position{File: 7, Rank: 7},
+					To:   move.Position{File: 5, Rank: 7},
+				},
+			},
+			"O-O",
+		},
+		{
+			[]move.Move{
+				{
+					From: move.Position{File: 4, Rank: 7},
+					To:   move.Position{File: 2, Rank: 7},
+				},
+				{
+					From: move.Position{File: 0, Rank: 7},
+					To:   move.Position{File: 3, Rank: 7},
+				},
+			},
+			"O-O-O",
+		},
+	}
+
+	for i, tc := range tcs {
+		tc := tc // rebind to this lexical scope
+
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			t.Parallel()
+			notation, err := c.ToChessNotation(tc.ms)
+			if err != nil {
+				t.Errorf("failed to convert to notation: %s", err)
+			}
+
+			if notation != tc.want {
+				t.Errorf("failed to convert, got: %s, want: %s", notation, tc.want)
+			}
+		})
+	}
+}
+
+func TestInputGame(t *testing.T) {
+	b := payloads.NewStandardBoard()
+	c := payloads.NewStandardChessGame(
+		payloads.ChessGameWithBoard(b),
+	)
+
+	content, err := os.ReadFile("../../testing/output/2022_07_08 16_19_11.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	split := strings.Split(string(content), "\n\n")
+
+	input := split[1]
+
+	lines := strings.Split(input, "\n")
+
+	for _, line := range lines {
+		m, err := move.NewMoveFromString(line)
+		if err != nil {
+			t.Fatalf("cannot read move: %s", line)
+		}
+
+		if err := c.MakeMove(m); err != nil {
+			t.Fatalf("invalid move: %+v, failed with error: %s", m, err)
+		}
+
+		c.NextTurn()
 	}
 }

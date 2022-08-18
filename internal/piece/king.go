@@ -1,12 +1,21 @@
 package piece
 
 import (
+	"github.com/tomwatson6/chessbot/internal/piece/rules"
 	"math"
 
 	"github.com/tomwatson6/chessbot/internal/move"
 )
 
-type King struct{}
+type King struct {
+	maxRange int
+}
+
+func NewKing() King {
+	return King{
+		maxRange: 1,
+	}
+}
 
 func (k King) GetPieceLetter() PieceLetter {
 	return PieceLetterKing
@@ -18,6 +27,19 @@ func (k King) GetPiecePoints() PiecePoints {
 
 func (k King) GetPieceType() PieceType {
 	return PieceTypeKing
+}
+
+func (k *King) Move(m move.Move) error {
+	rs := rules.Assert(
+		rules.IsValidLine(m),
+		rules.DoesNotExceedMaxRange(k.maxRange, m),
+	)
+
+	if err := rs(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (k King) IsValidMove(m move.Move) bool {

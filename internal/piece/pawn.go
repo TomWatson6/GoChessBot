@@ -1,6 +1,7 @@
 package piece
 
 import (
+	"github.com/tomwatson6/chessbot/internal/piece/rules"
 	"math"
 
 	"github.com/tomwatson6/chessbot/internal/colour"
@@ -8,8 +9,16 @@ import (
 )
 
 type Pawn struct {
+	maxRange int
 	Colour   colour.Colour
 	HasMoved bool
+}
+
+func NewPawn(c colour.Colour) *Pawn {
+	return &Pawn{
+		maxRange: 1,
+		Colour:   c,
+	}
 }
 
 func (p Pawn) GetPieceLetter() PieceLetter {
@@ -22,6 +31,27 @@ func (p Pawn) GetPiecePoints() PiecePoints {
 
 func (p Pawn) GetPieceType() PieceType {
 	return PieceTypePawn
+}
+
+func (p *Pawn) Move(m move.Move) error {
+	r := p.maxRange
+
+	if !p.HasMoved {
+		r += 1
+	}
+
+	rs := rules.Assert(
+		rules.IsValidLine(m),
+		rules.DoesNotExceedMaxRange(r, m),
+		rules.IsCorrectDirection(p.Colour, m),
+		rules.DoesNotExceedMaxRangeIfDiagonal(p.maxRange, m),
+	)
+
+	if err := rs(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (p Pawn) IsValidMove(m move.Move) bool {

@@ -1,5 +1,7 @@
 package linq
 
+import "fmt"
+
 func Any[T any](xs []T, f func(T) bool) bool {
 	for _, x := range xs {
 		if f(x) {
@@ -40,4 +42,14 @@ func Select[T any, R any](xs []T, f func(T) R) []R {
 	}
 
 	return result
+}
+
+func Find[T any](xs []T, f func(T) bool) (*T, error) {
+	for _, x := range xs {
+		if f(x) {
+			return &x, nil
+		}
+	}
+
+	return nil, fmt.Errorf("couldn't locate a piece with condition specified")
 }

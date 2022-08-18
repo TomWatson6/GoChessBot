@@ -64,3 +64,13 @@ func (s Set[T]) Intersect(t Set[T]) Set[T] {
 
 	return intersection
 }
+
+func (s Set[T]) ToArray() []T {
+	var arr []T
+
+	for item := range s {
+		arr = append(arr, item)
+	}
+
+	return arr
+}

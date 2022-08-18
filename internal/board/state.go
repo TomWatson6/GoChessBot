@@ -2,11 +2,11 @@ package board
 
 import (
 	"fmt"
+	"math"
+
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 	"github.com/tomwatson6/chessbot/internal/piece"
-	"math"
-	"sync"
 )
 
 // Update refreshes the state of the board,
@@ -46,6 +46,12 @@ func (b *Board) GenerateMoveMap() {
 	b.MoveMap = make(map[move.Position][]piece.Piece)
 	pieces := b.getRemainingPieces()
 
+	// Reset ValidMoves before assigning to it
+	for pos, piece := range b.Pieces {
+		piece.ValidMoves = make(map[move.Position]bool)
+		b.Pieces[pos] = piece
+	}
+
 	for _, pos := range b.Squares {
 		for _, piece := range pieces {
 			if b.IsValidMove(move.Move{From: piece.Position, To: pos}) {
@@ -62,37 +68,37 @@ func (b *Board) GenerateMoveMap() {
 func (b *Board) GenerateThreatMap() {
 	b.ThreatMap = make(map[move.Position][]piece.Piece)
 	pieces := b.getRemainingPieces()
-	wg := &sync.WaitGroup{}
-	mu := &sync.Mutex{}
+	//wg := &sync.WaitGroup{}
+	//mu := &sync.Mutex{}
 
-	wg.Add(len(b.Squares) * len(pieces))
+	//wg.Add(len(b.Squares) * len(pieces))
 	for _, pos := range b.Squares {
 		for _, p := range pieces {
-			go func(pos move.Position, p piece.Piece) {
-				defer wg.Done()
-				if b.IsValidMove(move.Move{From: p.Position, To: pos}) {
-					if p.GetPieceType() == piece.PieceTypePawn {
-						file := p.Position.File - pos.File
-						rank := p.Position.Rank - pos.Rank
+			//go func(pos move.Position, p piece.Piece) {
+			//defer wg.Done()
+			if b.IsValidMove(move.Move{From: p.Position, To: pos}) {
+				if p.GetPieceType() == piece.PieceTypePawn {
+					file := p.Position.File - pos.File
+					rank := p.Position.Rank - pos.Rank
 
-						x := math.Abs(float64(file))
-						y := math.Abs(float64(rank))
+					x := math.Abs(float64(file))
+					y := math.Abs(float64(rank))
 
-						// Only diagonal moves for a pawn are an attack, therefore forward move is not a threat
-						if x == 0 && (y == 1 || y == 2) {
-							return
-						}
+					// Only diagonal moves for a pawn are an attack, therefore forward move is not a threat
+					if x == 0 && (y == 1 || y == 2) {
+						return
 					}
-
-					mu.Lock()
-					b.ThreatMap[pos] = append(b.ThreatMap[pos], p)
-					mu.Unlock()
 				}
-			}(pos, p)
+
+				//mu.Lock()
+				b.ThreatMap[pos] = append(b.ThreatMap[pos], p)
+				//mu.Unlock()
+			}
+			//}(pos, p)
 		}
 	}
 
-	wg.Wait()
+	//wg.Wait()
 }
 
 // GetMoveMapForColour gets all possible moves for the position and colour specified
@@ -121,14 +127,47 @@ func (b Board) GetAttackingPiecesForColour(pos move.Position, c colour.Colour) [
 	return pieces
 }
 
-// IsCheck checks to see whether the king for the colour provided is currently in check
 func (b Board) IsCheck(c colour.Colour) bool {
-	if king, err := b.getKing(c); err == nil {
-		return len(b.ThreatMap[king.Position]) > 0
+	king, err := b.getKing(c)
+	if err != nil {
+		return false
+	}
+
+	return b.isThreatened(king)
+}
+
+func (b Board) isThreatened(p piece.Piece) bool {
+	ps := b.getRemainingPieces(p.Colour.Opposite())
+
+	for _, p2 := range ps {
+		if p2.IsValidMove(move.Move{From: p2.Position, To: p.Position}) {
+			return true
+		}
 	}
 
 	return false
 }
+
+func (b Board) getRemainingPieces(c colour.Colour) []*piece.Piece {
+	var ps []*piece.Piece
+
+	for _, p := range b.Pieces {
+		if p.Colour == c {
+			ps = append(ps, p)
+		}
+	}
+
+	return ps
+}
+
+// // IsCheck checks to see whether the king for the colour provided is currently in check
+// func (b Board) IsCheck(c colour.Colour) bool {
+// 	if king, err := b.getKing(c); err == nil {
+// 		return len(b.ThreatMap[king.Position]) > 0
+// 	}
+
+// 	return false
+// }
 
 // isPinned checks to see if the move provided is possible based on whether it is pinned to it's king or not
 func (b Board) isPinned(m move.Move) (Board, error) {
