@@ -1,6 +1,8 @@
 package rules
 
 import (
+	"math"
+
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 )
@@ -23,17 +25,57 @@ func IsValidLine(m move.Move) func() error {
 	}
 }
 
+func IsLargerThanOrEqualToThanMinRange(r int, m move.Move) func() error {
+	return func() error {
+		x, y := splitMove(m)
+		m := math.Max(float64(x), float64(y))
+		// xf := math.Abs(float64(x))
+		// yf := math.Abs(float64(y))
+		rf := float64(r)
+
+		if m >= rf {
+			return nil
+		}
+
+		return ErrorIsSmallerThanMinRange
+
+		// if xf == yf {
+		// 	if xf >= rf {
+		// 		return nil
+		// 	}
+		// 	return ErrorIsSmallerThanMinRange
+		// }
+
+		// if xf == 0 {
+		// 	if yf >= rf {
+		// 		return nil
+		// 	}
+		// }
+
+		// if yf == 0 {
+		// 	if xf >= rf {
+		// 		return nil
+		// 	}
+		// }
+
+		// return ErrorIsSmallerThanMinRange
+	}
+}
+
 func DoesNotExceedMaxRange(r int, m move.Move) func() error {
 	return func() error {
 		x, y := splitMove(m)
+		xf := math.Abs(float64(x))
+		yf := math.Abs(float64(y))
+		rf := float64(r)
 
 		// If diagonal move
-		if x == y || x == -y {
-			if x > 0 && r >= x {
+		if xf == yf {
+			if rf >= xf {
 				return nil
 			}
 
-			if y > 0 && r >= y {
+			if rf >= yf {
 				return nil
 			}
 
@@ -41,15 +83,15 @@ func DoesNotExceedMaxRange(r int, m move.Move) func() error {
 		}
 
 		// If vertical move
-		if x == 0 {
-			if r >= y {
+		if xf == 0 {
+			if rf >= yf {
 				return nil
 			}
 		}
 
 		// If horizontal move
-		if y == 0 {
-			if r >= x {
+		if yf == 0 {
+			if rf >= xf {
 				return nil
 			}
 		}
@@ -83,12 +125,14 @@ func DoesNotExceedMaxRangeIfDiagonal(r int, m move.Move) func() error {
 func IsValidKnightsMove(m move.Move) func() error {
 	return func() error {
 		x, y := splitMove(m)
+		xf := math.Abs(float64(x))
+		yf := math.Abs(float64(y))
 
-		if x == 1 && y == 2 {
+		if xf == 1 && yf == 2 {
 			return nil
 		}
 
-		if x == 2 && y == 1 {
+		if xf == 2 && yf == 1 {
 			return nil
 		}
 

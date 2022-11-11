@@ -6,11 +6,12 @@ import (
 )
 
 type Rook struct {
-	maxRange int
+	minRange, maxRange int
 }
 
-func NewRook() *Rook {
-	return &Rook{
+func NewRook() Rook {
+	return Rook{
+		minRange: 1,
 		maxRange: 8,
 	}
 }
@@ -27,9 +28,10 @@ func (r Rook) GetPieceType() PieceType {
 	return PieceTypeRook
 }
 
-func (r *Rook) Move(m move.Move) error {
+func (r Rook) IsValidMove(m move.Move) error {
 	rs := rules.Assert(
 		rules.IsValidLine(m),
+		rules.IsLargerThanOrEqualToThanMinRange(r.minRange, m),
 		rules.DoesNotExceedMaxRange(r.maxRange, m),
 		rules.IsNotDiagonalLine(m),
 	)
@@ -41,6 +43,6 @@ func (r *Rook) Move(m move.Move) error {
 	return nil
 }
 
-func (r Rook) IsValidMove(m move.Move) bool {
-	return m.From.File == m.To.File || m.From.Rank == m.To.Rank
-}
+//func (r Rook) IsValidMove(m move.Move) bool {
+//	return m.From.File == m.To.File || m.From.Rank == m.To.Rank
+//}

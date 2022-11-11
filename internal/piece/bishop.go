@@ -6,11 +6,12 @@ import (
 )
 
 type Bishop struct {
-	maxRange int
+	minRange, maxRange int
 }
 
-func NewBishop() *Bishop {
-	return &Bishop{
+func NewBishop() Bishop {
+	return Bishop{
+		minRange: 1,
 		maxRange: 8,
 	}
 }
@@ -27,9 +28,10 @@ func (b Bishop) GetPieceType() PieceType {
 	return PieceTypeBishop
 }
 
-func (b *Bishop) Move(m move.Move) error {
+func (b Bishop) IsValidMove(m move.Move) error {
 	rs := rules.Assert(
 		rules.IsValidLine(m),
+		rules.IsLargerThanOrEqualToThanMinRange(b.minRange, m),
 		rules.DoesNotExceedMaxRange(b.maxRange, m),
 		rules.IsDiagonalLine(m),
 	)
@@ -41,8 +43,8 @@ func (b *Bishop) Move(m move.Move) error {
 	return nil
 }
 
-func (b Bishop) IsValidMove(m move.Move) bool {
-	x := m.To.File - m.From.File
-	y := m.To.Rank - m.From.Rank
-	return (x == y || x == -y) && (x != 0 && y != 0)
-}
+//func (b Bishop) IsValidMove(m move.Move) bool {
+//	x := m.To.File - m.From.File
+//	y := m.To.Rank - m.From.Rank
+//	return (x == y || x == -y) && (x != 0 && y != 0)
+//}

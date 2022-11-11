@@ -6,11 +6,12 @@ import (
 )
 
 type Queen struct {
-	maxRange int
+	minRange, maxRange int
 }
 
-func NewQueen() *Queen {
-	return &Queen{
+func NewQueen() Queen {
+	return Queen{
+		minRange: 1,
 		maxRange: 8,
 	}
 }
@@ -27,9 +28,10 @@ func (q Queen) GetPieceType() PieceType {
 	return PieceTypeQueen
 }
 
-func (q *Queen) Move(m move.Move) error {
+func (q Queen) IsValidMove(m move.Move) error {
 	rs := rules.Assert(
 		rules.IsValidLine(m),
+		rules.IsLargerThanOrEqualToThanMinRange(q.minRange, m),
 		rules.DoesNotExceedMaxRange(q.maxRange, m),
 	)
 
@@ -40,19 +42,19 @@ func (q *Queen) Move(m move.Move) error {
 	return nil
 }
 
-func (q Queen) IsValidMove(m move.Move) bool {
-	x := m.To.File - m.From.File
-	y := m.To.Rank - m.From.Rank
-
-	// Horizontal and Vertical moves
-	if (x == 0 && y != 0) || (y == 0 && x != 0) {
-		return true
-	}
-
-	// Diagonal moves
-	if (x == y || x == -y) && (x != 0 && y != 0) {
-		return true
-	}
-
-	return false
-}
+//func (q Queen) IsValidMove(m move.Move) bool {
+//	x := m.To.File - m.From.File
+//	y := m.To.Rank - m.From.Rank
+//
+//	// Horizontal and Vertical moves
+//	if (x == 0 && y != 0) || (y == 0 && x != 0) {
+//		return true
+//	}
+//
+//	// Diagonal moves
+//	if (x == y || x == -y) && (x != 0 && y != 0) {
+//		return true
+//	}
+//
+//	return false
+//}

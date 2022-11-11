@@ -1,8 +1,10 @@
 package board_test
 
 import (
-	"github.com/tomwatson6/chessbot/internal/board"
+	"reflect"
 	"testing"
+
+	"github.com/tomwatson6/chessbot/internal/board"
 
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
@@ -15,7 +17,7 @@ func TestIsCheck(t *testing.T) {
 		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.Black,
 			Position:     move.Position{File: 7, Rank: 3},
-			PieceDetails: piece.Bishop{},
+			PieceDetails: piece.NewBishop(),
 		}),
 		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
 		payloads.BoardWithDeletedPiece(move.Position{File: 4, Rank: 1}),
@@ -45,7 +47,11 @@ func TestIsCheck(t *testing.T) {
 		c := c // rebind c into this lexical scope
 		t.Run(c.colour.String(), func(t *testing.T) {
 			t.Parallel()
-			got := b.IsCheck(c.colour)
+			got, err := b.IsCheck(c.colour)
+			if err != nil {
+				t.Fatal(err)
+			}
+
 			if got != c.want {
 				t.Errorf("IsCheck(%v) => %v, want %v", c.colour, got, c.want)
 			}
@@ -58,7 +64,7 @@ func TestIsCheckMate(t *testing.T) {
 		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.Black,
 			Position:     move.Position{File: 7, Rank: 3},
-			PieceDetails: piece.Bishop{},
+			PieceDetails: piece.NewBishop(),
 		}),
 		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
 	)
@@ -86,7 +92,11 @@ func TestIsCheckMate(t *testing.T) {
 		c := c // rebind c into this lexical scope
 		t.Run(c.colour.String(), func(t *testing.T) {
 			t.Parallel()
-			got := b.IsCheckMate(c.colour)
+			got, err := b.IsCheckMate(c.colour)
+			if err != nil {
+				t.Fatal(err)
+			}
+
 			if got != c.want {
 				t.Errorf("IsCheckMate(%v) => %v, want %v", c.colour, got, c.want)
 			}
@@ -99,7 +109,7 @@ func TestIsNotCheckMate(t *testing.T) {
 		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.Black,
 			Position:     move.Position{File: 7, Rank: 3},
-			PieceDetails: piece.Bishop{},
+			PieceDetails: piece.NewBishop(),
 		}),
 		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
 		payloads.BoardWithDeletedPiece(move.Position{File: 4, Rank: 1}),
@@ -128,7 +138,11 @@ func TestIsNotCheckMate(t *testing.T) {
 		c := c // rebind c into this lexical scope
 		t.Run(c.colour.String(), func(t *testing.T) {
 			t.Parallel()
-			got := b.IsCheckMate(c.colour)
+			got, err := b.IsCheckMate(c.colour)
+			if err != nil {
+				t.Fatal(err)
+			}
+
 			if got != c.want {
 				t.Errorf("IsCheckMate(%v) => %v, want %v", c.colour, got, c.want)
 			}
@@ -141,17 +155,17 @@ func TestMovePiece(t *testing.T) {
 		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.White,
 			Position:     move.Position{File: 0, Rank: 2},
-			PieceDetails: piece.Queen{},
+			PieceDetails: piece.NewQueen(),
 		}),
 		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.White,
 			Position:     move.Position{File: 4, Rank: 4},
-			PieceDetails: piece.Queen{},
+			PieceDetails: piece.NewQueen(),
 		}),
 		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.Black,
 			Position:     move.Position{File: 4, Rank: 6},
-			PieceDetails: piece.Bishop{},
+			PieceDetails: piece.NewBishop(),
 		}),
 	)
 
@@ -166,11 +180,22 @@ func TestMovePiece(t *testing.T) {
 	// 1 wR wN wB wQ wK wB wN wR
 	//    A  B  C  D  E  F  G  H
 
+	// Visualisation of the board after
+	// 8 bR bN bB bQ bK bB bN bR
+	// 7 bP ## bP bP bB bP bP bP
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## wQ ## ## ##
+	// 4 ## ## ## ## ## ## ## ##
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 wP wP wP wP wP wP wP wP
+	// 1 wR wN wB wQ wK wB wN wR
+	//    A  B  C  D  E  F  G  H
+
 	cases := []struct {
 		name  string
 		move  move.Move
 		check move.Position
-		want  piece.Piece
+		want  *piece.Piece
 	}{
 		{
 			name: "WhiteQueenDiagonalMove",
@@ -179,10 +204,10 @@ func TestMovePiece(t *testing.T) {
 				To:   move.Position{File: 1, Rank: 3},
 			},
 			check: move.Position{File: 1, Rank: 3},
-			want: piece.Piece{
+			want: &piece.Piece{
 				Colour:       colour.White,
 				Position:     move.Position{File: 1, Rank: 3},
-				PieceDetails: piece.Queen{},
+				PieceDetails: piece.NewQueen(),
 			},
 		},
 		{
@@ -192,10 +217,10 @@ func TestMovePiece(t *testing.T) {
 				To:   move.Position{File: 1, Rank: 6},
 			},
 			check: move.Position{File: 1, Rank: 6},
-			want: piece.Piece{
+			want: &piece.Piece{
 				Colour:       colour.White,
 				Position:     move.Position{File: 1, Rank: 6},
-				PieceDetails: piece.Queen{},
+				PieceDetails: piece.NewQueen(),
 			},
 		},
 		{
@@ -205,7 +230,7 @@ func TestMovePiece(t *testing.T) {
 				To:   move.Position{File: 1, Rank: 5},
 			},
 			check: move.Position{File: 1, Rank: 6},
-			want:  piece.Piece{},
+			want:  nil,
 		},
 		{
 			name: "WhitePawnDoubleMove",
@@ -214,10 +239,12 @@ func TestMovePiece(t *testing.T) {
 				To:   move.Position{File: 0, Rank: 3},
 			},
 			check: move.Position{File: 0, Rank: 3},
-			want: piece.Piece{
-				Colour:       colour.White,
-				Position:     move.Position{File: 0, Rank: 3},
-				PieceDetails: piece.Pawn{},
+			want: &piece.Piece{
+				Colour:   colour.White,
+				Position: move.Position{File: 0, Rank: 3},
+				PieceDetails: piece.NewPawn(
+					piece.PawnWithHasMoved(true),
+				),
 			},
 		},
 		{
@@ -227,10 +254,10 @@ func TestMovePiece(t *testing.T) {
 				To:   move.Position{File: 3, Rank: 1},
 			},
 			check: move.Position{File: 3, Rank: 1},
-			want: piece.Piece{
+			want: &piece.Piece{
 				Colour:       colour.White,
 				Position:     move.Position{File: 3, Rank: 1},
-				PieceDetails: piece.Pawn{},
+				PieceDetails: piece.NewPawn(),
 			},
 		},
 		{
@@ -240,10 +267,10 @@ func TestMovePiece(t *testing.T) {
 				To:   move.Position{File: 3, Rank: 5},
 			},
 			check: move.Position{File: 4, Rank: 6},
-			want: piece.Piece{
+			want: &piece.Piece{
 				Colour:       colour.Black,
 				Position:     move.Position{File: 4, Rank: 6},
-				PieceDetails: piece.Bishop{},
+				PieceDetails: piece.NewBishop(),
 			},
 		},
 	}
@@ -251,14 +278,18 @@ func TestMovePiece(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			b.Move(c.move)
+			//err := b.Move(c.move)
+			//if err != nil {
+			//	t.Fatalf("%s", err)
+			//}
 
 			if got, ok := b.Pieces[c.check]; ok {
-				if !got.Equals(c.want) {
+				if !reflect.DeepEqual(got, c.want) {
 					t.Errorf("MovePiece(%v) => Piece at position %v == %#v, want %#v",
 						c.move, c.check, got, c.want)
 				}
 			} else {
-				if c.want.PieceDetails != nil {
+				if c.want != nil {
 					t.Errorf("MovePiece(%v) => Piece at position %v == %#v, want %#v",
 						c.move, c.check, got, c.want)
 				}
@@ -270,7 +301,7 @@ func TestMovePiece(t *testing.T) {
 func TestIsValidMove(t *testing.T) {
 	history := []board.Turn{
 		{
-			colour.White: move.Move{
+			colour.Black: move.Move{
 				From: move.Position{File: 7, Rank: 6},
 				To:   move.Position{File: 7, Rank: 4},
 			},
@@ -281,28 +312,28 @@ func TestIsValidMove(t *testing.T) {
 		payloads.BoardWithPiece(&piece.Piece{
 			Colour:       colour.White,
 			Position:     move.Position{File: 0, Rank: 2},
-			PieceDetails: piece.Queen{},
+			PieceDetails: piece.NewQueen(),
 		}),
 		payloads.BoardWithPiece(&piece.Piece{
 			Colour:   colour.White,
 			Position: move.Position{File: 6, Rank: 4},
-			PieceDetails: piece.Pawn{
-				HasMoved: true,
-			},
+			PieceDetails: piece.NewPawn(
+				piece.PawnWithHasMoved(true),
+			),
 		}),
 		payloads.BoardWithPiece(&piece.Piece{
-			Colour:   colour.White,
+			Colour:   colour.Black,
 			Position: move.Position{File: 7, Rank: 4},
-			PieceDetails: piece.Pawn{
-				HasMoved: true,
-			},
+			PieceDetails: piece.NewPawn(
+				piece.PawnWithHasMoved(true),
+			),
 		}),
 		payloads.BoardWithPiece(&piece.Piece{
-			Colour:   colour.White,
+			Colour:   colour.Black,
 			Position: move.Position{File: 5, Rank: 4},
-			PieceDetails: piece.Pawn{
-				HasMoved: true,
-			},
+			PieceDetails: piece.NewPawn(
+				piece.PawnWithHasMoved(true),
+			),
 		}),
 		payloads.BoardWithDeletedPiece(move.Position{
 			File: 6,
@@ -353,7 +384,7 @@ func TestIsValidMove(t *testing.T) {
 			err := b.IsValidMove(c.move)
 
 			if (err == nil && !c.valid) || (err != nil && c.valid) {
-				t.Errorf("IsValidMove(%v) => %v, want %v", c.move, err == nil, c.valid)
+				t.Errorf("IsValidMove(%v) => %v, want %v", c.move, err, c.valid)
 			}
 		})
 	}
@@ -379,6 +410,7 @@ func TestPawnHasMoved(t *testing.T) {
 		t.Errorf("MovePiece with move %v failed", m)
 	}
 
+	// TODO: LOOK INTO WHY THIS IS NULL POINTER DEREFERENCE...
 	hasMoved = b.Pieces[to].PieceDetails.(piece.Pawn).HasMoved
 	if !hasMoved {
 		t.Errorf("HasMoved is %t, expected %t", hasMoved, true)

@@ -11,8 +11,8 @@ var (
 	ErrorLineIsNotClear = errors.New("the move specified is a move through a piece on the board")
 	// ErrorIsFriendlyCapture is thrown when the move specified is attempting to take a piece of the same colour
 	ErrorIsFriendlyCapture = errors.New("the move specified is a move that is attempting to take a piece of the same colour")
-	// ErrorIsNotPawnCapture is thrown when the piece in the start position is a pawn and another piece of the opposite colour is not where it is diagonally moving
-	ErrorIsNotPawnCapture = errors.New("the piece in the start position is a pawn and another piece of the opposite colour is not where it is diagonally moving")
+	// ErrorIsNotValidPawnCapture is thrown when the piece in the start position is a pawn and another piece of the opposite colour is not where it is diagonally moving
+	ErrorIsNotValidPawnCapture = errors.New("the piece in the start position is a pawn and another piece of the opposite colour is not where it is diagonally moving")
 	// ErrorKingNotFound is thrown when there is no king for the colour specified in the pieces on the board
 	ErrorKingNotFound = errors.New("there is no king for the colour specified in the pieces on the board")
 	// ErrorIsPinned is thrown when the piece that is trying to be moved is pinned to their king
@@ -21,6 +21,8 @@ var (
 	ErrorIsInCheck = errors.New("the king is in check for the colour of the piece at the position provided")
 	// ErrorPieceNotInStartPosition is thrown when there is no piece in the start position provided
 	ErrorPieceNotInStartPosition = errors.New("there is no piece in the start position provided")
+	// ErrorResultsInCheck is thrown when the move specified results in having the friendly king in check
+	ErrorResultsInCheck = errors.New("the move specified results in having the friendly king in check")
 )
 
 type Assertion func() error

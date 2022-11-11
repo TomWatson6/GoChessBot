@@ -9,7 +9,6 @@ import (
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 	"github.com/tomwatson6/chessbot/internal/piece"
-	"github.com/tomwatson6/chessbot/pkg/utility/linq"
 )
 
 func (c Chess) TranslateNotation(n string) ([]move.Move, error) {
@@ -92,19 +91,17 @@ func (c Chess) translatePawnMove(n string) (move.Move, error) {
 	runes := []rune(n)
 
 	m.To = move.Position{File: fileToNumber(runes[0]), Rank: rankToNumber(runes[1])}
-	movePieces := c.Board.GetMoveMapForColour(m.To, c.Turn)
-	instantiated := false
 
-	for _, movePiece := range movePieces {
-		if movePiece.GetPieceType() == piece.PieceTypePawn {
-			m.From = movePiece.Position
-			instantiated = true
-			break
+	if p, ok := c.Board.Pieces[move.Position{File: m.To.File, Rank: m.To.Rank - 1}]; ok {
+		if p.GetPieceType() == piece.PieceTypePawn {
+			m.From = p.Position
+			return m, nil
 		}
-	}
-
-	if instantiated {
-		return m, nil
+	} else if p, ok := c.Board.Pieces[move.Position{File: m.To.File, Rank: m.To.Rank - 2}]; ok {
+		if p.GetPieceType() == piece.PieceTypePawn {
+			m.From = p.Position
+			return m, nil
+		}
 	}
 
 	return move.Move{}, fmt.Errorf("invalid move: %s", n)
@@ -117,7 +114,11 @@ func (c Chess) translatePieceMove(n string) (move.Move, error) {
 	runes := []rune(n)
 
 	m.To = move.Position{File: fileToNumber(runes[1]), Rank: rankToNumber(runes[2])}
-	movePieces := c.Board.MoveMap[m.To]
+	movePieces, err := c.Board.GetPiecesThatMoveToDestWithColour(m.To, c.Turn)
+	if err != nil {
+		return move.Move{}, err
+	}
+
 	instantiated := false
 
 	for _, movePiece := range movePieces {
@@ -164,7 +165,10 @@ func (c Chess) translatePawnCapture(n string) (move.Move, error) {
 		opp = colour.Black
 	}
 
-	attackingPieces := c.Board.GetAttackingPiecesForColour(m.To, opp)
+	attackingPieces, err := c.Board.GetAttackingPiecesForColour(m.To, opp)
+	if err != nil {
+		return move.Move{}, err
+	}
 
 	for _, attackingPiece := range attackingPieces {
 		if attackingPiece.Position.File == fileToNumber(left[0]) &&
@@ -184,7 +188,12 @@ func (c Chess) translatePieceCapture(n string) (move.Move, error) {
 	left := []rune(parts[0])
 	right := []rune(parts[1])
 	m.To = move.Position{File: fileToNumber(right[0]), Rank: rankToNumber(right[1])}
-	attackingPieces := c.Board.ThreatMap[m.To]
+
+	attackingPieces, err := c.Board.GetAttackingPiecesForColour(m.To, c.Turn)
+	if err != nil {
+		return move.Move{}, err
+	}
+
 	instantiated := false
 
 	for _, p := range attackingPieces {
@@ -284,76 +293,76 @@ func (c Chess) translatePawnPromotionMove(n string) (move.Move, error) {
 	}
 }
 
-func (c Chess) ToChessNotation(ms []move.Move) (string, error) {
-	if len(ms) == 2 {
-		// Castling move
-		var pieces []piece.Piece
-
-		for _, m := range ms {
-			if p, ok := c.Board.Pieces[m.From]; ok {
-				pieces = append(pieces, p)
-			}
-		}
-
-		rook, err := linq.Find(pieces,
-			func(p piece.Piece) bool {
-				return p.GetPieceType() == piece.PieceTypeRook
-			})
-		if err != nil {
-			return "", err
-		}
-
-		if rook.Position.File == 0 {
-			return "O-O-O", nil
-		} else {
-			return "O-O", nil
-		}
-	} else {
-		// Normal move
-		m := ms[0]
-		notation := ""
-
-		if p, ok := c.Board.Pieces[m.From]; ok {
-			attackers := c.Board.GetAttackingPiecesForColour(m.To, p.Colour)
-			var temp []piece.Piece
-
-			for _, a := range attackers {
-				if !a.Equals(*p) {
-					temp = append(temp, a)
-				}
-			}
-
-			attackers = temp
-
-			if linq.Any(attackers,
-				func(p2 piece.Piece) bool {
-					return p.GetPieceType() == p2.GetPieceType()
-				}) {
-				// Needs specific from location in the notation
-				file := numberToFile(m.From.File)
-				rank := numberToRank(m.From.Rank)
-				notation = notation + file + rank
-			}
-
-			if p.GetPieceType() != piece.PieceTypePawn {
-				notation = notation + string(p.GetPieceLetter())
-			}
-
-			if _, ok := c.Board.Pieces[m.To]; ok {
-				notation = notation + "x"
-			}
-
-			file := numberToFile(m.To.File)
-			rank := numberToRank(m.To.Rank)
-
-			notation = notation + file + rank
-
-			return notation, nil
-		}
-	}
-
-	return "", fmt.Errorf("cannot convert move to notation")
-}
+//func (c Chess) ToChessNotation(ms []move.Move) (string, error) {
+//	if len(ms) == 2 {
+//		// Castling move
+//		var pieces []piece.Piece
+//
+//		for _, m := range ms {
+//			if p, ok := c.Board.Pieces[m.From]; ok {
+//				pieces = append(pieces, *p)
+//			}
+//		}
+//
+//		rook, err := linq.Find(pieces,
+//			func(p piece.Piece) bool {
+//				return p.GetPieceType() == piece.PieceTypeRook
+//			})
+//		if err != nil {
+//			return "", err
+//		}
+//
+//		if rook.Position.File == 0 {
+//			return "O-O-O", nil
+//		} else {
+//			return "O-O", nil
+//		}
+//	} else {
+//		// Normal move
+//		m := ms[0]
+//		notation := ""
+//
+//		if p, ok := c.Board.Pieces[m.From]; ok {
+//			attackers := c.Board.GetAttackingPiecesForColour(m.To, p.Colour)
+//			var temp []piece.Piece
+//
+//			for _, a := range attackers {
+//				if !a.Equals(*p) {
+//					temp = append(temp, a)
+//				}
+//			}
+//
+//			attackers = temp
+//
+//			if linq.Any(attackers,
+//				func(p2 piece.Piece) bool {
+//					return p.GetPieceType() == p2.GetPieceType()
+//				}) {
+//				// Needs specific from location in the notation
+//				file := numberToFile(m.From.File)
+//				rank := numberToRank(m.From.Rank)
+//				notation = notation + file + rank
+//			}
+//
+//			if p.GetPieceType() != piece.PieceTypePawn {
+//				notation = notation + string(p.GetPieceLetter())
+//			}
+//
+//			if _, ok := c.Board.Pieces[m.To]; ok {
+//				notation = notation + "x"
+//			}
+//
+//			file := numberToFile(m.To.File)
+//			rank := numberToRank(m.To.Rank)
+//
+//			notation = notation + file + rank
+//
+//			return notation, nil
+//		}
+//	}
+//
+//	return "", fmt.Errorf("cannot convert move to notation")
+//}
 
 func fileToNumber(file rune) int {
 	return int(file - 'a')

@@ -36,6 +36,9 @@ func IsLineClear(ps map[move.Position]*piece.Piece, m move.Move) func() error {
 		}
 
 		for _, pos := range line {
+			if pos == m.From {
+				continue
+			}
 			if _, ok := ps[pos]; ok {
 				return ErrorLineIsNotClear
 			}
@@ -98,7 +101,7 @@ func IsNotPinned(w, h int, ps map[move.Position]*piece.Piece, m move.Move) func(
 				}
 
 				if index < len(expected) {
-					if !p2.Equals(*expected[index]) {
+					if !p2.Equals(expected[index]) {
 						return nil
 					}
 					index++
@@ -106,7 +109,7 @@ func IsNotPinned(w, h int, ps map[move.Position]*piece.Piece, m move.Move) func(
 				}
 
 				if p.Colour != p2.Colour {
-					if p2.IsValidMove(move.Move{From: p2.Position, To: k.Position}) {
+					if err := p2.IsValidMove(move.Move{From: p2.Position, To: k.Position}); err == nil {
 						return ErrorIsPinned
 					}
 				}
@@ -120,13 +123,13 @@ func IsNotPinned(w, h int, ps map[move.Position]*piece.Piece, m move.Move) func(
 	}
 }
 
-func IsPawnCapture(ps map[move.Position]*piece.Piece, whiteMove, blackMove, m move.Move) func() error {
+func IsValidIfPawnCapture(ps map[move.Position]*piece.Piece, whiteMove, blackMove, m move.Move) func() error {
 	return func() error {
 		dx := m.To.File - m.From.File
-		dy := m.To.Rank - m.From.Rank
 
-		if dx != 1 || dy != 1 {
-			return ErrorIsNotPawnCapture
+		// If pawn is not moving diagonally then it isn't a pawn capture move
+		if dx == 0 {
+			return nil
 		}
 
 		p := ps[m.From]
@@ -140,7 +143,7 @@ func IsPawnCapture(ps map[move.Position]*piece.Piece, whiteMove, blackMove, m mo
 		// En passant
 		if p2, ok := ps[move.Position{File: m.From.File + dx, Rank: m.From.Rank}]; ok {
 			if p2.GetPieceType() != piece.PieceTypePawn {
-				return ErrorIsNotPawnCapture
+				return ErrorIsNotValidPawnCapture
 			}
 
 			lastMove := blackMove
@@ -158,7 +161,7 @@ func IsPawnCapture(ps map[move.Position]*piece.Piece, whiteMove, blackMove, m mo
 			}
 		}
 
-		return ErrorIsNotPawnCapture
+		return ErrorIsNotValidPawnCapture
 	}
 }
 
@@ -172,19 +175,27 @@ func IsPieceInStartPosition(ps map[move.Position]*piece.Piece, pos move.Position
 	}
 }
 
-func IsNotInCheck(ps map[move.Position]*piece.Piece, pos move.Position) func() error {
+func IsNotInCheck(ps map[move.Position]*piece.Piece, movingPiece *piece.Piece, pos move.Position) func() error {
 	return func() error {
-		p := ps[pos]
-
-		col := p.Colour
+		col := movingPiece.Colour
 
 		k, err := getKing(ps, col)
 		if err != nil {
 			return err
 		}
 
+		attackedPosition := k.Position
+
+		if movingPiece.GetPieceType() == piece.PieceTypeKing {
+			attackedPosition = pos
+		}
+
 		for _, p2 := range ps {
-			if p2.IsValidMove(move.Move{From: p2.Position, To: k.Position}) {
+			if p2.Colour == col {
+				continue
+			}
+
+			if err := p2.IsValidMove(move.Move{From: p2.Position, To: attackedPosition}); err == nil {
 				return ErrorIsInCheck
 			}
 		}

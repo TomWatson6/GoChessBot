@@ -9,16 +9,21 @@ type PieceDetails interface {
 	GetPieceType() PieceType
 	GetPiecePoints() PiecePoints
 	GetPieceLetter() PieceLetter
-	IsValidMove(m move.Move) bool
+	IsValidMove(m move.Move) error
 }
 
 type Piece struct {
 	Position move.Position
 	Colour   colour.Colour
+	//HasMoved bool <-- This is going to be need for castling moves as well as pawns
 	PieceDetails
 }
 
-func (p Piece) Equals(p2 Piece) bool {
+func (p *Piece) Equals(p2 *Piece) bool {
+	if p2 == nil {
+		return false
+	}
+
 	if p.GetPieceType() != p2.GetPieceType() {
 		return false
 	}

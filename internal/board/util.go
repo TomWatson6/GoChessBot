@@ -1,9 +1,12 @@
 package board
 
 import (
+	"fmt"
+	"math"
+
+	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 	"github.com/tomwatson6/chessbot/internal/piece"
-	"math"
 )
 
 func (b Board) getLine(start, end move.Position, includingLast bool) []move.Position {
@@ -87,12 +90,25 @@ func (b Board) isLineClear(line []move.Position) bool {
 	return true
 }
 
-func (b Board) getRemainingPieces() []piece.Piece {
-	var pieces []piece.Piece
+func (b Board) getRemainingPieces(c colour.Colour) []*piece.Piece {
+	var pieces []*piece.Piece
 
 	for _, p := range b.Pieces {
-		pieces = append(pieces, p)
+		if p.Colour == c {
+			pieces = append(pieces, p)
+		}
 	}
 
 	return pieces
+}
+
+// getKing gets the king piece for the colour provided
+func (b Board) getKing(c colour.Colour) (*piece.Piece, error) {
+	for _, p := range b.Pieces {
+		if p.Colour == c && p.GetPieceType() == piece.PieceTypeKing {
+			return p, nil
+		}
+	}
+
+	return &piece.Piece{}, fmt.Errorf("cannot find king")
 }

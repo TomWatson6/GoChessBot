@@ -1,18 +1,17 @@
 package piece
 
 import (
-	"github.com/tomwatson6/chessbot/internal/piece/rules"
-	"math"
-
 	"github.com/tomwatson6/chessbot/internal/move"
+	"github.com/tomwatson6/chessbot/internal/piece/rules"
 )
 
 type Knight struct {
-	maxRange int
+	minRange, maxRange int
 }
 
-func NewKnight() *Knight {
-	return &Knight{
+func NewKnight() Knight {
+	return Knight{
+		minRange: 1,
 		maxRange: 2,
 	}
 }
@@ -29,8 +28,9 @@ func (k Knight) GetPieceType() PieceType {
 	return PieceTypeKnight
 }
 
-func (k *Knight) Move(m move.Move) error {
+func (k Knight) IsValidMove(m move.Move) error {
 	rs := rules.Assert(
+		rules.IsLargerThanOrEqualToThanMinRange(k.minRange, m),
 		rules.IsValidKnightsMove(m),
 	)
 
@@ -41,12 +41,12 @@ func (k *Knight) Move(m move.Move) error {
 	return nil
 }
 
-func (k Knight) IsValidMove(m move.Move) bool {
-	if math.Abs(float64(m.To.File-m.From.File)) == 2 {
-		return math.Abs(float64(m.To.Rank-m.From.Rank)) == 1
-	} else if math.Abs(float64(m.To.Rank-m.From.Rank)) == 2 {
-		return math.Abs(float64(m.To.File-m.From.File)) == 1
-	}
-
-	return false
-}
+//func (k Knight) IsValidMove(m move.Move) bool {
+//	if math.Abs(float64(m.To.File-m.From.File)) == 2 {
+//		return math.Abs(float64(m.To.Rank-m.From.Rank)) == 1
+//	} else if math.Abs(float64(m.To.Rank-m.From.Rank)) == 2 {
+//		return math.Abs(float64(m.To.File-m.From.File)) == 1
+//	}
+//
+//	return false
+//}

@@ -1,12 +1,16 @@
 package board
 
 import (
+	"errors"
+
 	"github.com/tomwatson6/chessbot/cmd/config"
 	"github.com/tomwatson6/chessbot/internal/board/rules"
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 	"github.com/tomwatson6/chessbot/internal/piece"
 )
+
+var ErrorIsCheckMate = errors.New("king is in check mate, game over")
 
 // Board is a struct to hold the current state of the chess game board
 type Board struct {
@@ -26,8 +30,8 @@ func New(w, h int) Board {
 	b.Width = w
 	b.Height = h
 
-	for r := 0; r < 8; r++ {
-		for f := 0; f < 8; f++ {
+	for r := 0; r < b.Height; r++ {
+		for f := 0; f < b.Width; f++ {
 			b.Squares = append(b.Squares, move.Position{File: f, Rank: r})
 		}
 	}
@@ -58,16 +62,30 @@ func (b Board) IsValidMove(m move.Move) error {
 
 	p := b.Pieces[m.From]
 
+	// Then check that it is a valid move for the piece itself, not too costly
+	if err := p.IsValidMove(m); err != nil {
+		return err
+	}
+
+	// Thirdly, the most expensive check, which should come last, can it move with the current state of the board?
+	if err := b.ValidatePieceMove(*p, m); err != nil {
+		return err
+	}
+
+	//if b.IsCheck(p.Colour) {
+	//	if b.IsCheckMate(p.Colour) {
+	//		return ErrorIsCheckMate
+	//	}
+	//	// Check for checkmate
+	//	// Make sure that the move specified escapes check if not checkmate
+	//}
+
 	// If in check, then from/to must be on the line between attacker and king unless a knight in which case the from must be the king
 	// First need to check if in check
 
 	// Check for the king being in check, that will narrow the amount of moves to a subset if so
 
 	// If in check, then a different ruleset must be applied
-
-	if err := b.ValidatePieceMove(*p, m); err != nil {
-		return err
-	}
 
 	return nil
 }
@@ -80,15 +98,23 @@ func (b *Board) Move(m move.Move) error {
 	p := b.Pieces[m.From]
 	p.Position = m.To
 
+	// This needs a better implementation when considering castling moves
+	if p.GetPieceType() == piece.PieceTypePawn {
+		p.PieceDetails = piece.NewPawn(
+			piece.PawnWithColour(p.Colour),
+			piece.PawnWithHasMoved(true),
+		)
+	}
+
 	if _, ok := b.Pieces[m.To]; ok {
 		b.Pieces[m.To] = p
-		b.Pieces[m.From] = nil
+		delete(b.Pieces, m.From)
 	} else {
 		// En passant
 		dx := m.To.File - m.From.File
 
 		b.Pieces[m.To] = p
-		b.Pieces[move.Position{File: m.From.File + dx, Rank: m.From.Rank}] = nil
+		delete(b.Pieces, move.Position{File: m.From.File + dx, Rank: m.From.Rank})
 	}
 
 	b.History[len(b.History)-1][p.Colour] = m
@@ -99,6 +125,105 @@ func (b *Board) Move(m move.Move) error {
 	}
 
 	return nil
+}
+
+func (b Board) GetPiecesThatMoveToDestWithColour(dest move.Position, col colour.Colour) ([]*piece.Piece, error) {
+	var output []*piece.Piece
+
+	for _, p := range b.Pieces {
+		if p.Colour != col {
+			continue
+		}
+
+		if err := p.IsValidMove(move.Move{
+			From: p.Position,
+			To:   dest,
+		}); err == nil {
+			output = append(output, p)
+		} else {
+			return []*piece.Piece{}, err
+		}
+	}
+
+	return output, nil
+}
+
+func (b Board) GetAttackingPiecesForColour(dest move.Position, col colour.Colour) ([]*piece.Piece, error) {
+	var output []*piece.Piece
+
+	for _, p := range b.Pieces {
+		if p.Colour == col {
+			continue
+		}
+
+		m := move.Move{
+			From: p.Position,
+			To:   dest,
+		}
+
+		if err := b.IsValidMove(m); err == nil {
+			output = append(output, p)
+		}
+	}
+
+	return output, nil
+}
+
+func (b Board) IsCheck(c colour.Colour) (bool, error) {
+	k, err := b.getKing(c)
+	if err != nil {
+		return false, err
+	}
+
+	ps, err := b.GetAttackingPiecesForColour(k.Position, c)
+	if err != nil {
+		return false, err
+	}
+
+	for _, p := range ps {
+		if err := b.IsValidMove(move.Move{From: p.Position, To: k.Position}); err != nil {
+			continue
+		}
+
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (b Board) IsCheckMate(c colour.Colour) (bool, error) {
+	if check, err := b.IsCheck(c); check && err == nil {
+		k, err := b.getKing(c)
+		if err != nil {
+			return false, err
+		}
+
+		iter := []int{-1, 0, 1}
+
+		for _, f := range iter {
+			for _, r := range iter {
+				if f == 0 && r == 0 {
+					continue
+				}
+
+				file := k.Position.File + f
+				rank := k.Position.Rank + r
+
+				move := move.Move{
+					From: k.Position,
+					To:   move.Position{File: file, Rank: rank},
+				}
+
+				if err := b.IsValidMove(move); err == nil {
+					return false, nil
+				}
+			}
+		}
+
+		return true, nil
+	}
+
+	return false, nil
 }
 
 // Make rules for IsCheck and IsCheckMate, should be able to check them per successful turn, as an update on state of the board?

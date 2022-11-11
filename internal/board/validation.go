@@ -2,6 +2,7 @@ package board
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/tomwatson6/chessbot/internal/board/rules"
 	"github.com/tomwatson6/chessbot/internal/colour"
@@ -47,34 +48,34 @@ func (b Board) ValidatePieceMove(p piece.Piece, m move.Move) error {
 }
 
 func (b Board) validatePawnMove(p piece.Piece, m move.Move) error {
-	if !p.IsValidMove(m) {
+	if err := p.IsValidMove(m); err != nil {
 		return ErrorInvalidPawnMove
 	}
 
-	if m.To.Rank-m.From.Rank == 0 {
+	if m.To.File-m.From.File == 0 {
 		// Handle pawn forward move
 		validBoardMove := rules.Assert(
 			rules.IsLineClear(b.Pieces, m),
-			rules.IsNotInCheck(b.Pieces, m.From),
+			rules.IsNotInCheck(b.Pieces, &p, m.From),
 		)
 
 		if err := validBoardMove(); err != nil {
-			return err
+			return fmt.Errorf("%w: %s", ErrorInvalidPawnMove, err)
 		}
 
 		return nil
 	}
 
-	history := b.History[len(b.History)-1]
+	lastMove := b.History[len(b.History)-1]
 
-	whiteMove := history[colour.White]
-	blackMove := history[colour.Black]
+	whiteMove := lastMove[colour.White]
+	blackMove := lastMove[colour.Black]
 
 	// Handle pawn capture
 	validBoardMove := rules.Assert(
 		rules.IsLineClear(b.Pieces, m),
-		rules.IsPawnCapture(b.Pieces, whiteMove, blackMove, m),
-		rules.IsNotInCheck(b.Pieces, m.From),
+		rules.IsValidIfPawnCapture(b.Pieces, whiteMove, blackMove, m),
+		rules.IsNotInCheck(b.Pieces, &p, m.From),
 	)
 
 	if err := validBoardMove(); err != nil {
@@ -85,13 +86,13 @@ func (b Board) validatePawnMove(p piece.Piece, m move.Move) error {
 }
 
 func (b Board) validateRookMove(p piece.Piece, m move.Move) error {
-	if !p.IsValidMove(m) {
+	if err := p.IsValidMove(m); err != nil {
 		return ErrorInvalidRookMove
 	}
 
 	validBoardMove := rules.Assert(
 		rules.IsLineClear(b.Pieces, m),
-		rules.IsNotInCheck(b.Pieces, m.From),
+		rules.IsNotInCheck(b.Pieces, &p, m.From),
 	)
 
 	if err := validBoardMove(); err != nil {
@@ -102,11 +103,11 @@ func (b Board) validateRookMove(p piece.Piece, m move.Move) error {
 }
 
 func (b Board) validateKnightMove(p piece.Piece, m move.Move) error {
-	if !p.IsValidMove(m) {
+	if err := p.IsValidMove(m); err != nil {
 		return ErrorInvalidKnightMove
 	}
 
-	validBoardMove := rules.IsNotInCheck(b.Pieces, m.From)
+	validBoardMove := rules.IsNotInCheck(b.Pieces, &p, m.From)
 
 	if err := validBoardMove(); err != nil {
 		return err
@@ -116,13 +117,13 @@ func (b Board) validateKnightMove(p piece.Piece, m move.Move) error {
 }
 
 func (b Board) validateBishopMove(p piece.Piece, m move.Move) error {
-	if !p.IsValidMove(m) {
+	if err := p.IsValidMove(m); err != nil {
 		return ErrorInvalidBishopMove
 	}
 
 	validBoardMove := rules.Assert(
 		rules.IsLineClear(b.Pieces, m),
-		rules.IsNotInCheck(b.Pieces, m.From),
+		rules.IsNotInCheck(b.Pieces, &p, m.From),
 	)
 
 	if err := validBoardMove(); err != nil {
@@ -133,13 +134,13 @@ func (b Board) validateBishopMove(p piece.Piece, m move.Move) error {
 }
 
 func (b Board) validateQueenMove(p piece.Piece, m move.Move) error {
-	if !p.IsValidMove(m) {
+	if err := p.IsValidMove(m); err != nil {
 		return ErrorInvalidQueenMove
 	}
 
 	validBoardMove := rules.Assert(
 		rules.IsLineClear(b.Pieces, m),
-		rules.IsNotInCheck(b.Pieces, m.From),
+		rules.IsNotInCheck(b.Pieces, &p, m.From),
 	)
 
 	if err := validBoardMove(); err != nil {
@@ -150,12 +151,12 @@ func (b Board) validateQueenMove(p piece.Piece, m move.Move) error {
 }
 
 func (b Board) validateKingMove(p piece.Piece, m move.Move) error {
-	if !p.IsValidMove(m) {
+	if err := p.IsValidMove(m); err != nil {
 		return ErrorInvalidKingMove
 	}
 
 	validBoardMove := rules.Assert(
-		rules.IsNotInCheck(b.Pieces, m.To),
+		rules.IsNotInCheck(b.Pieces, &p, m.To),
 		rules.IsLineClear(b.Pieces, m),
 	)
 

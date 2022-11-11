@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/tomwatson6/chessbot/internal/chess"
 	"github.com/tomwatson6/chessbot/internal/colour"
 )
 
@@ -33,9 +32,9 @@ func getUserInput(c colour.Colour) (string, error) {
 // -
 
 func main() {
-	c := chess.NewRandom()
-
-	c.Play()
+	//c := chess.NewRandom()
+	//
+	//c.Play()
 
 	//c := chess.New(colour.White)
 

@@ -1,6 +1,7 @@
 Main:
-- Add IsCheck functionality to the board
-- Add IsCheckMate functionality to the board
+- Add functionality around HasMoved to be at piece level, so that checking for castling (king / rook hasn't moved) is possible
+- Add check for HasMoved on king/rook and some function to make sure castling is possible, aka not moving through check, and isLineClear between start / destination for each piece
+- Make a check for moving out of check being capturing the attacking piece, as well as just the king moving to safety (taking attacking piece should be a valid way to do so)
 - Remake the translator in an internal translation package
 - Refactor the generation package to use the new structure changes
 - Refactor the random game play to use all the new stuff

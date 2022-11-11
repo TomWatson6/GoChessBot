@@ -1,23 +1,41 @@
 package piece
 
 import (
-	"github.com/tomwatson6/chessbot/internal/piece/rules"
-	"math"
-
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
+	"github.com/tomwatson6/chessbot/internal/piece/rules"
 )
 
 type Pawn struct {
-	maxRange int
-	Colour   colour.Colour
-	HasMoved bool
+	minRange, maxRange int
+	Colour             colour.Colour
+	HasMoved           bool
 }
 
-func NewPawn(c colour.Colour) *Pawn {
-	return &Pawn{
+type PawnOption func(p *Pawn)
+
+func NewPawn(opts ...PawnOption) Pawn {
+	p := Pawn{
+		minRange: 1,
 		maxRange: 1,
-		Colour:   c,
+	}
+
+	for _, opt := range opts {
+		opt(&p)
+	}
+
+	return p
+}
+
+func PawnWithColour(c colour.Colour) PawnOption {
+	return func(p *Pawn) {
+		p.Colour = c
+	}
+}
+
+func PawnWithHasMoved(moved bool) PawnOption {
+	return func(p *Pawn) {
+		p.HasMoved = moved
 	}
 }
 
@@ -33,7 +51,7 @@ func (p Pawn) GetPieceType() PieceType {
 	return PieceTypePawn
 }
 
-func (p *Pawn) Move(m move.Move) error {
+func (p Pawn) IsValidMove(m move.Move) error {
 	r := p.maxRange
 
 	if !p.HasMoved {
@@ -42,6 +60,7 @@ func (p *Pawn) Move(m move.Move) error {
 
 	rs := rules.Assert(
 		rules.IsValidLine(m),
+		rules.IsLargerThanOrEqualToThanMinRange(p.minRange, m),
 		rules.DoesNotExceedMaxRange(r, m),
 		rules.IsCorrectDirection(p.Colour, m),
 		rules.DoesNotExceedMaxRangeIfDiagonal(p.maxRange, m),
@@ -54,22 +73,22 @@ func (p *Pawn) Move(m move.Move) error {
 	return nil
 }
 
-func (p Pawn) IsValidMove(m move.Move) bool {
-	y := m.To.Rank - m.From.Rank
-	x := math.Abs(float64(m.To.File - m.From.File))
-
-	mult := 1
-
-	// Pawns can only move in 1 direction
-	if p.Colour == colour.Black {
-		mult = -1
-	}
-
-	if y == mult && x <= 1 {
-		return true
-	} else if y == mult*2 && !p.HasMoved {
-		return x == 0
-	}
-
-	return false
-}
+//func (p Pawn) IsValidMove(m move.Move) bool {
+//	y := m.To.Rank - m.From.Rank
+//	x := math.Abs(float64(m.To.File - m.From.File))
+//
+//	mult := 1
+//
+//	// Pawns can only move in 1 direction
+//	if p.Colour == colour.Black {
+//		mult = -1
+//	}
+//
+//	if y == mult && x <= 1 {
+//		return true
+//	} else if y == mult*2 && !p.HasMoved {
+//		return x == 0
+//	}
+//
+//	return false
+//}

@@ -5,6 +5,8 @@ import "errors"
 var (
 	// ErrorIsNotValidLine is thrown when the move is not a valid line
 	ErrorIsNotValidLine = errors.New("the move provided is not a valid line")
+	// ErrorIsSmallerThanMinRange is thrown when the move provided is smaller than the min range
+	ErrorIsSmallerThanMinRange = errors.New("the move provided is smaller than the min range")
 	// ErrorDiagonalLineExceedsMaxRange is thrown when the move exceeds the max range and is diagonal
 	ErrorDiagonalLineExceedsMaxRange = errors.New("the move provided exceeds the max range and is diagonal")
 	// ErrorExceedsMaxRange is thrown when the move is larger than the max range of the piece
