@@ -27,8 +27,10 @@ func IsValidLine(m move.Move) func() error {
 
 func IsLargerThanOrEqualToThanMinRange(r int, m move.Move) func() error {
 	return func() error {
-		x, y := splitMove(m)
-		m := math.Max(float64(x), float64(y))
+		x0, y0 := splitMove(m)
+		x := math.Abs(float64(x0))
+		y := math.Abs(float64(y0))
+		m := math.Max(x, y)
 		// xf := math.Abs(float64(x))
 		// yf := math.Abs(float64(y))
 		rf := float64(r)
