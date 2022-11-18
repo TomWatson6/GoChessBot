@@ -169,15 +169,15 @@ func (b Board) GetAttackingPiecesForColour(dest move.Position, col colour.Colour
 	return output, nil
 }
 
-func (b Board) IsCheck(c colour.Colour) (bool, error) {
+func (b Board) IsCheck(c colour.Colour) (*piece.Piece, bool, error) {
 	k, err := b.getKing(c)
 	if err != nil {
-		return false, err
+		return nil, false, err
 	}
 
 	ps, err := b.GetAttackingPiecesForColour(k.Position, c)
 	if err != nil {
-		return false, err
+		return nil, false, err
 	}
 
 	for _, p := range ps {
@@ -185,45 +185,81 @@ func (b Board) IsCheck(c colour.Colour) (bool, error) {
 			continue
 		}
 
-		return true, nil
+		return p, true, nil
 	}
 
-	return false, nil
+	return nil, false, nil
 }
 
 func (b Board) IsCheckMate(c colour.Colour) (bool, error) {
-	if check, err := b.IsCheck(c); check && err == nil {
+	if p, check, err := b.IsCheck(c); check && err == nil {
 		k, err := b.getKing(c)
 		if err != nil {
 			return false, err
 		}
 
-		iter := []int{-1, 0, 1}
+		if possible := b.kingCanMoveToSafety(k); possible {
+			return false, nil
+		}
 
-		for _, f := range iter {
-			for _, r := range iter {
-				if f == 0 && r == 0 {
-					continue
-				}
+		attackLine := b.getLine(p.Position, k.Position, true, false)
 
-				file := k.Position.File + f
-				rank := k.Position.Rank + r
-
-				move := move.Move{
-					From: k.Position,
-					To:   move.Position{File: file, Rank: rank},
-				}
-
-				if err := b.IsValidMove(move); err == nil {
-					return false, nil
-				}
-			}
+		if possible := b.checkIfPiecesCanMoveToLine(c, attackLine); possible {
+			return false, nil
 		}
 
 		return true, nil
+
+		// Can a piece take the attacking piece for the king, how will we find a piece that's attacking the king?
+		// IsCheck could return the piece that is attacking the king maybe? In which case we can then check if any of the piece of the king's
+		// colour are able to take it
+		// Can anything block the piece, we also need to know the line of the attacking piece if it exists, which we can use getLine(...) from util.go to do so
+		// Can any piece of the attacked king's colour move onto any of the line piece
+		// If we include the starting position (where the attacking piece is) in the line, then we don't have to do the first check, we can just check if we can take it
+		// May have to consider Pawn moves carefully, as forward moves are not a capture but IsValidMove(...) in board should cover this case already (I'm hoping...)
 	}
 
 	return false, nil
+}
+
+func (b Board) kingCanMoveToSafety(k *piece.Piece) bool {
+	iter := []int{-1, 0, 1}
+
+	for _, f := range iter {
+		for _, r := range iter {
+			if f == 0 && r == 0 {
+				continue
+			}
+
+			file := k.Position.File + f
+			rank := k.Position.Rank + r
+
+			move := move.Move{
+				From: k.Position,
+				To:   move.Position{File: file, Rank: rank},
+			}
+
+			if err := b.IsValidMove(move); err == nil {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func (b Board) checkIfPiecesCanMoveToLine(c colour.Colour, line []move.Position) bool {
+	ps := b.getRemainingPieces(c)
+
+	for _, dest := range line {
+		for _, p := range ps {
+			if err := b.IsValidMove(move.Move{From: p.Position, To: dest}); err == nil {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 // Make rules for IsCheck and IsCheckMate, should be able to check them per successful turn, as an update on state of the board?

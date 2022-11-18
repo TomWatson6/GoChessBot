@@ -47,7 +47,7 @@ func TestIsCheck(t *testing.T) {
 		c := c // rebind c into this lexical scope
 		t.Run(c.colour.String(), func(t *testing.T) {
 			t.Parallel()
-			got, err := b.IsCheck(c.colour)
+			_, got, err := b.IsCheck(c.colour)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -60,91 +60,112 @@ func TestIsCheck(t *testing.T) {
 }
 
 func TestIsCheckMate(t *testing.T) {
-	b := payloads.NewStandardBoard(
-		payloads.BoardWithPiece(&piece.Piece{
-			Colour:       colour.Black,
-			Position:     move.Position{File: 7, Rank: 3},
-			PieceDetails: piece.NewBishop(),
-		}),
-		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
-	)
-
-	// Visualisation of the board
-	// 8 bR bN bB bQ bK bB bN bR
-	// 7 bP bP bP bP bP bP bP bP
-	// 6 ## ## ## ## ## ## ## ##
-	// 5 ## ## ## ## ## ## ## ##
-	// 4 ## ## ## ## ## ## ## bB
-	// 3 ## ## ## ## ## ## ## ##
-	// 2 wP wP wP wP wP ## wP wP
-	// 1 wR wN wB wQ wK wB wN wR
-	//    A  B  C  D  E  F  G  H
-
-	cases := []struct {
-		colour colour.Colour
-		want   bool
+	tcs := []struct {
+		name  string
+		b     board.Board
+		white bool
+		black bool
 	}{
-		{colour.White, true},
-		{colour.Black, false},
+		{
+			// Visualisation of the board
+			// 8 bR bN bB bQ bK bB bN bR
+			// 7 bP bP bP bP bP bP bP bP
+			// 6 ## ## ## ## ## ## ## ##
+			// 5 ## ## ## ## ## ## ## ##
+			// 4 ## ## ## ## ## ## ## bB
+			// 3 ## ## ## ## ## ## ## ##
+			// 2 wP wP wP wP wP ## wP wP
+			// 1 wR wN wB wQ wK wB wN wR
+			//    A  B  C  D  E  F  G  H
+
+			name: "BishopPlacingWhiteInCheckWithBlockingMove",
+			b: payloads.NewStandardBoard(
+				payloads.BoardWithPiece(&piece.Piece{
+					Colour:       colour.Black,
+					Position:     move.Position{File: 7, Rank: 3},
+					PieceDetails: piece.NewBishop(),
+				}),
+				payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
+			),
+			white: false,
+			black: false,
+		},
+		{
+			// Visualisation of the board
+			// 8 bR bN bB bQ bK bB bN bR
+			// 7 bP bP bP bP bP bP bP bP
+			// 6 ## ## ## ## ## ## ## ##
+			// 5 ## ## ## ## ## ## ## ##
+			// 4 ## ## ## ## ## ## ## bB
+			// 3 ## ## ## ## ## ## ## ##
+			// 2 wP wP wP wP ## ## wP wP
+			// 1 wR wN wB wQ wK wB wN wR
+			//    A  B  C  D  E  F  G  H
+
+			name: "BishopPlacingWhiteInCheckWithKingEscape",
+			b: payloads.NewStandardBoard(
+				payloads.BoardWithPiece(&piece.Piece{
+					Colour:       colour.Black,
+					Position:     move.Position{File: 7, Rank: 3},
+					PieceDetails: piece.NewBishop(),
+				}),
+				payloads.BoardWithDeletedPiece(move.Position{File: 4, Rank: 1}),
+				payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
+			),
+			white: false,
+			black: false,
+		},
+		{
+			// Visualisation of the board
+			// 8 bR bN bB bQ bK bB bN bR
+			// 7 bP bP bP bP bP bP bP bP
+			// 6 ## ## ## ## ## ## ## ##
+			// 5 ## ## ## ## ## ## ## ##
+			// 4 wR ## ## ## ## ## ## bB
+			// 3 ## ## ## ## ## ## ## ##
+			// 2 wP wP wP wP wP ## wP wP
+			// 1 wR wN wB wQ wK wB wN wR
+			//    A  B  C  D  E  F  G  H
+
+			name: "AttackingBlackVulnerableBishop",
+			b: payloads.NewStandardBoard(
+				payloads.BoardWithPiece(&piece.Piece{
+					Colour:       colour.Black,
+					Position:     move.Position{File: 7, Rank: 3},
+					PieceDetails: piece.NewBishop(),
+				}),
+				payloads.BoardWithPiece(&piece.Piece{
+					Colour:       colour.White,
+					Position:     move.Position{File: 0, Rank: 3},
+					PieceDetails: piece.NewRook(),
+				}),
+				payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
+			),
+			white: false,
+			black: false,
+		},
 	}
 
-	for _, c := range cases {
+	for _, c := range tcs {
 		c := c // rebind c into this lexical scope
-		t.Run(c.colour.String(), func(t *testing.T) {
+		t.Run(c.name, func(t *testing.T) {
 			t.Parallel()
-			got, err := b.IsCheckMate(c.colour)
+			w, err := c.b.IsCheckMate(colour.White)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if got != c.want {
-				t.Errorf("IsCheckMate(%v) => %v, want %v", c.colour, got, c.want)
-			}
-		})
-	}
-}
-
-func TestIsNotCheckMate(t *testing.T) {
-	b := payloads.NewStandardBoard(
-		payloads.BoardWithPiece(&piece.Piece{
-			Colour:       colour.Black,
-			Position:     move.Position{File: 7, Rank: 3},
-			PieceDetails: piece.NewBishop(),
-		}),
-		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
-		payloads.BoardWithDeletedPiece(move.Position{File: 4, Rank: 1}),
-	)
-
-	// Visualisation of the board
-	// 8 bR bN bB bQ bK bB bN bR
-	// 7 bP bP bP bP bP bP bP bP
-	// 6 ## ## ## ## ## ## ## ##
-	// 5 ## ## ## ## ## ## ## ##
-	// 4 ## ## ## ## ## ## ## bB
-	// 3 ## ## ## ## ## ## ## ##
-	// 2 wP wP wP wP wP ## wP wP
-	// 1 wR wN wB wQ wK wB wN wR
-	//    A  B  C  D  E  F  G  H
-
-	cases := []struct {
-		colour colour.Colour
-		want   bool
-	}{
-		{colour.White, false},
-		{colour.Black, false},
-	}
-
-	for _, c := range cases {
-		c := c // rebind c into this lexical scope
-		t.Run(c.colour.String(), func(t *testing.T) {
-			t.Parallel()
-			got, err := b.IsCheckMate(c.colour)
+			b, err := c.b.IsCheckMate(colour.Black)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if got != c.want {
-				t.Errorf("IsCheckMate(%v) => %v, want %v", c.colour, got, c.want)
+			if w != c.white {
+				t.Errorf("IsCheckMate(%v) => %v, want %v", colour.White, w, c.white)
+			}
+
+			if b != c.black {
+				t.Errorf("IsCheckMate(%v) => %v, want %v", colour.Black, b, c.black)
 			}
 		})
 	}

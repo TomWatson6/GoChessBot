@@ -175,7 +175,7 @@ func IsPieceInStartPosition(ps map[move.Position]*piece.Piece, pos move.Position
 	}
 }
 
-func IsNotInCheck(ps map[move.Position]*piece.Piece, movingPiece *piece.Piece, pos move.Position) func() error {
+func IsNotInCheck(ps map[move.Position]*piece.Piece, movingPiece *piece.Piece, m move.Move) func() error {
 	return func() error {
 		col := movingPiece.Colour
 
@@ -187,7 +187,7 @@ func IsNotInCheck(ps map[move.Position]*piece.Piece, movingPiece *piece.Piece, p
 		attackedPosition := k.Position
 
 		if movingPiece.GetPieceType() == piece.PieceTypeKing {
-			attackedPosition = pos
+			attackedPosition = m.To
 		}
 
 		for _, p2 := range ps {

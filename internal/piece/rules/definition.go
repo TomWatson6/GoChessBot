@@ -40,27 +40,6 @@ func IsLargerThanOrEqualToThanMinRange(r int, m move.Move) func() error {
 		}
 
 		return ErrorIsSmallerThanMinRange
-
-		// if xf == yf {
-		// 	if xf >= rf {
-		// 		return nil
-		// 	}
-		// 	return ErrorIsSmallerThanMinRange
-		// }
-
-		// if xf == 0 {
-		// 	if yf >= rf {
-		// 		return nil
-		// 	}
-		// }
-
-		// if yf == 0 {
-		// 	if xf >= rf {
-		// 		return nil
-		// 	}
-		// }
-
-		// return ErrorIsSmallerThanMinRange
 	}
 }
 

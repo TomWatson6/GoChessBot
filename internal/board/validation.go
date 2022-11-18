@@ -56,7 +56,7 @@ func (b Board) validatePawnMove(p piece.Piece, m move.Move) error {
 		// Handle pawn forward move
 		validBoardMove := rules.Assert(
 			rules.IsLineClear(b.Pieces, m),
-			rules.IsNotInCheck(b.Pieces, &p, m.From),
+			// rules.IsNotInCheck(b.Pieces, &p, m),
 		)
 
 		if err := validBoardMove(); err != nil {
@@ -75,7 +75,7 @@ func (b Board) validatePawnMove(p piece.Piece, m move.Move) error {
 	validBoardMove := rules.Assert(
 		rules.IsLineClear(b.Pieces, m),
 		rules.IsValidIfPawnCapture(b.Pieces, whiteMove, blackMove, m),
-		rules.IsNotInCheck(b.Pieces, &p, m.From),
+		// rules.IsNotInCheck(b.Pieces, &p, m),
 	)
 
 	if err := validBoardMove(); err != nil {
@@ -92,7 +92,7 @@ func (b Board) validateRookMove(p piece.Piece, m move.Move) error {
 
 	validBoardMove := rules.Assert(
 		rules.IsLineClear(b.Pieces, m),
-		rules.IsNotInCheck(b.Pieces, &p, m.From),
+		// rules.IsNotInCheck(b.Pieces, &p, m),
 	)
 
 	if err := validBoardMove(); err != nil {
@@ -107,23 +107,24 @@ func (b Board) validateKnightMove(p piece.Piece, m move.Move) error {
 		return ErrorInvalidKnightMove
 	}
 
-	validBoardMove := rules.IsNotInCheck(b.Pieces, &p, m.From)
+	// validBoardMove := rules.IsNotInCheck(b.Pieces, &p, m)
 
-	if err := validBoardMove(); err != nil {
-		return err
-	}
+	// if err := validBoardMove(); err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
 
 func (b Board) validateBishopMove(p piece.Piece, m move.Move) error {
+	// I think this is already done at a higher level, in IsCheck(...) <-- this needs to be checked TODO
 	if err := p.IsValidMove(m); err != nil {
 		return ErrorInvalidBishopMove
 	}
 
 	validBoardMove := rules.Assert(
 		rules.IsLineClear(b.Pieces, m),
-		rules.IsNotInCheck(b.Pieces, &p, m.From),
+		// rules.IsNotInCheck(b.Pieces, &p, m),
 	)
 
 	if err := validBoardMove(); err != nil {
@@ -140,7 +141,7 @@ func (b Board) validateQueenMove(p piece.Piece, m move.Move) error {
 
 	validBoardMove := rules.Assert(
 		rules.IsLineClear(b.Pieces, m),
-		rules.IsNotInCheck(b.Pieces, &p, m.From),
+		// rules.IsNotInCheck(b.Pieces, &p, m),
 	)
 
 	if err := validBoardMove(); err != nil {
@@ -156,7 +157,7 @@ func (b Board) validateKingMove(p piece.Piece, m move.Move) error {
 	}
 
 	validBoardMove := rules.Assert(
-		rules.IsNotInCheck(b.Pieces, &p, m.To),
+		// rules.IsNotInCheck(b.Pieces, &p, m),
 		rules.IsLineClear(b.Pieces, m),
 	)
 
