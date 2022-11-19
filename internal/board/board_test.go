@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/tomwatson6/chessbot/internal/board"
+	"github.com/tomwatson6/chessbot/internal/output"
 
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
@@ -306,6 +307,8 @@ func TestMovePiece(t *testing.T) {
 
 			if got, ok := b.Pieces[c.check]; ok {
 				if !reflect.DeepEqual(got, c.want) {
+					output.PrintBoard(b, colour.Black)
+
 					t.Errorf("MovePiece(%v) => Piece at position %v == %#v, want %#v",
 						c.move, c.check, got, c.want)
 				}

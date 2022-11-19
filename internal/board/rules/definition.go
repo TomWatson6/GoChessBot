@@ -1,6 +1,8 @@
 package rules
 
 import (
+	"reflect"
+
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 	"github.com/tomwatson6/chessbot/internal/piece"
@@ -70,14 +72,8 @@ func IsNotPinned(w, h int, ps map[move.Position]*piece.Piece, m move.Move) func(
 			return err
 		}
 
-		// If the piece being moved is the king, then it is not pinned
 		if k.Position == p.Position {
 			return nil
-		}
-
-		expected := []*piece.Piece{
-			k,
-			p,
 		}
 
 		dx := p.Position.File - k.Position.File
@@ -85,38 +81,43 @@ func IsNotPinned(w, h int, ps map[move.Position]*piece.Piece, m move.Move) func(
 
 		sx, sy := getSteps(dx, dy)
 
-		index := 0
+		var seq []*piece.Piece
+		seq = append(seq, k)
 
 		x := k.Position.File
 		y := k.Position.Rank
 
-		// While still in bounds of the board
-		for x >= 0 && x < w && y >= 0 && y < h {
-			dest := move.Position{File: x, Rank: y}
+		var line []move.Position
+		line = append(line, move.Position{File: x, Rank: y})
 
-			if p2, ok := ps[dest]; ok {
-				// If destination is hit, then piece still blocks against potential attacker
-				if dest == m.To {
+		for x+sx >= 0 && x+sx < w && y+sy >= 0 && y+sy < h {
+			x += sx
+			y += sy
+
+			line = append(line, move.Position{File: x, Rank: y})
+
+			if p2, ok := ps[move.Position{File: x, Rank: y}]; ok {
+				seq = append(seq, p2)
+
+				if len(seq) == 2 && !reflect.DeepEqual(p, p2) {
 					return nil
 				}
 
-				if index < len(expected) {
-					if !p2.Equals(expected[index]) {
-						return nil
-					}
-					index++
-					continue
-				}
-
-				if p.Colour != p2.Colour {
+				if len(seq) == 3 && p2.Colour != p.Colour {
 					if err := p2.IsValidMove(move.Move{From: p2.Position, To: k.Position}); err == nil {
+						// Check to see if destination of the move is on the line between the attacker and the king
+						for _, l := range line {
+							if reflect.DeepEqual(m.To, l) {
+								return nil
+							}
+						}
+
 						return ErrorIsPinned
 					}
+
+					return nil
 				}
 			}
-
-			x += sx
-			y += sy
 		}
 
 		return nil
