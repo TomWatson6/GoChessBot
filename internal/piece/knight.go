@@ -30,7 +30,7 @@ func (k Knight) GetPieceType() PieceType {
 
 func (k Knight) IsValidMove(m move.Move) error {
 	rs := rules.Assert(
-		rules.IsLargerThanOrEqualToThanMinRange(k.minRange, m),
+		rules.IsLargerThanOrEqualToMinRange(k.minRange, m),
 		rules.IsValidKnightsMove(m),
 	)
 

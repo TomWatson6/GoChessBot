@@ -60,7 +60,7 @@ func (p Pawn) IsValidMove(m move.Move) error {
 
 	rs := rules.Assert(
 		rules.IsValidLine(m),
-		rules.IsLargerThanOrEqualToThanMinRange(p.minRange, m),
+		rules.IsLargerThanOrEqualToMinRange(p.minRange, m),
 		rules.DoesNotExceedMaxRange(r, m),
 		rules.IsCorrectDirection(p.Colour, m),
 		rules.DoesNotExceedMaxRangeIfDiagonal(p.maxRange, m),

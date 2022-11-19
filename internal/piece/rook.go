@@ -31,7 +31,7 @@ func (r Rook) GetPieceType() PieceType {
 func (r Rook) IsValidMove(m move.Move) error {
 	rs := rules.Assert(
 		rules.IsValidLine(m),
-		rules.IsLargerThanOrEqualToThanMinRange(r.minRange, m),
+		rules.IsLargerThanOrEqualToMinRange(r.minRange, m),
 		rules.DoesNotExceedMaxRange(r.maxRange, m),
 		rules.IsNotDiagonalLine(m),
 	)

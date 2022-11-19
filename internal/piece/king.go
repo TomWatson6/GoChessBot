@@ -31,7 +31,7 @@ func (k King) GetPieceType() PieceType {
 func (k King) IsValidMove(m move.Move) error {
 	rs := rules.Assert(
 		rules.IsValidLine(m),
-		rules.IsLargerThanOrEqualToThanMinRange(k.minRange, m),
+		rules.IsLargerThanOrEqualToMinRange(k.minRange, m),
 		rules.DoesNotExceedMaxRange(k.maxRange, m),
 	)
 

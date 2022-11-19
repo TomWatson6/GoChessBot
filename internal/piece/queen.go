@@ -31,7 +31,7 @@ func (q Queen) GetPieceType() PieceType {
 func (q Queen) IsValidMove(m move.Move) error {
 	rs := rules.Assert(
 		rules.IsValidLine(m),
-		rules.IsLargerThanOrEqualToThanMinRange(q.minRange, m),
+		rules.IsLargerThanOrEqualToMinRange(q.minRange, m),
 		rules.DoesNotExceedMaxRange(q.maxRange, m),
 	)
 

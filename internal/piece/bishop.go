@@ -31,7 +31,7 @@ func (b Bishop) GetPieceType() PieceType {
 func (b Bishop) IsValidMove(m move.Move) error {
 	rs := rules.Assert(
 		rules.IsValidLine(m),
-		rules.IsLargerThanOrEqualToThanMinRange(b.minRange, m),
+		rules.IsLargerThanOrEqualToMinRange(b.minRange, m),
 		rules.DoesNotExceedMaxRange(b.maxRange, m),
 		rules.IsDiagonalLine(m),
 	)
