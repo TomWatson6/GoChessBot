@@ -90,6 +90,7 @@ func (b Board) IsValidMove(m move.Move) error {
 	return nil
 }
 
+// TODO: look at logic for this - en passant is currently being considered for any piece moving without taking
 func (b *Board) Move(m move.Move) error {
 	if err := b.IsValidMove(m); err != nil {
 		return err

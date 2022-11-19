@@ -99,7 +99,7 @@ func TestIsCheckMate(t *testing.T) {
 			// 5 ## ## ## ## ## ## ## ##
 			// 4 ## ## ## ## ## ## ## bB
 			// 3 ## ## ## ## ## ## ## ##
-			// 2 wP wP wP wP ## ## wP wP
+			// 2 wP wP wP wP ## ## ## wP
 			// 1 wR wN wB wQ wK wB wN wR
 			//    A  B  C  D  E  F  G  H
 
@@ -112,6 +112,7 @@ func TestIsCheckMate(t *testing.T) {
 				}),
 				payloads.BoardWithDeletedPiece(move.Position{File: 4, Rank: 1}),
 				payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
+				payloads.BoardWithDeletedPiece(move.Position{File: 6, Rank: 1}),
 			),
 			white: false,
 			black: false,
@@ -124,7 +125,7 @@ func TestIsCheckMate(t *testing.T) {
 			// 5 ## ## ## ## ## ## ## ##
 			// 4 wR ## ## ## ## ## ## bB
 			// 3 ## ## ## ## ## ## ## ##
-			// 2 wP wP wP wP wP ## wP wP
+			// 2 wP wP wP wP wP ## ## wP
 			// 1 wR wN wB wQ wK wB wN wR
 			//    A  B  C  D  E  F  G  H
 
@@ -141,6 +142,87 @@ func TestIsCheckMate(t *testing.T) {
 					PieceDetails: piece.NewRook(),
 				}),
 				payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 1}),
+				payloads.BoardWithDeletedPiece(move.Position{File: 6, Rank: 1}),
+			),
+			white: false,
+			black: false,
+		},
+		{
+			// Visualisation of the board
+			// 8 bR bN bB bQ bK bB bN bR
+			// 7 bP bP bP bP bP ## bP bP
+			// 6 ## ## ## ## ## ## ## ##
+			// 5 ## ## ## ## ## ## ## wB
+			// 4 ## ## ## ## ## ## ## ##
+			// 3 ## ## ## ## ## ## ## ##
+			// 2 wP wP wP wP wP wP wP wP
+			// 1 wR wN wB wQ wK wB wN wR
+			//    A  B  C  D  E  F  G  H
+
+			name: "BishopPlacingBlackInCheckWithBlockingMove",
+			b: payloads.NewStandardBoard(
+				payloads.BoardWithPiece(&piece.Piece{
+					Colour:       colour.White,
+					Position:     move.Position{File: 7, Rank: 4},
+					PieceDetails: piece.NewBishop(),
+				}),
+				payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 6}),
+			),
+			white: false,
+			black: false,
+		},
+		{
+			// Visualisation of the board
+			// 8 bR bN bB bQ bK bB bN bR
+			// 7 bP bP bP bP ## ## ## bP
+			// 6 ## ## ## ## ## ## ## ##
+			// 5 ## ## ## ## ## ## ## wB
+			// 4 ## ## ## ## ## ## ## ##
+			// 3 ## ## ## ## ## ## ## ##
+			// 2 wP wP wP wP wP wP wP wP
+			// 1 wR wN wB wQ wK wB wN wR
+			//    A  B  C  D  E  F  G  H
+
+			name: "BishopPlacingBlackInCheckWithKingEscape",
+			b: payloads.NewStandardBoard(
+				payloads.BoardWithPiece(&piece.Piece{
+					Colour:       colour.White,
+					Position:     move.Position{File: 7, Rank: 4},
+					PieceDetails: piece.NewBishop(),
+				}),
+				payloads.BoardWithDeletedPiece(move.Position{File: 4, Rank: 6}),
+				payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 6}),
+				payloads.BoardWithDeletedPiece(move.Position{File: 6, Rank: 6}),
+			),
+			white: false,
+			black: false,
+		},
+		{
+			// Visualisation of the board
+			// 8 bR bN bB bQ bK bB bN bR
+			// 7 bP bP bP bP bP ## ## bP
+			// 6 ## ## ## ## ## ## ## ##
+			// 5 bR ## ## ## ## ## ## wB
+			// 4 ## ## ## ## ## ## ## ##
+			// 3 ## ## ## ## ## ## ## ##
+			// 2 wP wP wP wP wP wP wP wP
+			// 1 wR wN wB wQ wK wB wN wR
+			//    A  B  C  D  E  F  G  H
+
+			name: "AttackingWhiteVulnerableBishop",
+			b: payloads.NewStandardBoard(
+				payloads.BoardWithPiece(&piece.Piece{
+					Colour:       colour.White,
+					Position:     move.Position{File: 7, Rank: 4},
+					PieceDetails: piece.NewBishop(),
+				}),
+				payloads.BoardWithPiece(&piece.Piece{
+					Colour:       colour.Black,
+					Position:     move.Position{File: 0, Rank: 4},
+					PieceDetails: piece.NewRook(),
+				}),
+				payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 6}),
+				payloads.BoardWithDeletedPiece(move.Position{File: 6, Rank: 6}),
 			),
 			white: false,
 			black: false,
