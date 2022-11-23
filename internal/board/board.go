@@ -96,27 +96,51 @@ func (b *Board) Move(m move.Move) error {
 		return err
 	}
 
+	// If it's a pawn, then set has moved and consider en passant
+	// Otherwise, treat as a normal piece
+
 	p := b.Pieces[m.From]
 	p.Position = m.To
 
-	// This needs a better implementation when considering castling moves
 	if p.GetPieceType() == piece.PieceTypePawn {
 		p.PieceDetails = piece.NewPawn(
 			piece.PawnWithColour(p.Colour),
 			piece.PawnWithHasMoved(true),
 		)
-	}
 
-	if _, ok := b.Pieces[m.To]; ok {
+		if _, ok := b.Pieces[m.To]; ok {
+			b.Pieces[m.To] = p
+			delete(b.Pieces, m.From)
+		} else {
+			// En passant
+			dx := m.To.File - m.From.File
+
+			b.Pieces[m.To] = p
+			delete(b.Pieces, move.Position{File: m.From.File + dx, Rank: m.From.Rank})
+		}
+	} else {
 		b.Pieces[m.To] = p
 		delete(b.Pieces, m.From)
-	} else {
-		// En passant
-		dx := m.To.File - m.From.File
-
-		b.Pieces[m.To] = p
-		delete(b.Pieces, move.Position{File: m.From.File + dx, Rank: m.From.Rank})
 	}
+
+	// This needs a better implementation when considering castling moves
+	// if p.GetPieceType() == piece.PieceTypePawn {
+	// 	p.PieceDetails = piece.NewPawn(
+	// 		piece.PawnWithColour(p.Colour),
+	// 		piece.PawnWithHasMoved(true),
+	// 	)
+	// }
+
+	// if _, ok := b.Pieces[m.To]; ok {
+	// 	b.Pieces[m.To] = p
+	// 	delete(b.Pieces, m.From)
+	// } else {
+	// 	// En passant
+	// 	dx := m.To.File - m.From.File
+
+	// 	b.Pieces[m.To] = p
+	// 	delete(b.Pieces, move.Position{File: m.From.File + dx, Rank: m.From.Rank})
+	// }
 
 	b.History[len(b.History)-1][p.Colour] = m
 

@@ -389,8 +389,6 @@ func TestMovePiece(t *testing.T) {
 
 			if got, ok := b.Pieces[c.check]; ok {
 				if !reflect.DeepEqual(got, c.want) {
-					output.PrintBoard(b, colour.Black)
-
 					t.Errorf("MovePiece(%v) => Piece at position %v == %#v, want %#v",
 						c.move, c.check, got, c.want)
 				}
@@ -400,6 +398,8 @@ func TestMovePiece(t *testing.T) {
 						c.move, c.check, got, c.want)
 				}
 			}
+
+			output.PrintBoard(b, colour.Black)
 		})
 	}
 }

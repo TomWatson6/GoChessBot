@@ -56,7 +56,6 @@ func (b Board) validatePawnMove(p piece.Piece, m move.Move) error {
 		// Handle pawn forward move
 		validBoardMove := rules.Assert(
 			rules.IsLineClear(b.Pieces, m),
-			// rules.IsNotInCheck(b.Pieces, &p, m),
 		)
 
 		if err := validBoardMove(); err != nil {
@@ -75,7 +74,6 @@ func (b Board) validatePawnMove(p piece.Piece, m move.Move) error {
 	validBoardMove := rules.Assert(
 		rules.IsLineClear(b.Pieces, m),
 		rules.IsValidIfPawnCapture(b.Pieces, whiteMove, blackMove, m),
-		// rules.IsNotInCheck(b.Pieces, &p, m),
 	)
 
 	if err := validBoardMove(); err != nil {
@@ -92,7 +90,6 @@ func (b Board) validateRookMove(p piece.Piece, m move.Move) error {
 
 	validBoardMove := rules.Assert(
 		rules.IsLineClear(b.Pieces, m),
-		// rules.IsNotInCheck(b.Pieces, &p, m),
 	)
 
 	if err := validBoardMove(); err != nil {
@@ -107,12 +104,6 @@ func (b Board) validateKnightMove(p piece.Piece, m move.Move) error {
 		return ErrorInvalidKnightMove
 	}
 
-	// validBoardMove := rules.IsNotInCheck(b.Pieces, &p, m)
-
-	// if err := validBoardMove(); err != nil {
-	// 	return err
-	// }
-
 	return nil
 }
 
@@ -124,7 +115,6 @@ func (b Board) validateBishopMove(p piece.Piece, m move.Move) error {
 
 	validBoardMove := rules.Assert(
 		rules.IsLineClear(b.Pieces, m),
-		// rules.IsNotInCheck(b.Pieces, &p, m),
 	)
 
 	if err := validBoardMove(); err != nil {
@@ -141,7 +131,6 @@ func (b Board) validateQueenMove(p piece.Piece, m move.Move) error {
 
 	validBoardMove := rules.Assert(
 		rules.IsLineClear(b.Pieces, m),
-		// rules.IsNotInCheck(b.Pieces, &p, m),
 	)
 
 	if err := validBoardMove(); err != nil {
@@ -152,12 +141,13 @@ func (b Board) validateQueenMove(p piece.Piece, m move.Move) error {
 }
 
 func (b Board) validateKingMove(p piece.Piece, m move.Move) error {
+	// Find max distance of dx/dy - if >= 2 then it's castling move, check conditions
+
 	if err := p.IsValidMove(m); err != nil {
 		return ErrorInvalidKingMove
 	}
 
 	validBoardMove := rules.Assert(
-		// rules.IsNotInCheck(b.Pieces, &p, m),
 		rules.IsLineClear(b.Pieces, m),
 	)
 
