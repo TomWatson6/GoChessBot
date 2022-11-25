@@ -231,7 +231,7 @@ func getLine(m move.Move) ([]move.Position, error) {
 	x := m.From.File
 	y := m.From.Rank
 
-	for x != m.To.File && y != m.To.Rank {
+	for x != m.To.File || y != m.To.Rank {
 		line = append(line, move.Position{File: x, Rank: y})
 
 		x += sx

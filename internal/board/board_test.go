@@ -5,13 +5,54 @@ import (
 	"testing"
 
 	"github.com/tomwatson6/chessbot/internal/board"
-	"github.com/tomwatson6/chessbot/internal/output"
 
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 	"github.com/tomwatson6/chessbot/internal/piece"
 	"github.com/tomwatson6/chessbot/testing/payloads"
 )
+
+func BenchmarkGetValidMoves(b *testing.B) {
+	bo := payloads.NewStandardBoard()
+
+	for i := 0; i < b.N; i++ {
+		var moves []move.Move
+		for _, s := range bo.Squares {
+			for _, p := range bo.Pieces {
+				m := move.Move{From: p.Position, To: s}
+				if err := bo.IsValidMove(m); err == nil {
+					moves = append(moves, m)
+				}
+			}
+		}
+	}
+}
+
+func TestGetValidMoves(t *testing.T) {
+	bo := payloads.NewStandardBoard()
+	var moves []move.Move
+
+	for _, s := range bo.Squares {
+		for _, p := range bo.Pieces {
+			m := move.Move{From: p.Position, To: s}
+			if err := bo.IsValidMove(m); err == nil {
+				moves = append(moves, m)
+			}
+		}
+	}
+
+	if len(moves) != 40 {
+		t.Fatalf("Number of valid moves incorrect -> expected: %d, got: %d", 40, len(moves))
+	}
+}
+
+func TestRandom(t *testing.T) {
+	bo := payloads.NewStandardBoard()
+
+	if err := bo.IsValidMove(move.Move{From: move.Position{File: 0, Rank: 7}, To: move.Position{File: 0, Rank: 0}}); err == nil {
+		t.Fatalf("WTF IS GOING ON: %s", err)
+	}
+}
 
 func TestIsCheck(t *testing.T) {
 	b := payloads.NewStandardBoard(
@@ -382,10 +423,6 @@ func TestMovePiece(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			b.Move(c.move)
-			//err := b.Move(c.move)
-			//if err != nil {
-			//	t.Fatalf("%s", err)
-			//}
 
 			if got, ok := b.Pieces[c.check]; ok {
 				if !reflect.DeepEqual(got, c.want) {
@@ -398,8 +435,6 @@ func TestMovePiece(t *testing.T) {
 						c.move, c.check, got, c.want)
 				}
 			}
-
-			output.PrintBoard(b, colour.Black)
 		})
 	}
 }
