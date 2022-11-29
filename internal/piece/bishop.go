@@ -43,6 +43,10 @@ func (b Bishop) IsValidMove(m move.Move) error {
 	return nil
 }
 
+func (b Bishop) HasMoved() bool {
+	return true
+}
+
 //func (b Bishop) IsValidMove(m move.Move) bool {
 //	x := m.To.File - m.From.File
 //	y := m.To.Rank - m.From.Rank

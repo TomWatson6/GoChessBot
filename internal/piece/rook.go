@@ -7,6 +7,7 @@ import (
 
 type Rook struct {
 	minRange, maxRange int
+	hasMoved           bool
 }
 
 func NewRook() Rook {
@@ -41,6 +42,10 @@ func (r Rook) IsValidMove(m move.Move) error {
 	}
 
 	return nil
+}
+
+func (r Rook) HasMoved() bool {
+	return r.hasMoved
 }
 
 //func (r Rook) IsValidMove(m move.Move) bool {

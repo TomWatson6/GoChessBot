@@ -8,8 +8,8 @@ import (
 
 type Pawn struct {
 	minRange, maxRange int
-	Colour             colour.Colour
-	HasMoved           bool
+	colour             colour.Colour
+	hasMoved           bool
 }
 
 type PawnOption func(p *Pawn)
@@ -18,6 +18,7 @@ func NewPawn(opts ...PawnOption) Pawn {
 	p := Pawn{
 		minRange: 1,
 		maxRange: 1,
+		colour:   colour.White,
 	}
 
 	for _, opt := range opts {
@@ -29,13 +30,13 @@ func NewPawn(opts ...PawnOption) Pawn {
 
 func PawnWithColour(c colour.Colour) PawnOption {
 	return func(p *Pawn) {
-		p.Colour = c
+		p.colour = c
 	}
 }
 
 func PawnWithHasMoved(moved bool) PawnOption {
 	return func(p *Pawn) {
-		p.HasMoved = moved
+		p.hasMoved = moved
 	}
 }
 
@@ -54,7 +55,7 @@ func (p Pawn) GetPieceType() PieceType {
 func (p Pawn) IsValidMove(m move.Move) error {
 	r := p.maxRange
 
-	if !p.HasMoved {
+	if !p.hasMoved {
 		r += 1
 	}
 
@@ -62,7 +63,7 @@ func (p Pawn) IsValidMove(m move.Move) error {
 		rules.IsValidLine(m),
 		rules.IsLargerThanOrEqualToMinRange(p.minRange, m),
 		rules.DoesNotExceedMaxRange(r, m),
-		rules.IsCorrectDirection(p.Colour, m),
+		rules.IsCorrectDirection(p.colour, m),
 		rules.DoesNotExceedMaxRangeIfDiagonal(p.maxRange, m),
 	)
 
@@ -71,6 +72,10 @@ func (p Pawn) IsValidMove(m move.Move) error {
 	}
 
 	return nil
+}
+
+func (p Pawn) HasMoved() bool {
+	return p.hasMoved
 }
 
 //func (p Pawn) IsValidMove(m move.Move) bool {

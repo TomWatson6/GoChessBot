@@ -10,6 +10,7 @@ type PieceDetails interface {
 	GetPiecePoints() PiecePoints
 	GetPieceLetter() PieceLetter
 	IsValidMove(m move.Move) error
+	HasMoved() bool
 }
 
 type Piece struct {

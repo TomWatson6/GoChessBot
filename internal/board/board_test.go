@@ -536,7 +536,7 @@ func TestPawnHasMoved(t *testing.T) {
 
 	b := payloads.NewStandardBoard()
 
-	hasMoved := b.Pieces[move.Position{File: 0, Rank: 1}].PieceDetails.(piece.Pawn).HasMoved
+	hasMoved := b.Pieces[move.Position{File: 0, Rank: 1}].PieceDetails.HasMoved()
 	if hasMoved {
 		t.Errorf("HasMoved is %t, expected %t", hasMoved, false)
 	}
@@ -551,8 +551,7 @@ func TestPawnHasMoved(t *testing.T) {
 		t.Errorf("MovePiece with move %v failed", m)
 	}
 
-	// TODO: LOOK INTO WHY THIS IS NULL POINTER DEREFERENCE...
-	hasMoved = b.Pieces[to].PieceDetails.(piece.Pawn).HasMoved
+	hasMoved = b.Pieces[to].PieceDetails.HasMoved()
 	if !hasMoved {
 		t.Errorf("HasMoved is %t, expected %t", hasMoved, true)
 	}

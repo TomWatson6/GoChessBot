@@ -7,6 +7,7 @@ import (
 
 type King struct {
 	minRange, maxRange int
+	hasMoved           bool
 }
 
 func NewKing() King {
@@ -29,10 +30,16 @@ func (k King) GetPieceType() PieceType {
 }
 
 func (k King) IsValidMove(m move.Move) error {
+	max := k.maxRange
+
+	if !k.hasMoved {
+		max += 1
+	}
+
 	rs := rules.Assert(
 		rules.IsValidLine(m),
 		rules.IsLargerThanOrEqualToMinRange(k.minRange, m),
-		rules.DoesNotExceedMaxRange(k.maxRange, m),
+		rules.DoesNotExceedMaxRange(max, m),
 	)
 
 	if err := rs(); err != nil {
@@ -40,6 +47,10 @@ func (k King) IsValidMove(m move.Move) error {
 	}
 
 	return nil
+}
+
+func (k King) HasMoved() bool {
+	return k.hasMoved
 }
 
 //func (k King) IsValidMove(m move.Move) bool {

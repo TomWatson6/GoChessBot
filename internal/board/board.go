@@ -62,30 +62,9 @@ func (b Board) IsValidMove(m move.Move) error {
 
 	p := b.Pieces[m.From]
 
-	// Then check that it is a valid move for the piece itself, not too costly
-	if err := p.IsValidMove(m); err != nil {
-		return err
-	}
-
-	// Thirdly, the most expensive check, which should come last, can it move with the current state of the board?
 	if err := b.ValidatePieceMove(*p, m); err != nil {
 		return err
 	}
-
-	//if b.IsCheck(p.Colour) {
-	//	if b.IsCheckMate(p.Colour) {
-	//		return ErrorIsCheckMate
-	//	}
-	//	// Check for checkmate
-	//	// Make sure that the move specified escapes check if not checkmate
-	//}
-
-	// If in check, then from/to must be on the line between attacker and king unless a knight in which case the from must be the king
-	// First need to check if in check
-
-	// Check for the king being in check, that will narrow the amount of moves to a subset if so
-
-	// If in check, then a different ruleset must be applied
 
 	return nil
 }
@@ -95,9 +74,6 @@ func (b *Board) Move(m move.Move) error {
 	if err := b.IsValidMove(m); err != nil {
 		return err
 	}
-
-	// If it's a pawn, then set has moved and consider en passant
-	// Otherwise, treat as a normal piece
 
 	p := b.Pieces[m.From]
 	p.Position = m.To
@@ -122,25 +98,6 @@ func (b *Board) Move(m move.Move) error {
 		b.Pieces[m.To] = p
 		delete(b.Pieces, m.From)
 	}
-
-	// This needs a better implementation when considering castling moves
-	// if p.GetPieceType() == piece.PieceTypePawn {
-	// 	p.PieceDetails = piece.NewPawn(
-	// 		piece.PawnWithColour(p.Colour),
-	// 		piece.PawnWithHasMoved(true),
-	// 	)
-	// }
-
-	// if _, ok := b.Pieces[m.To]; ok {
-	// 	b.Pieces[m.To] = p
-	// 	delete(b.Pieces, m.From)
-	// } else {
-	// 	// En passant
-	// 	dx := m.To.File - m.From.File
-
-	// 	b.Pieces[m.To] = p
-	// 	delete(b.Pieces, move.Position{File: m.From.File + dx, Rank: m.From.Rank})
-	// }
 
 	b.History[len(b.History)-1][p.Colour] = m
 

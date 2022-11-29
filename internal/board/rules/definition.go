@@ -1,6 +1,7 @@
 package rules
 
 import (
+	"math"
 	"reflect"
 
 	"github.com/tomwatson6/chessbot/internal/colour"
@@ -198,6 +199,71 @@ func IsNotInCheck(ps map[move.Position]*piece.Piece, movingPiece *piece.Piece, m
 
 			if err := p2.IsValidMove(move.Move{From: p2.Position, To: attackedPosition}); err == nil {
 				return ErrorIsInCheck
+			}
+		}
+
+		return nil
+	}
+}
+
+func IsValidIfCastlingMove(ps map[move.Position]*piece.Piece, m move.Move) func() error {
+	return func() error {
+		dx := m.To.File - m.From.File
+		dy := m.To.Rank - m.From.Rank
+
+		// If it is not a castling move, then it is a valid move
+		// Once established that it's a 2 space move, we know it's a castling attempt
+		if math.Abs(float64(dx)) < 2 && math.Abs(float64(dy)) < 2 {
+			return nil
+		}
+
+		if dy != 0 {
+			return ErrorInvalidCastlingMove
+		}
+
+		k := ps[m.From]
+		if k.HasMoved() {
+			return ErrorInvalidCastlingMove
+		}
+
+		sx, sy := getSteps(dx, dy)
+		var line []move.Position
+
+		x := m.From.File
+		y := m.From.Rank
+
+		for x != m.To.File || y != m.To.Rank {
+			line = append(line, move.Position{File: x, Rank: y})
+
+			if p, ok := ps[move.Position{File: x, Rank: y}]; ok {
+				if p.GetPieceType() == piece.PieceTypeRook && !p.HasMoved() {
+					break
+				} else {
+					return ErrorInvalidCastlingMove
+				}
+			}
+
+			x += sx
+			y += sy
+		}
+
+		for _, pos := range line[:len(line)-1] {
+			for _, p := range ps {
+				if p.Colour == k.Colour {
+					continue
+				}
+
+				attack := move.Move{From: p.Position, To: pos}
+				if err := p.IsValidMove(attack); err == nil {
+					if err := IsLineClear(ps, attack); err == nil {
+						return ErrorInvalidCastlingMove
+					}
+				}
+
+				// Only need to check if king is castling through check, not the rook
+				if pos == m.To {
+					break
+				}
 			}
 		}
 

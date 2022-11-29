@@ -42,19 +42,6 @@ func (q Queen) IsValidMove(m move.Move) error {
 	return nil
 }
 
-//func (q Queen) IsValidMove(m move.Move) bool {
-//	x := m.To.File - m.From.File
-//	y := m.To.Rank - m.From.Rank
-//
-//	// Horizontal and Vertical moves
-//	if (x == 0 && y != 0) || (y == 0 && x != 0) {
-//		return true
-//	}
-//
-//	// Diagonal moves
-//	if (x == y || x == -y) && (x != 0 && y != 0) {
-//		return true
-//	}
-//
-//	return false
-//}
+func (q Queen) HasMoved() bool {
+	return true
+}

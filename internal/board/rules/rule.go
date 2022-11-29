@@ -23,6 +23,8 @@ var (
 	ErrorPieceNotInStartPosition = errors.New("there is no piece in the start position provided")
 	// ErrorResultsInCheck is thrown when the move specified results in having the friendly king in check
 	ErrorResultsInCheck = errors.New("the move specified results in having the friendly king in check")
+	// ErrorInvalidCastlingMove is thrown when the move specified is not a valid castling move
+	ErrorInvalidCastlingMove = errors.New("the move specified is not a valid castling move")
 )
 
 type Assertion func() error

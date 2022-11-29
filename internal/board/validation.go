@@ -141,14 +141,13 @@ func (b Board) validateQueenMove(p piece.Piece, m move.Move) error {
 }
 
 func (b Board) validateKingMove(p piece.Piece, m move.Move) error {
-	// Find max distance of dx/dy - if >= 2 then it's castling move, check conditions
-
 	if err := p.IsValidMove(m); err != nil {
 		return ErrorInvalidKingMove
 	}
 
 	validBoardMove := rules.Assert(
 		rules.IsLineClear(b.Pieces, m),
+		rules.IsValidIfCastlingMove(b.Pieces, m),
 	)
 
 	if err := validBoardMove(); err != nil {

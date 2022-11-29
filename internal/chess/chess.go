@@ -3,11 +3,13 @@ package chess
 import (
 	"bufio"
 	"fmt"
+	"os"
+	"strings"
+
+	"github.com/tomwatson6/chessbot/cmd/config"
 	"github.com/tomwatson6/chessbot/internal/board"
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
-	"os"
-	"strings"
 )
 
 type Chess struct {
@@ -18,7 +20,8 @@ type Chess struct {
 func New(col colour.Colour) Chess {
 	var c Chess
 
-	c.Board = board.New(8, 8)
+	width, height := config.GetBoardDimensions()
+	c.Board = board.New(width, height)
 	c.Turn = col
 
 	return c

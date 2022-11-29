@@ -41,6 +41,10 @@ func (k Knight) IsValidMove(m move.Move) error {
 	return nil
 }
 
+func (k Knight) HasMoved() bool {
+	return true
+}
+
 //func (k Knight) IsValidMove(m move.Move) bool {
 //	if math.Abs(float64(m.To.File-m.From.File)) == 2 {
 //		return math.Abs(float64(m.To.Rank-m.From.Rank)) == 1
