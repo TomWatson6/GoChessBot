@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/tomwatson6/chessbot/internal/board"
+	"github.com/tomwatson6/chessbot/internal/output"
 
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
@@ -45,15 +46,6 @@ func TestGetValidMoves(t *testing.T) {
 		t.Fatalf("Number of valid moves incorrect -> expected: %d, got: %d", 40, len(moves))
 	}
 }
-
-func TestRandom(t *testing.T) {
-	bo := payloads.NewStandardBoard()
-
-	if err := bo.IsValidMove(move.Move{From: move.Position{File: 0, Rank: 7}, To: move.Position{File: 0, Rank: 0}}); err == nil {
-		t.Fatalf("WTF IS GOING ON: %s", err)
-	}
-}
-
 func TestIsCheck(t *testing.T) {
 	b := payloads.NewStandardBoard(
 		payloads.BoardWithPiece(&piece.Piece{
@@ -516,6 +508,8 @@ func TestIsValidMove(t *testing.T) {
 		{move.Move{From: move.Position{File: 1, Rank: 0}, To: move.Position{File: 2, Rank: 2}}, true},
 		{move.Move{From: move.Position{File: 6, Rank: 4}, To: move.Position{File: 7, Rank: 5}}, true},
 		{move.Move{From: move.Position{File: 6, Rank: 4}, To: move.Position{File: 5, Rank: 5}}, false},
+		{move.Move{From: move.Position{File: 3, Rank: 1}, To: move.Position{File: 3, Rank: 4}}, false},
+		{move.Move{From: move.Position{File: 0, Rank: 1}, To: move.Position{File: 0, Rank: 2}}, false},
 	}
 
 	for _, c := range cases {
@@ -523,6 +517,7 @@ func TestIsValidMove(t *testing.T) {
 		t.Run(c.move.String(), func(t *testing.T) {
 			t.Parallel()
 			err := b.IsValidMove(c.move)
+			output.PrintBoard(b, colour.White)
 
 			if (err == nil && !c.valid) || (err != nil && c.valid) {
 				t.Errorf("IsValidMove(%v) => %v, want %v", c.move, err, c.valid)

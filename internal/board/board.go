@@ -75,6 +75,8 @@ func (b *Board) Move(m move.Move) error {
 		return err
 	}
 
+	var toDelete move.Position
+
 	p := b.Pieces[m.From]
 	p.Position = m.To
 
@@ -92,12 +94,16 @@ func (b *Board) Move(m move.Move) error {
 			dx := m.To.File - m.From.File
 
 			b.Pieces[m.To] = p
-			delete(b.Pieces, move.Position{File: m.From.File + dx, Rank: m.From.Rank})
+			toDelete = move.Position{File: m.From.File + dx, Rank: m.From.Rank}
 		}
+	} else if p.GetPieceType() == piece.PieceTypeKing {
+
 	} else {
 		b.Pieces[m.To] = p
-		delete(b.Pieces, m.From)
+		toDelete = m.From
 	}
+
+	delete(b.Pieces, toDelete)
 
 	b.History[len(b.History)-1][p.Colour] = m
 
