@@ -10,10 +10,24 @@ type King struct {
 	hasMoved           bool
 }
 
-func NewKing() King {
-	return King{
+type KingOption func(k *King)
+
+func NewKing(opts ...KingOption) King {
+	k := King{
 		minRange: 1,
 		maxRange: 1,
+	}
+
+	for _, opt := range opts {
+		opt(&k)
+	}
+
+	return k
+}
+
+func KingWithHasMoved(hasMoved bool) KingOption {
+	return func(k *King) {
+		k.hasMoved = hasMoved
 	}
 }
 

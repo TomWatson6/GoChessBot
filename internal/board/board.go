@@ -97,7 +97,27 @@ func (b *Board) Move(m move.Move) error {
 			toDelete = move.Position{File: m.From.File + dx, Rank: m.From.Rank}
 		}
 	} else if p.GetPieceType() == piece.PieceTypeKing {
+		p.PieceDetails = piece.NewKing(
+			piece.KingWithHasMoved(true),
+		)
 
+		// Castling move, so needs to also move the rook
+		if m.Distance() == 2 {
+			rookMove := b.getRookCastlingMove(m)
+			r := b.Pieces[rookMove.From]
+
+			r.Position = rookMove.To
+			r.PieceDetails = piece.NewRook(
+				piece.RookWithHasMoved(true),
+			)
+
+			b.Pieces[rookMove.To] = r
+
+			delete(b.Pieces, rookMove.From)
+		}
+
+		b.Pieces[m.To] = p
+		toDelete = m.From
 	} else {
 		b.Pieces[m.To] = p
 		toDelete = m.From
@@ -208,6 +228,33 @@ func (b Board) IsCheckMate(c colour.Colour) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (b Board) getRookCastlingMove(m move.Move) move.Move {
+	switch {
+	case m.To == move.Position{File: 2, Rank: 0}:
+		return move.Move{
+			From: move.Position{File: 0, Rank: 0},
+			To:   move.Position{File: 3, Rank: 0},
+		}
+	case m.To == move.Position{File: 6, Rank: 0}:
+		return move.Move{
+			From: move.Position{File: 7, Rank: 0},
+			To:   move.Position{File: 5, Rank: 0},
+		}
+	case m.To == move.Position{File: 2, Rank: 7}:
+		return move.Move{
+			From: move.Position{File: 0, Rank: 7},
+			To:   move.Position{File: 3, Rank: 7},
+		}
+	case m.To == move.Position{File: 6, Rank: 7}:
+		return move.Move{
+			From: move.Position{File: 7, Rank: 7},
+			To:   move.Position{File: 5, Rank: 7},
+		}
+	default:
+		return move.Move{}
+	}
 }
 
 func (b Board) kingCanMoveToSafety(k *piece.Piece) bool {

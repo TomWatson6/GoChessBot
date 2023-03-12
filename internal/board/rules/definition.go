@@ -229,8 +229,8 @@ func IsValidIfCastlingMove(ps map[move.Position]*piece.Piece, m move.Move) func(
 		sx, sy := getSteps(dx, dy)
 		var line []move.Position
 
-		x := m.From.File
-		y := m.From.Rank
+		x := m.From.File + sx
+		y := m.From.Rank + sy
 
 		for x != m.To.File || y != m.To.Rank {
 			line = append(line, move.Position{File: x, Rank: y})

@@ -26,6 +26,10 @@ func BenchmarkGetValidMoves(b *testing.B) {
 				}
 			}
 		}
+
+		if len(moves) != 40 {
+			b.Fatalf("Got incorrect number of moves, got: %d, expected: %d\n", len(moves), 40)
+		}
 	}
 }
 
@@ -46,6 +50,7 @@ func TestGetValidMoves(t *testing.T) {
 		t.Fatalf("Number of valid moves incorrect -> expected: %d, got: %d", 40, len(moves))
 	}
 }
+
 func TestIsCheck(t *testing.T) {
 	b := payloads.NewStandardBoard(
 		payloads.BoardWithPiece(&piece.Piece{
@@ -428,6 +433,196 @@ func TestMovePiece(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestValidWhiteKingSideCastlingMove(t *testing.T) {
+	b := payloads.NewStandardBoard(
+		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 0}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 6, Rank: 0}),
+	)
+
+	// Visualisation of the board
+	// 8 bR bN bB bQ bK bB bN bR
+	// 7 bP bP bP bP bP bP bP bP
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## ## ## ## ##
+	// 4 ## ## ## ## ## ## ## ##
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 wP wP wP wP wP wP wP wP
+	// 1 wR wN wB wQ wK ## ## wR
+	//    A  B  C  D  E  F  G  H
+
+	m := move.Move{
+		From: move.Position{File: 4, Rank: 0},
+		To:   move.Position{File: 6, Rank: 0},
+	}
+
+	if err := b.Move(m); err != nil {
+		t.Fatalf("King side castling move invalid, failed with error: %s\n", err)
+	}
+
+	k, ok := b.Pieces[m.To]
+	if !ok {
+		t.Fatalf("There is no piece in destination square for the king")
+	}
+
+	if k.GetPieceType() != piece.PieceTypeKing || !k.HasMoved() || k.Position != m.To {
+		t.Fatalf("King details at destination square are incorrect, got: %#v\n", k)
+	}
+
+	rDest := move.Position{File: 5, Rank: 0}
+
+	r, ok := b.Pieces[rDest]
+	if !ok {
+		t.Fatalf("There is no piece in destination square for the rook")
+	}
+
+	if r.GetPieceType() != piece.PieceTypeRook || !r.HasMoved() || r.Position != rDest {
+		t.Fatalf("Rook details at destination square are incorrect, got: %#v\n", r)
+	}
+}
+
+func TestValidWhiteQueenSideCastlingMove(t *testing.T) {
+	b := payloads.NewStandardBoard(
+		payloads.BoardWithDeletedPiece(move.Position{File: 1, Rank: 0}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 2, Rank: 0}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 3, Rank: 0}),
+	)
+
+	// Visualisation of the board
+	// 8 bR bN bB bQ bK bB bN bR
+	// 7 bP bP bP bP bP bP bP bP
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## ## ## ## ##
+	// 4 ## ## ## ## ## ## ## ##
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 wP wP wP wP wP wP wP wP
+	// 1 wR ## ## ## wK wB wN wR
+	//    A  B  C  D  E  F  G  H
+
+	m := move.Move{
+		From: move.Position{File: 4, Rank: 0},
+		To:   move.Position{File: 2, Rank: 0},
+	}
+
+	if err := b.Move(m); err != nil {
+		t.Fatalf("King side castling move invalid, failed with error: %s\n", err)
+	}
+
+	k, ok := b.Pieces[m.To]
+	if !ok {
+		t.Fatalf("There is no piece in destination square for the king")
+	}
+
+	if k.GetPieceType() != piece.PieceTypeKing || !k.HasMoved() || k.Position != m.To {
+		t.Fatalf("King details at destination square are incorrect, got: %#v\n", k)
+	}
+
+	rDest := move.Position{File: 3, Rank: 0}
+
+	r, ok := b.Pieces[rDest]
+	if !ok {
+		t.Fatalf("There is no piece in destination square for the rook")
+	}
+
+	if r.GetPieceType() != piece.PieceTypeRook || !r.HasMoved() || r.Position != rDest {
+		t.Fatalf("Rook details at destination square are incorrect, got: %#v\n", r)
+	}
+}
+
+func TestValidBlackKingSideCastlingMove(t *testing.T) {
+	b := payloads.NewStandardBoard(
+		payloads.BoardWithDeletedPiece(move.Position{File: 5, Rank: 7}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 6, Rank: 7}),
+	)
+
+	// Visualisation of the board
+	// 8 bR bN bB bQ bK ## ## bR
+	// 7 bP bP bP bP bP bP bP bP
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## ## ## ## ##
+	// 4 ## ## ## ## ## ## ## ##
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 wP wP wP wP wP wP wP wP
+	// 1 wR wN wB wQ wK wB wN wR
+	//    A  B  C  D  E  F  G  H
+
+	m := move.Move{
+		From: move.Position{File: 4, Rank: 7},
+		To:   move.Position{File: 6, Rank: 7},
+	}
+
+	if err := b.Move(m); err != nil {
+		t.Fatalf("King side castling move invalid, failed with error: %s\n", err)
+	}
+
+	k, ok := b.Pieces[m.To]
+	if !ok {
+		t.Fatalf("There is no piece in destination square for the king")
+	}
+
+	if k.GetPieceType() != piece.PieceTypeKing || !k.HasMoved() || k.Position != m.To {
+		t.Fatalf("King details at destination square are incorrect, got: %#v\n", k)
+	}
+
+	rDest := move.Position{File: 5, Rank: 7}
+
+	r, ok := b.Pieces[rDest]
+	if !ok {
+		t.Fatalf("There is no piece in destination square for the rook")
+	}
+
+	if r.GetPieceType() != piece.PieceTypeRook || !r.HasMoved() || r.Position != rDest {
+		t.Fatalf("Rook details at destination square are incorrect, got: %#v\n", r)
+	}
+}
+
+func TestValidBlackQueenSideCastlingMove(t *testing.T) {
+	b := payloads.NewStandardBoard(
+		payloads.BoardWithDeletedPiece(move.Position{File: 1, Rank: 7}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 2, Rank: 7}),
+		payloads.BoardWithDeletedPiece(move.Position{File: 3, Rank: 7}),
+	)
+
+	// Visualisation of the board
+	// 8 bR ## ## ## bK bB bN bR
+	// 7 bP bP bP bP bP bP bP bP
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## ## ## ## ##
+	// 4 ## ## ## ## ## ## ## ##
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 wP wP wP wP wP wP wP wP
+	// 1 wR wN wB wQ wK wB wN wR
+	//    A  B  C  D  E  F  G  H
+
+	m := move.Move{
+		From: move.Position{File: 4, Rank: 7},
+		To:   move.Position{File: 2, Rank: 7},
+	}
+
+	if err := b.Move(m); err != nil {
+		t.Fatalf("King side castling move invalid, failed with error: %s\n", err)
+	}
+
+	k, ok := b.Pieces[m.To]
+	if !ok {
+		t.Fatalf("There is no piece in destination square for the king")
+	}
+
+	if k.GetPieceType() != piece.PieceTypeKing || !k.HasMoved() || k.Position != m.To {
+		t.Fatalf("King details at destination square are incorrect, got: %#v\n", k)
+	}
+
+	rDest := move.Position{File: 3, Rank: 7}
+
+	r, ok := b.Pieces[rDest]
+	if !ok {
+		t.Fatalf("There is no piece in destination square for the rook")
+	}
+
+	if r.GetPieceType() != piece.PieceTypeRook || !r.HasMoved() || r.Position != rDest {
+		t.Fatalf("Rook details at destination square are incorrect, got: %#v\n", r)
 	}
 }
 

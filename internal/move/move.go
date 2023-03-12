@@ -2,6 +2,7 @@ package move
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -51,6 +52,17 @@ func NewMoveFromString(s string) (Move, error) {
 	m.To = Position{File: file, Rank: rank}
 
 	return m, nil
+}
+
+func (m Move) Distance() int {
+	dx := math.Abs(float64(m.To.File - m.From.File))
+	dy := math.Abs(float64(m.To.Rank - m.From.Rank))
+
+	if dx > dy {
+		return int(dx)
+	}
+
+	return int(dy)
 }
 
 func (m Move) String() string {

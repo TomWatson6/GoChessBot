@@ -10,10 +10,24 @@ type Rook struct {
 	hasMoved           bool
 }
 
-func NewRook() Rook {
-	return Rook{
+type RookOption func(r *Rook)
+
+func NewRook(opts ...RookOption) Rook {
+	r := Rook{
 		minRange: 1,
 		maxRange: 8,
+	}
+
+	for _, opt := range opts {
+		opt(&r)
+	}
+
+	return r
+}
+
+func RookWithHasMoved(hasMoved bool) RookOption {
+	return func(r *Rook) {
+		r.hasMoved = hasMoved
 	}
 }
 

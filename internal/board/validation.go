@@ -41,7 +41,11 @@ func (b Board) ValidatePieceMove(p piece.Piece, m move.Move) error {
 	case piece.Queen:
 		return b.validateQueenMove(p, m)
 	case piece.King:
-		return b.validateKingMove(p, m)
+		if m.Distance() == 1 {
+			return b.validateKingMove(p, m)
+		}
+
+		return b.validateKingCastlingMove(p, m)
 	default:
 		return ErrorInvalidPieceType
 	}
@@ -145,10 +149,21 @@ func (b Board) validateKingMove(p piece.Piece, m move.Move) error {
 		return ErrorInvalidKingMove
 	}
 
-	validBoardMove := rules.Assert(
-		rules.IsLineClear(b.Pieces, m),
-		rules.IsValidIfCastlingMove(b.Pieces, m),
-	)
+	validBoardMove := rules.IsLineClear(b.Pieces, m)
+
+	if err := validBoardMove(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (b Board) validateKingCastlingMove(p piece.Piece, m move.Move) error {
+	if err := p.IsValidMove(m); err != nil {
+		return ErrorInvalidKingMove
+	}
+
+	validBoardMove := rules.IsValidIfCastlingMove(b.Pieces, m)
 
 	if err := validBoardMove(); err != nil {
 		return err

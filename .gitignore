@@ -3,3 +3,5 @@ Makefile
 /.idea/modules.xml
 /.idea/chessbot.iml
 cover.out
+*.prof
+*.test.exe
