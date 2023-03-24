@@ -458,7 +458,7 @@ func TestValidWhiteKingSideCastlingMove(t *testing.T) {
 		To:   move.Position{File: 6, Rank: 0},
 	}
 
-	if err := b.Move(m); err != nil {
+	if _, err := b.Move(m); err != nil {
 		t.Fatalf("King side castling move invalid, failed with error: %s\n", err)
 	}
 
@@ -506,7 +506,7 @@ func TestValidWhiteQueenSideCastlingMove(t *testing.T) {
 		To:   move.Position{File: 2, Rank: 0},
 	}
 
-	if err := b.Move(m); err != nil {
+	if _, err := b.Move(m); err != nil {
 		t.Fatalf("King side castling move invalid, failed with error: %s\n", err)
 	}
 
@@ -553,7 +553,7 @@ func TestValidBlackKingSideCastlingMove(t *testing.T) {
 		To:   move.Position{File: 6, Rank: 7},
 	}
 
-	if err := b.Move(m); err != nil {
+	if _, err := b.Move(m); err != nil {
 		t.Fatalf("King side castling move invalid, failed with error: %s\n", err)
 	}
 
@@ -601,7 +601,7 @@ func TestValidBlackQueenSideCastlingMove(t *testing.T) {
 		To:   move.Position{File: 2, Rank: 7},
 	}
 
-	if err := b.Move(m); err != nil {
+	if _, err := b.Move(m); err != nil {
 		t.Fatalf("King side castling move invalid, failed with error: %s\n", err)
 	}
 
@@ -736,7 +736,7 @@ func TestPawnHasMoved(t *testing.T) {
 
 	m := move.Move{From: from, To: to}
 
-	err := b.Move(m)
+	_, err := b.Move(m)
 	if err != nil {
 		t.Errorf("MovePiece with move %v failed", m)
 	}

@@ -1,6 +1,8 @@
 package piece
 
 import (
+	"fmt"
+
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
 )
@@ -14,10 +16,33 @@ type PieceDetails interface {
 }
 
 type Piece struct {
-	Position move.Position
-	Colour   colour.Colour
+	Position move.Position `json:"position"`
+	Colour   colour.Colour `json:"colour"`
 	//HasMoved bool <-- This is going to be need for castling moves as well as pawns
-	PieceDetails
+	PieceDetails `json:"-"`
+}
+
+func (p Piece) String() string {
+	t := ""
+
+	switch p.GetPieceType() {
+	case PieceTypeKing:
+		t = "King"
+	case PieceTypeQueen:
+		t = "Queen"
+	case PieceTypeBishop:
+		t = "Bishop"
+	case PieceTypeKnight:
+		t = "Knight"
+	case PieceTypeRook:
+		t = "Rook"
+	default:
+		t = "Pawn"
+	}
+
+	output := fmt.Sprintf("%s: %s %s", p.Position.String(), p.Colour.String(), t)
+
+	return output
 }
 
 func (p *Piece) Equals(p2 *Piece) bool {

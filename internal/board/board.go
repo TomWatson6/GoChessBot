@@ -1,7 +1,9 @@
 package board
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/tomwatson6/chessbot/cmd/config"
 	"github.com/tomwatson6/chessbot/internal/board/rules"
@@ -14,14 +16,55 @@ var ErrorIsCheckMate = errors.New("king is in check mate, game over")
 
 // Board is a struct to hold the current state of the chess game board
 type Board struct {
-	Width   int
-	Height  int
-	Squares []move.Position
-	Pieces  map[move.Position]*piece.Piece
-	History []Turn
+	Width   int                            `json:"width"`
+	Height  int                            `json:"height"`
+	Squares []move.Position                `json:"-"`
+	Pieces  map[move.Position]*piece.Piece `json:"pieces"`
+	History []Turn                         `json:"history"`
+}
+
+func (b *Board) MarshalJSON() ([]byte, error) {
+	// Convert the Pieces map to a map with string keys.
+	pieces := make(map[string]string)
+	for pos, p := range b.Pieces {
+		pieces[pos.String()] = p.String()
+	}
+
+	// Convert the History slice to a slice of strings.
+	history := make([]string, len(b.History))
+	for i, turn := range b.History {
+		history[i] = turn.String()
+	}
+
+	// Create an anonymous struct with the same fields as the original Board struct,
+	// but with the types that can be marshalled directly to JSON.
+	auxBoard := struct {
+		Width   int               `json:"width"`
+		Height  int               `json:"height"`
+		Pieces  map[string]string `json:"pieces"`
+		History []string          `json:"history"`
+	}{
+		Width:   b.Width,
+		Height:  b.Height,
+		Pieces:  pieces,
+		History: history,
+	}
+
+	// Marshal the anonymous struct to JSON.
+	return json.Marshal(auxBoard)
 }
 
 type Turn map[colour.Colour]move.Move
+
+func (t Turn) String() string {
+	output := ""
+
+	for c, m := range t {
+		output += fmt.Sprintf("%s: %s\n", c.String(), m.String())
+	}
+
+	return output
+}
 
 // New makes a new instance of a board with a default state
 func New(w, h int) Board {
@@ -70,9 +113,12 @@ func (b Board) IsValidMove(m move.Move) error {
 }
 
 // TODO: look at logic for this - en passant is currently being considered for any piece moving without taking
-func (b *Board) Move(m move.Move) error {
+func (b *Board) Move(m move.Move) ([]move.Move, error) {
+	movesMade := []move.Move{}
+	movesMade = append(movesMade, m)
+
 	if err := b.IsValidMove(m); err != nil {
-		return err
+		return []move.Move{}, err
 	}
 
 	var toDelete move.Position
@@ -104,6 +150,8 @@ func (b *Board) Move(m move.Move) error {
 		// Castling move, so needs to also move the rook
 		if m.Distance() == 2 {
 			rookMove := b.getRookCastlingMove(m)
+			movesMade = append(movesMade, rookMove)
+
 			r := b.Pieces[rookMove.From]
 
 			r.Position = rookMove.To
@@ -132,7 +180,7 @@ func (b *Board) Move(m move.Move) error {
 		b.History = append(b.History, make(Turn))
 	}
 
-	return nil
+	return movesMade, nil
 }
 
 func (b Board) GetPiecesThatMoveToDestWithColour(dest move.Position, col colour.Colour) ([]*piece.Piece, error) {

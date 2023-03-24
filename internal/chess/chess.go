@@ -13,8 +13,8 @@ import (
 )
 
 type Chess struct {
-	Board board.Board
-	Turn  colour.Colour
+	Board board.Board   `json:"board"`
+	Turn  colour.Colour `json:"turn"`
 }
 
 func New(col colour.Colour) Chess {
@@ -25,6 +25,12 @@ func New(col colour.Colour) Chess {
 	c.Turn = col
 
 	return c
+}
+
+func (c Chess) MarshalJSON() ([]byte, error) {
+	// output := fmt.Sprintf("Current Turn: %s\n", c.Turn.String())
+
+	return c.Board.MarshalJSON()
 }
 
 // Play starts a game for the colour specified, and cycles turns until a winner is determined - returns winning colour
@@ -52,23 +58,21 @@ func New(col colour.Colour) Chess {
 //	}
 //}
 
-func (c *Chess) MakeMove(m move.Move) error {
+func (c *Chess) MakeMove(m move.Move) ([]move.Move, error) {
 	if c.Board.Pieces[m.From].Colour != c.Turn {
-		return fmt.Errorf("invalid move for current turn: %v", m)
-	}
-	if err := c.Board.Move(m); err != nil {
-		return fmt.Errorf("failed validation of move: %v, err: %w", m, err)
+		return []move.Move{}, fmt.Errorf("invalid move for current turn: %v", m)
 	}
 
-	return nil
+	moves, err := c.Board.Move(m)
+	if err != nil {
+		return []move.Move{}, fmt.Errorf("failed validation of move: %v, err: %w", m, err)
+	}
+
+	return moves, nil
 }
 
 func (c *Chess) NextTurn() {
-	if c.Turn == colour.White {
-		c.Turn = colour.Black
-	} else {
-		c.Turn = colour.White
-	}
+	c.Turn = c.Turn.Opposite()
 }
 
 func getInput(c colour.Colour) (string, error) {

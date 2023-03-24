@@ -8,11 +8,8 @@ import (
 )
 
 type Move struct {
-	From, To Position
-}
-
-type Position struct {
-	File, Rank int
+	From Position `json:"from"`
+	To   Position `json:"to"`
 }
 
 func NewMoveFromString(s string) (Move, error) {
@@ -67,8 +64,4 @@ func (m Move) Distance() int {
 
 func (m Move) String() string {
 	return fmt.Sprintf("%s->%s", m.From.String(), m.To.String())
-}
-
-func (p Position) String() string {
-	return fmt.Sprintf("(%d,%d)", p.File, p.Rank)
 }

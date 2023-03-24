@@ -34,7 +34,7 @@ func TestSimpleMoves(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		if err := c.MakeMove(tc.m); err != nil {
+		if _, err := c.MakeMove(tc.m); err != nil {
 			t.Fatalf("MakeMove() returned error: %s", err)
 		}
 		c.NextTurn()
