@@ -68,6 +68,8 @@ func (c *Chess) MakeMove(m move.Move) ([]move.Move, error) {
 		return []move.Move{}, fmt.Errorf("failed validation of move: %v, err: %w", m, err)
 	}
 
+	c.NextTurn()
+
 	return moves, nil
 }
 

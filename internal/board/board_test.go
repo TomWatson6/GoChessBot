@@ -17,15 +17,7 @@ func BenchmarkGetValidMoves(b *testing.B) {
 	bo := payloads.NewStandardBoard()
 
 	for i := 0; i < b.N; i++ {
-		var moves []move.Move
-		for _, s := range bo.Squares {
-			for _, p := range bo.Pieces {
-				m := move.Move{From: p.Position, To: s}
-				if err := bo.IsValidMove(m); err == nil {
-					moves = append(moves, m)
-				}
-			}
-		}
+		moves := bo.GetValidMoves()
 
 		if len(moves) != 40 {
 			b.Fatalf("Got incorrect number of moves, got: %d, expected: %d\n", len(moves), 40)
@@ -35,19 +27,12 @@ func BenchmarkGetValidMoves(b *testing.B) {
 
 func TestGetValidMoves(t *testing.T) {
 	bo := payloads.NewStandardBoard()
-	var moves []move.Move
 
-	for _, s := range bo.Squares {
-		for _, p := range bo.Pieces {
-			m := move.Move{From: p.Position, To: s}
-			if err := bo.IsValidMove(m); err == nil {
-				moves = append(moves, m)
-			}
-		}
-	}
+	moves := bo.GetValidMoves()
+	expected := 40
 
-	if len(moves) != 40 {
-		t.Fatalf("Number of valid moves incorrect -> expected: %d, got: %d", 40, len(moves))
+	if len(moves) != expected {
+		t.Fatalf("Number of valid moves incorrect -> expected: %d, got: %d", expected, len(moves))
 	}
 }
 

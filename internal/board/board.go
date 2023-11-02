@@ -183,6 +183,25 @@ func (b *Board) Move(m move.Move) ([]move.Move, error) {
 	return movesMade, nil
 }
 
+func (b Board) GetValidMoves() []move.Move {
+	var moves []move.Move
+
+	for _, s := range b.Squares {
+		for _, p := range b.Pieces {
+			m := move.Move{
+				From: p.Position,
+				To:   s,
+			}
+
+			if err := b.IsValidMove(m); err == nil {
+				moves = append(moves, m)
+			}
+		}
+	}
+
+	return moves
+}
+
 func (b Board) GetPiecesThatMoveToDestWithColour(dest move.Position, col colour.Colour) ([]*piece.Piece, error) {
 	var output []*piece.Piece
 
@@ -191,14 +210,14 @@ func (b Board) GetPiecesThatMoveToDestWithColour(dest move.Position, col colour.
 			continue
 		}
 
-		if err := p.IsValidMove(move.Move{
-			From: p.Position,
-			To:   dest,
-		}); err == nil {
-			output = append(output, p)
-		} else {
+		m := move.Move{From: p.Position, To: dest}
+
+		err := p.IsValidMove(m)
+		if err != nil {
 			return []*piece.Piece{}, err
 		}
+
+		output = append(output, p)
 	}
 
 	return output, nil

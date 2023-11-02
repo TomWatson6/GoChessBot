@@ -37,7 +37,6 @@ func TestSimpleMoves(t *testing.T) {
 		if _, err := c.MakeMove(tc.m); err != nil {
 			t.Fatalf("MakeMove() returned error: %s", err)
 		}
-		c.NextTurn()
 	}
 }
 
