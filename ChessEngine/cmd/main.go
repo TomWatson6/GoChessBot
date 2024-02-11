@@ -118,6 +118,8 @@ func state(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// TODO: Get Valid Moves endpoint needs to be added for the AI
+
 func main() {
 	http.HandleFunc("/start", startGame)
 	http.HandleFunc("/move", movePiece)

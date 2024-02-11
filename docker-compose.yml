@@ -1,11 +1,11 @@
 version: '3'
 services:
   app:
-    image: golang:latest # Replace with the Go Docker image you need
+    image: golang:latest
     container_name: chess-engine
     working_dir: /app
     volumes:
-      - ./ChessEngine:/app # Map your Go application code into the container
+      - ./ChessEngine:/app
     ports:
-      - "8080:8080" # Map your application's port to the host machine
-    command: go run ./cmd # Replace with the command to start your Go application
+      - "8080:8080"
+    command: go run ./cmd
