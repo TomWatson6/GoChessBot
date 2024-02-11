@@ -5,7 +5,7 @@ services:
     container_name: chess-engine
     working_dir: /app
     volumes:
-      - .:/app # Map your Go application code into the container
+      - ./ChessEngine:/app # Map your Go application code into the container
     ports:
       - "8080:8080" # Map your application's port to the host machine
     command: go run ./cmd # Replace with the command to start your Go application
