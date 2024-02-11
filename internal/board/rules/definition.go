@@ -145,7 +145,7 @@ func IsValidIfPawnCapture(ps map[move.Position]*piece.Piece, whiteMove, blackMov
 		// En passant
 		if p2, ok := ps[move.Position{File: m.From.File + dx, Rank: m.From.Rank}]; ok {
 			if p2.GetPieceType() != piece.PieceTypePawn {
-				return ErrorIsNotValidPawnCapture
+				return ErrorIsNotValidDiagonalPawnCapture
 			}
 
 			lastMove := blackMove
@@ -163,7 +163,7 @@ func IsValidIfPawnCapture(ps map[move.Position]*piece.Piece, whiteMove, blackMov
 			}
 		}
 
-		return ErrorIsNotValidPawnCapture
+		return ErrorIsNotValidDiagonalPawnCapture
 	}
 }
 
@@ -174,6 +174,16 @@ func IsPieceInStartPosition(ps map[move.Position]*piece.Piece, pos move.Position
 		}
 
 		return ErrorPieceNotInStartPosition
+	}
+}
+
+func IsNotPieceInEndPosition(ps map[move.Position]*piece.Piece, pos move.Position) func() error {
+	return func() error {
+		if _, ok := ps[pos]; ok {
+			return ErrorIsNotValidPawnCapture
+		}
+
+		return nil
 	}
 }
 
@@ -286,7 +296,7 @@ func getLine(m move.Move) ([]move.Position, error) {
 	dx := m.To.File - m.From.File
 	dy := m.To.Rank - m.From.Rank
 
-	if dx != dy && dx != 0 && dy != 0 {
+	if math.Abs(float64(dx)) != math.Abs(float64(dy)) && dx != 0 && dy != 0 {
 		return []move.Position{}, ErrorIsNotValidLine
 	}
 

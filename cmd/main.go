@@ -73,7 +73,7 @@ func movePiece(w http.ResponseWriter, r *http.Request) {
 	move, err := getMove(r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		resp.Err = err
+		resp.Err = fmt.Sprintf("%s", err)
 		fmt.Fprint(w, resp)
 		return
 	}
@@ -81,8 +81,9 @@ func movePiece(w http.ResponseWriter, r *http.Request) {
 	moves, err := c.MakeMove(move)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		resp.Err = err
-		fmt.Fprint(w, resp)
+		resp.Err = fmt.Sprintf("%s", err)
+		// fmt.Fprint(w, resp)
+		// return
 	}
 
 	resp.Moves = moves
@@ -122,6 +123,7 @@ func main() {
 	http.HandleFunc("/move", movePiece)
 	http.HandleFunc("/state", state)
 
+	fmt.Println("Use /start {GET}, /move {POST}, /state {GET} to use ChessBot")
 	fmt.Println("Listening on :8080...")
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {

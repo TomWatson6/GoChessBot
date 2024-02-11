@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/tomwatson6/chessbot/internal/board"
-	"github.com/tomwatson6/chessbot/internal/output"
 
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
@@ -697,7 +696,6 @@ func TestIsValidMove(t *testing.T) {
 		t.Run(c.move.String(), func(t *testing.T) {
 			t.Parallel()
 			err := b.IsValidMove(c.move)
-			output.PrintBoard(b, colour.White)
 
 			if (err == nil && !c.valid) || (err != nil && c.valid) {
 				t.Errorf("IsValidMove(%v) => %v, want %v", c.move, err, c.valid)
@@ -732,5 +730,54 @@ func TestPawnHasMoved(t *testing.T) {
 	}
 }
 
-// TODO: In random chess game, pieces can capture other pieces of their own colour
-// TODO: When in check, it doesn't realise it can take the threatening piece
+func TestCanTakeKingWhenInCheck(t *testing.T) {
+	t.Parallel()
+
+	history := []board.Turn{
+		{
+			colour.White: move.Move{
+				From: move.Position{File: 6, Rank: 3},
+				To:   move.Position{File: 7, Rank: 4},
+			},
+		},
+	}
+
+	b := payloads.NewStandardBoard(
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 7, Rank: 4},
+			PieceDetails: piece.NewBishop(),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 5, Rank: 6},
+			PieceDetails: piece.NewBishop(),
+		}),
+		payloads.BoardWithHistory(history),
+	)
+
+	// Visualisation of the board
+	// 8 bR bN bB bQ bK bB bN bR
+	// 7 bP bP bP bP bP bB bP bP
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## ## ## ## wB
+	// 4 ## ## ## ## ## ## ## ##
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 wP wP wP wP wP wP wP wP
+	// 1 wR wN wB wQ wK wB wN wR
+	//    A  B  C  D  E  F  G  H
+
+	p := b.Pieces[move.Position{File: 5, Rank: 6}]
+
+	if err := b.IsValidMove(move.Move{From: p.Position, To: move.Position{File: 4, Rank: 5}}); err == nil {
+		t.Fatalf("expected error, got nil, bishop should not be able to move out of a pinned position exposing it's king")
+	}
+
+	from := move.Position{File: 5, Rank: 6}
+	to := move.Position{File: 7, Rank: 4}
+	m := move.Move{From: from, To: to}
+
+	if _, err := b.Move(m); err != nil {
+		t.Fatalf("failed with error: %s", err)
+	}
+}

@@ -2,6 +2,7 @@ package chess
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -10,6 +11,11 @@ import (
 	"github.com/tomwatson6/chessbot/internal/board"
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
+)
+
+var (
+	// ErrorPieceNotInStartPosition is thrown when there is no piece in the start position provided
+	ErrorPieceNotInStartPosition = errors.New("there is no piece in the start position provided")
 )
 
 type Chess struct {
@@ -59,6 +65,10 @@ func (c Chess) MarshalJSON() ([]byte, error) {
 //}
 
 func (c *Chess) MakeMove(m move.Move) ([]move.Move, error) {
+	if _, ok := c.Board.Pieces[m.From]; !ok {
+		return []move.Move{}, ErrorPieceNotInStartPosition
+	}
+
 	if c.Board.Pieces[m.From].Colour != c.Turn {
 		return []move.Move{}, fmt.Errorf("invalid move for current turn: %v", m)
 	}

@@ -60,6 +60,7 @@ func (b Board) validatePawnMove(p piece.Piece, m move.Move) error {
 		// Handle pawn forward move
 		validBoardMove := rules.Assert(
 			rules.IsLineClear(b.Pieces, m),
+			rules.IsNotPieceInEndPosition(b.Pieces, m.To),
 		)
 
 		if err := validBoardMove(); err != nil {

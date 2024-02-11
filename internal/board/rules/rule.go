@@ -11,8 +11,10 @@ var (
 	ErrorLineIsNotClear = errors.New("the move specified is a move through a piece on the board")
 	// ErrorIsFriendlyCapture is thrown when the move specified is attempting to take a piece of the same colour
 	ErrorIsFriendlyCapture = errors.New("the move specified is a move that is attempting to take a piece of the same colour")
-	// ErrorIsNotValidPawnCapture is thrown when the piece in the start position is a pawn and another piece of the opposite colour is not where it is diagonally moving
-	ErrorIsNotValidPawnCapture = errors.New("the piece in the start position is a pawn and another piece of the opposite colour is not where it is diagonally moving")
+	// ErrorIsNotValidPawnCapture is thrown when the piece in the start position is a pawn, the pawn is moving forward vertically, and there is a piece in the end position
+	ErrorIsNotValidPawnCapture = errors.New("the piece in the start position is a pawn, the pawn is moving forward vertically, and there is a piece in the end position")
+	// ErrorIsNotValidDiagonalPawnCapture is thrown when the piece in the start position is a pawn and another piece of the opposite colour is not where it is diagonally moving
+	ErrorIsNotValidDiagonalPawnCapture = errors.New("the piece in the start position is a pawn and another piece of the opposite colour is not where it is diagonally moving")
 	// ErrorKingNotFound is thrown when there is no king for the colour specified in the pieces on the board
 	ErrorKingNotFound = errors.New("there is no king for the colour specified in the pieces on the board")
 	// ErrorIsPinned is thrown when the piece that is trying to be moved is pinned to their king

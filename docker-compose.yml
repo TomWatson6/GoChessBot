@@ -2,7 +2,7 @@ version: '3'
 services:
   app:
     image: golang:latest # Replace with the Go Docker image you need
-    container_name: chess-bot
+    container_name: chess-engine
     working_dir: /app
     volumes:
       - .:/app # Map your Go application code into the container

@@ -23,6 +23,7 @@ type Board struct {
 	History []Turn                         `json:"history"`
 }
 
+// TODO - Refactor the history in this once translation is tested, needs to return moves in notation as a list
 func (b *Board) MarshalJSON() ([]byte, error) {
 	// Convert the Pieces map to a map with string keys.
 	pieces := make(map[string]string)
@@ -60,7 +61,7 @@ func (t Turn) String() string {
 	output := ""
 
 	for c, m := range t {
-		output += fmt.Sprintf("%s: %s\n", c.String(), m.String())
+		output += fmt.Sprintf("%s: %s -> ", c.String(), m.String())
 	}
 
 	return output
@@ -113,6 +114,8 @@ func (b Board) IsValidMove(m move.Move) error {
 }
 
 // TODO: look at logic for this - en passant is currently being considered for any piece moving without taking
+// TODO: Check castling functionality - Make tests for this to do so
+// TODO: Implement piece promotion
 func (b *Board) Move(m move.Move) ([]move.Move, error) {
 	movesMade := []move.Move{}
 	movesMade = append(movesMade, m)
