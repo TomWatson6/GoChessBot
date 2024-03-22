@@ -186,6 +186,32 @@ func (b *Board) Move(m move.Move) ([]move.Move, error) {
 	return movesMade, nil
 }
 
+func (b *Board) Promote(m move.Move, pd piece.PieceDetails) error {
+	if p, ok := b.Pieces[m.From]; ok {
+		if p.PieceDetails.GetPieceType() != piece.PieceTypePawn {
+			return fmt.Errorf("the piece being promoted is of the incorrect type")
+		}
+
+		if p.Colour == colour.White && m.To.Rank != 7 {
+			return fmt.Errorf("the piece being promoted is not moving to the 8th rank")
+		}
+
+		if p.Colour == colour.Black && m.To.Rank != 0 {
+			return fmt.Errorf("the piece being promoted is not moving to the 1st rank")
+		}
+
+		b.Pieces[m.To] = &piece.Piece{
+			Colour:       p.Colour,
+			Position:     m.To,
+			PieceDetails: pd,
+		}
+
+		delete(b.Pieces, m.From)
+	}
+
+	return nil
+}
+
 func (b Board) GetValidMoves() []move.Move {
 	var moves []move.Move
 

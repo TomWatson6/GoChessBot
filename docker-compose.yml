@@ -1,11 +1,24 @@
 version: '3'
 services:
-  app:
+  chess-engine:
     image: golang:latest
     container_name: chess-engine
-    working_dir: /app
+    working_dir: /chess_engine
     volumes:
-      - ./ChessEngine:/app
+      - ./ChessEngine:/chess_engine
     ports:
-      - "8080:8080"
+      - "8000:8000"
     command: go run ./cmd
+
+  # chess-ai:
+  #   image: rust:latest
+  #   container_name: chess-ai
+  #   working_dir: /chess_ai
+  #   volumes:
+  #     - ./chess_ai:/chess_ai
+  #   ports:
+  #     - "8080:8080"
+  #   command: bash -c "cargo install --path . && cargo build --release && ./target/release/chess_ai"
+
+  #   # Set the user to root to avoid permission issues
+  #   user: root

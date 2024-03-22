@@ -781,3 +781,83 @@ func TestCanTakeKingWhenInCheck(t *testing.T) {
 		t.Fatalf("failed with error: %s", err)
 	}
 }
+
+func TestPawnPromotion(t *testing.T) {
+	t.Parallel()
+
+	b := payloads.NewEmptyBoard(
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 3, Rank: 6},
+			PieceDetails: piece.NewPawn(),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 3, Rank: 1},
+			PieceDetails: piece.NewPawn(),
+		}),
+	)
+
+	tcs := []struct {
+		name    string
+		move    move.Move
+		details piece.PieceDetails
+		want    *piece.Piece
+	}{
+		{
+			name: "WhitePawnPromotion",
+			move: move.Move{
+				From: move.Position{File: 3, Rank: 6},
+				To:   move.Position{File: 3, Rank: 7},
+			},
+			details: piece.NewQueen(),
+			want: &piece.Piece{
+				Colour:       colour.White,
+				Position:     move.Position{File: 3, Rank: 7},
+				PieceDetails: piece.NewQueen(),
+			},
+		},
+		{
+			name: "BlackPawnPromotion",
+			move: move.Move{
+				From: move.Position{File: 3, Rank: 1},
+				To:   move.Position{File: 3, Rank: 0},
+			},
+			details: piece.NewBishop(),
+			want: &piece.Piece{
+				Colour:       colour.Black,
+				Position:     move.Position{File: 3, Rank: 0},
+				PieceDetails: piece.NewBishop(),
+			},
+		},
+	}
+
+	// Visualisation of the board
+	// 8 ## ## ## ## ## ## ## ##
+	// 7 ## ## ## wP ## ## ## ##
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## ## ## ## ##
+	// 4 ## ## ## ## ## ## ## ##
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 ## ## ## bP ## ## ## ##
+	// 1 ## ## ## ## ## ## ## ##
+	//    A  B  C  D  E  F  G  H
+
+	for _, c := range tcs {
+		c := c // rebind t into this lexical scope
+		t.Run(c.name, func(t *testing.T) {
+			t.Parallel()
+			b.Promote(c.move, c.details)
+
+			if got, ok := b.Pieces[c.move.To]; ok {
+				if !reflect.DeepEqual(got, c.want) {
+					t.Errorf("Promote(%v, %v) => Piece at position %v == %#v, want %#v",
+						c.move, c.details, c.move.To, got, c.want)
+				}
+			} else {
+				t.Errorf("Promote(%v, %v) => Piece at position %v == %#v, want %#v",
+					c.move, c.details, c.move.To, got, c.want)
+			}
+		})
+	}
+}

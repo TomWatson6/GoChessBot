@@ -126,53 +126,9 @@ func main() {
 	http.HandleFunc("/state", state)
 
 	fmt.Println("Use /start {GET}, /move {POST}, /state {GET} to use ChessBot")
-	fmt.Println("Listening on :8080...")
-	err := http.ListenAndServe(":8080", nil)
+	fmt.Println("Listening on :8000...")
+	err := http.ListenAndServe(":8000", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	//c := chess.NewRandom()
-	//
-	//c.Play()
-
-	//c := chess.New(colour.White)
-
-	//for {
-	//	output.PrintBoard(c.Board, c.Turn)
-	//	input, err := getUserInput(c.Turn)
-	//	if err != nil {
-	//		fmt.Println(err)
-	//		continue
-	//	}
-	//
-	//	ms, err := c.TranslateNotation(input)
-	//
-	//	fmt.Printf("%v\n", ms)
-	//
-	//	if err != nil {
-	//		fmt.Println(err)
-	//		continue
-	//	}
-	//
-	//	hasError := false
-	//
-	//	for _, m := range ms {
-	//		if err := c.MakeMove(m); err != nil {
-	//			fmt.Println(err)
-	//			hasError = true
-	//		}
-	//	}
-	//
-	//	if hasError {
-	//		continue
-	//	}
-	//
-	//	if c.Board.IsCheckMate(c.Turn.Opposite()) {
-	//		fmt.Printf("Checkmate! %s wins!\n", c.Turn)
-	//		break
-	//	}
-	//
-	//	c.NextTurn()
-	//}
 }

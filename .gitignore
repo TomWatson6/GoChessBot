@@ -1,7 +1,4 @@
-Makefile
-/.idea/vcs.xml
-/.idea/modules.xml
-/.idea/chessbot.iml
-cover.out
+*cover.out
 *.prof
 *.test.exe
+chess_ai/target
