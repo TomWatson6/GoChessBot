@@ -8,9 +8,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/tomwatson6/chessbot/cmd/api"
+	"github.com/tomwatson6/chessbot/generation"
 	"github.com/tomwatson6/chessbot/internal/chess"
 	"github.com/tomwatson6/chessbot/internal/colour"
 	"github.com/tomwatson6/chessbot/internal/move"
@@ -118,12 +120,69 @@ func state(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getRandomBoard(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	c = chess.New(colour.White)
+	b := generation.NewBoard(10)
+	c.Board = b
+
+	jsonResponse, err := json.Marshal(c)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Failed to marshal json with error: %s\n", err)
+		return
+	}
+
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Failed to write json with error: %s\n", err)
+	}
+}
+
+func power(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	queryParams := r.URL.Query()
+
+	fileStr := queryParams.Get("file")
+	file, err := strconv.Atoi(fileStr)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Failed to marshal json with error: %s\n", err)
+		return
+	}
+
+	rankStr := queryParams.Get("rank")
+	rank, err := strconv.Atoi(rankStr)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Failed to marshal json with error: %s\n", err)
+		return
+	}
+
+	p := c.Board.Power(file, rank)
+	jsonResponse, err := json.Marshal(p)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Failed to marshal json with error: %s\n", err)
+		return
+	}
+
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Failed to write json with error: %s\n", err)
+	}
+}
+
 // TODO: Get Valid Moves endpoint needs to be added for the AI
 
 func main() {
 	http.HandleFunc("/start", startGame)
 	http.HandleFunc("/move", movePiece)
 	http.HandleFunc("/state", state)
+	http.HandleFunc("/randomboard", getRandomBoard)
+	http.HandleFunc("/power", power)
 
 	fmt.Println("Use /start {GET}, /move {POST}, /state {GET} to use ChessBot")
 	fmt.Println("Listening on :8000...")

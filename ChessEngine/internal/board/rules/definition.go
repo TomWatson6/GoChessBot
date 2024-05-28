@@ -125,7 +125,7 @@ func IsNotPinned(w, h int, ps map[move.Position]*piece.Piece, m move.Move) func(
 	}
 }
 
-func IsValidIfPawnCapture(ps map[move.Position]*piece.Piece, whiteMove, blackMove, m move.Move) func() error {
+func IsValidIfPawnCapture(ps map[move.Position]*piece.Piece, whiteMove, blackMove, m *move.Move) func() error {
 	return func() error {
 		dx := m.To.File - m.From.File
 
@@ -140,6 +140,10 @@ func IsValidIfPawnCapture(ps map[move.Position]*piece.Piece, whiteMove, blackMov
 			if p.Colour != p2.Colour {
 				return nil
 			}
+		}
+
+		if whiteMove == nil && blackMove == nil {
+			return ErrorIsNotValidDiagonalPawnCapture
 		}
 
 		// En passant
@@ -280,6 +284,14 @@ func IsValidIfCastlingMove(ps map[move.Position]*piece.Piece, m move.Move) func(
 		return nil
 	}
 }
+
+// func IsNotMovingIntoDanger(ps map[move.Position]*piece.Piece, m move.Move) func() error {
+// 	return func() error {
+// 		for _, p := range ps {
+// 			if Is
+// 		}
+// 	}
+// }
 
 func getKing(ps map[move.Position]*piece.Piece, c colour.Colour) (*piece.Piece, error) {
 	for _, k := range ps {

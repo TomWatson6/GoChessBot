@@ -19,6 +19,8 @@ var (
 	ErrorIsDiagonalLine = errors.New("the move is a diagonal line, but should not be")
 	// ErrorIsNotDiagonalLine is thrown when the line is diagonal, and should not be
 	ErrorIsNotDiagonalLine = errors.New("the move is not a diagonal line, but should be")
+	// ErrorInvalidCastlingMove is thrown when the castling move is not valid
+	ErrorInvalidCastlingMove = errors.New("the castling move is not valid")
 )
 
 type Assertion func() error

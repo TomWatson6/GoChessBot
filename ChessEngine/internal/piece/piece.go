@@ -40,7 +40,7 @@ func (p Piece) String() string {
 		t = "Pawn"
 	}
 
-	output := fmt.Sprintf("%s: %s %s", p.Position.String(), p.Colour.String(), t)
+	output := fmt.Sprintf("%s %s", p.Colour.String(), t)
 
 	return output
 }

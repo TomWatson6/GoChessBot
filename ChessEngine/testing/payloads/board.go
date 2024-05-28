@@ -23,6 +23,9 @@ func NewStandardBoard(opts ...BoardOption) board.Board {
 func NewEmptyBoard(opts ...BoardOption) board.Board {
 	var b board.Board
 
+	b.Width = 8
+	b.Height = 8
+
 	for r := 0; r < 8; r++ {
 		for f := 0; f < 8; f++ {
 			b.Squares = append(b.Squares, move.Position{File: f, Rank: r})

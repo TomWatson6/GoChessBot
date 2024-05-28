@@ -52,11 +52,7 @@ func DoesNotExceedMaxRange(r int, m move.Move) func() error {
 
 		// If diagonal move
 		if xf == yf {
-			if rf >= xf {
-				return nil
-			}
-
-			if rf >= yf {
+			if rf >= xf || rf >= yf {
 				return nil
 			}
 
@@ -64,17 +60,13 @@ func DoesNotExceedMaxRange(r int, m move.Move) func() error {
 		}
 
 		// If vertical move
-		if xf == 0 {
-			if rf >= yf {
-				return nil
-			}
+		if xf == 0 && rf >= yf {
+			return nil
 		}
 
 		// If horizontal move
-		if yf == 0 {
-			if rf >= xf {
-				return nil
-			}
+		if yf == 0 && rf >= xf {
+			return nil
 		}
 
 		return ErrorExceedsMaxRange

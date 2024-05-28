@@ -37,6 +37,15 @@ func (b *Board) MarshalJSON() ([]byte, error) {
 		history[i] = turn.String()
 	}
 
+	power := make(map[string]string)
+	for _, s := range b.Squares {
+		if p, ok := b.Pieces[s]; ok {
+			pow := b.Power(s.File, s.Rank)
+
+			power[p.Position.String()] = fmt.Sprintf("%+v", pow)
+		}
+	}
+
 	// Create an anonymous struct with the same fields as the original Board struct,
 	// but with the types that can be marshalled directly to JSON.
 	auxBoard := struct {
@@ -44,18 +53,20 @@ func (b *Board) MarshalJSON() ([]byte, error) {
 		Height  int               `json:"height"`
 		Pieces  map[string]string `json:"pieces"`
 		History []string          `json:"history"`
+		Power   map[string]string `json:"power"`
 	}{
 		Width:   b.Width,
 		Height:  b.Height,
 		Pieces:  pieces,
 		History: history,
+		Power:   power,
 	}
 
 	// Marshal the anonymous struct to JSON.
 	return json.Marshal(auxBoard)
 }
 
-type Turn map[colour.Colour]move.Move
+type Turn map[colour.Colour]*move.Move
 
 func (t Turn) String() string {
 	output := ""
@@ -176,7 +187,7 @@ func (b *Board) Move(m move.Move) ([]move.Move, error) {
 
 	delete(b.Pieces, toDelete)
 
-	b.History[len(b.History)-1][p.Colour] = m
+	b.History[len(b.History)-1][p.Colour] = &m
 
 	// Create new entry if black's move is successful
 	if p.Colour == colour.Black {

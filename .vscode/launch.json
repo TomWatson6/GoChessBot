@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch ChessEngine",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/ChessEngine/cmd",
+            "cwd": "${workspaceFolder}/ChessEngine/cmd",
+            "env": {},
+            "args": []
+        }
+    ]
+}

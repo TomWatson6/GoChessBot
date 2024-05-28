@@ -70,15 +70,20 @@ func (b Board) validatePawnMove(p piece.Piece, m move.Move) error {
 		return nil
 	}
 
-	lastMove := b.History[len(b.History)-1]
+	var whiteMove *move.Move
+	var blackMove *move.Move
+	var lastMove Turn
 
-	whiteMove := lastMove[colour.White]
-	blackMove := lastMove[colour.Black]
+	if len(b.History) > 0 {
+		lastMove = b.History[len(b.History)-1]
+		whiteMove = lastMove[colour.White]
+		blackMove = lastMove[colour.Black]
+	}
 
 	// Handle pawn capture
 	validBoardMove := rules.Assert(
 		rules.IsLineClear(b.Pieces, m),
-		rules.IsValidIfPawnCapture(b.Pieces, whiteMove, blackMove, m),
+		rules.IsValidIfPawnCapture(b.Pieces, whiteMove, blackMove, &m),
 	)
 
 	if err := validBoardMove(); err != nil {
@@ -150,7 +155,10 @@ func (b Board) validateKingMove(p piece.Piece, m move.Move) error {
 		return ErrorInvalidKingMove
 	}
 
-	validBoardMove := rules.IsLineClear(b.Pieces, m)
+	validBoardMove := rules.Assert(
+		rules.IsLineClear(b.Pieces, m),
+		// rules.IsNotMovingIntoDanger(b.Pieces, m),
+	)
 
 	if err := validBoardMove(); err != nil {
 		return err

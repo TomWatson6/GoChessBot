@@ -613,7 +613,7 @@ func TestValidBlackQueenSideCastlingMove(t *testing.T) {
 func TestIsValidMove(t *testing.T) {
 	history := []board.Turn{
 		{
-			colour.Black: move.Move{
+			colour.Black: &move.Move{
 				From: move.Position{File: 7, Rank: 6},
 				To:   move.Position{File: 7, Rank: 4},
 			},
@@ -647,6 +647,13 @@ func TestIsValidMove(t *testing.T) {
 				piece.PawnWithHasMoved(true),
 			),
 		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:   colour.Black,
+			Position: move.Position{File: 1, Rank: 4},
+			PieceDetails: piece.NewPawn(
+				piece.PawnWithHasMoved(true),
+			),
+		}),
 		payloads.BoardWithDeletedPiece(move.Position{
 			File: 6,
 			Rank: 1,
@@ -666,7 +673,7 @@ func TestIsValidMove(t *testing.T) {
 	// 8 bR bN bB bQ bK bB bN bR
 	// 7 bP bP bP bP bP ## bP ##
 	// 6 ## ## ## ## ## ## ## ##
-	// 5 ## ## ## ## ## bP wP bP
+	// 5 ## wP ## ## ## bP wP bP
 	// 4 ## ## ## ## ## ## ## ##
 	// 3 wQ ## ## ## ## ## ## ##
 	// 2 wP wP wP wP wP wP ## wP
@@ -689,6 +696,7 @@ func TestIsValidMove(t *testing.T) {
 		{move.Move{From: move.Position{File: 6, Rank: 4}, To: move.Position{File: 5, Rank: 5}}, false},
 		{move.Move{From: move.Position{File: 3, Rank: 1}, To: move.Position{File: 3, Rank: 4}}, false},
 		{move.Move{From: move.Position{File: 0, Rank: 1}, To: move.Position{File: 0, Rank: 2}}, false},
+		{move.Move{From: move.Position{File: 3, Rank: 6}, To: move.Position{File: 1, Rank: 4}}, false},
 	}
 
 	for _, c := range cases {
@@ -735,7 +743,7 @@ func TestCanTakeKingWhenInCheck(t *testing.T) {
 
 	history := []board.Turn{
 		{
-			colour.White: move.Move{
+			colour.White: &move.Move{
 				From: move.Position{File: 6, Rank: 3},
 				To:   move.Position{File: 7, Rank: 4},
 			},

@@ -54,6 +54,7 @@ func (k King) IsValidMove(m move.Move) error {
 		rules.IsValidLine(m),
 		rules.IsLargerThanOrEqualToMinRange(k.minRange, m),
 		rules.DoesNotExceedMaxRange(max, m),
+		// rules.IsValidIfCastling(m),
 	)
 
 	if err := rs(); err != nil {

@@ -27,6 +27,8 @@ var (
 	ErrorResultsInCheck = errors.New("the move specified results in having the friendly king in check")
 	// ErrorInvalidCastlingMove is thrown when the move specified is not a valid castling move
 	ErrorInvalidCastlingMove = errors.New("the move specified is not a valid castling move")
+	// ErrorIsMovingIntoDanger is thrown when a king with the move specified moves it into a position of danger, which is illegal in chess
+	// ErrorIsMovingIntoDanger = errors.New("the move specified is a move that moves the king into a square where it is under threat, and so it is moving into check")
 )
 
 type Assertion func() error
