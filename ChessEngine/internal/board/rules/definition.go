@@ -220,7 +220,7 @@ func IsNotInCheck(ps map[move.Position]*piece.Piece, movingPiece *piece.Piece, m
 	}
 }
 
-func IsValidIfCastlingMove(ps map[move.Position]*piece.Piece, m move.Move) func() error {
+func IsValidIfCastlingMove(width, height int, ps map[move.Position]*piece.Piece, m move.Move) func() error {
 	return func() error {
 		dx := m.To.File - m.From.File
 		dy := m.To.Rank - m.From.Rank
@@ -246,11 +246,14 @@ func IsValidIfCastlingMove(ps map[move.Position]*piece.Piece, m move.Move) func(
 		x := m.From.File + sx
 		y := m.From.Rank + sy
 
-		for x != m.To.File || y != m.To.Rank {
+		rookFound := false
+
+		for x >= 0 && x < width && y >= 0 && y < height {
 			line = append(line, move.Position{File: x, Rank: y})
 
 			if p, ok := ps[move.Position{File: x, Rank: y}]; ok {
 				if p.GetPieceType() == piece.PieceTypeRook && !p.HasMoved() {
+					rookFound = true
 					break
 				} else {
 					return ErrorInvalidCastlingMove
@@ -261,23 +264,18 @@ func IsValidIfCastlingMove(ps map[move.Position]*piece.Piece, m move.Move) func(
 			y += sy
 		}
 
+		if !rookFound {
+			return ErrorInvalidCastlingMove
+		}
+
 		for _, pos := range line[:len(line)-1] {
-			for _, p := range ps {
-				if p.Colour == k.Colour {
-					continue
-				}
+			if isThreatened(ps, k, pos) {
+				return ErrorInvalidCastlingMove
+			}
 
-				attack := move.Move{From: p.Position, To: pos}
-				if err := p.IsValidMove(attack); err == nil {
-					if err := IsLineClear(ps, attack); err == nil {
-						return ErrorInvalidCastlingMove
-					}
-				}
-
-				// Only need to check if king is castling through check, not the rook
-				if pos == m.To {
-					break
-				}
+			// Only need to check if king is castling through check, not the rook
+			if pos == m.To {
+				break
 			}
 		}
 
@@ -285,13 +283,38 @@ func IsValidIfCastlingMove(ps map[move.Position]*piece.Piece, m move.Move) func(
 	}
 }
 
-// func IsNotMovingIntoDanger(ps map[move.Position]*piece.Piece, m move.Move) func() error {
-// 	return func() error {
-// 		for _, p := range ps {
-// 			if Is
-// 		}
-// 	}
-// }
+func IsNotMovingIntoDanger(ps map[move.Position]*piece.Piece, m move.Move) func() error {
+	return func() error {
+		p := ps[m.From]
+
+		if isThreatened(ps, p, m.To) {
+			return ErrorIsMovingIntoDanger
+		}
+
+		return nil
+	}
+}
+
+func isThreatened(ps map[move.Position]*piece.Piece, p *piece.Piece, pos move.Position) bool {
+	for _, pi := range ps {
+		if pi.Colour == p.Colour {
+			continue
+		}
+
+		attack := move.Move{From: pi.Position, To: pos}
+		if err := p.IsValidMove(attack); err == nil {
+			if p.GetPieceType() == piece.PieceTypeKnight {
+				return true
+			}
+
+			if err := IsLineClear(ps, attack)(); err == nil {
+				return true
+			}
+		}
+	}
+
+	return false
+}
 
 func getKing(ps map[move.Position]*piece.Piece, c colour.Colour) (*piece.Piece, error) {
 	for _, k := range ps {

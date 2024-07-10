@@ -317,7 +317,7 @@ func (b Board) IsCheckMate(c colour.Colour) (bool, error) {
 			return false, nil
 		}
 
-		attackLine := b.getLine(p.Position, k.Position, true, false)
+		attackLine := b.GetLine(p.Position, k.Position, true, false)
 
 		if possible := b.checkIfPiecesCanMoveToLine(c, attackLine); possible {
 			return false, nil

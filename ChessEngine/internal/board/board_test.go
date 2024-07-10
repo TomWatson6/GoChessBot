@@ -654,6 +654,11 @@ func TestIsValidMove(t *testing.T) {
 				piece.PawnWithHasMoved(true),
 			),
 		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 5, Rank: 3},
+			PieceDetails: piece.NewBishop(),
+		}),
 		payloads.BoardWithDeletedPiece(move.Position{
 			File: 6,
 			Rank: 1,
@@ -666,6 +671,10 @@ func TestIsValidMove(t *testing.T) {
 			File: 5,
 			Rank: 6,
 		}),
+		payloads.BoardWithDeletedPiece(move.Position{
+			File: 3,
+			Rank: 1,
+		}),
 		payloads.BoardWithHistory(history),
 	)
 
@@ -674,9 +683,9 @@ func TestIsValidMove(t *testing.T) {
 	// 7 bP bP bP bP bP ## bP ##
 	// 6 ## ## ## ## ## ## ## ##
 	// 5 ## wP ## ## ## bP wP bP
-	// 4 ## ## ## ## ## ## ## ##
+	// 4 ## ## ## ## ## bB ## ##
 	// 3 wQ ## ## ## ## ## ## ##
-	// 2 wP wP wP wP wP wP ## wP
+	// 2 wP wP wP ## wP wP ## wP
 	// 1 wR wN wB wQ wK wB wN wR
 	//    A  B  C  D  E  F  G  H
 
@@ -697,6 +706,7 @@ func TestIsValidMove(t *testing.T) {
 		{move.Move{From: move.Position{File: 3, Rank: 1}, To: move.Position{File: 3, Rank: 4}}, false},
 		{move.Move{From: move.Position{File: 0, Rank: 1}, To: move.Position{File: 0, Rank: 2}}, false},
 		{move.Move{From: move.Position{File: 3, Rank: 6}, To: move.Position{File: 1, Rank: 4}}, false},
+		{move.Move{From: move.Position{File: 4, Rank: 0}, To: move.Position{File: 3, Rank: 1}}, false},
 	}
 
 	for _, c := range cases {
@@ -738,6 +748,7 @@ func TestPawnHasMoved(t *testing.T) {
 	}
 }
 
+// TODO: Look at what the hell this does...
 func TestCanTakeKingWhenInCheck(t *testing.T) {
 	t.Parallel()
 

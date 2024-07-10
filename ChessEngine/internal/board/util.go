@@ -9,7 +9,7 @@ import (
 	"github.com/tomwatson6/chessbot/internal/piece"
 )
 
-func (b Board) getLine(start, end move.Position, includingFirst, includingLast bool) []move.Position {
+func (b Board) GetLine(start, end move.Position, includingFirst, includingLast bool) []move.Position {
 	// If x and y not equal to 0 (not horiz or vert), then if abs(x) != abs(y) (also not diagonal), return
 	// Only side case is Knight, and you would never check a line for a Knight
 	if end.File-start.File != 0 && end.Rank-start.Rank != 0 {
@@ -79,7 +79,7 @@ func (b Board) getLine(start, end move.Position, includingFirst, includingLast b
 	}
 
 	last := len(line)
-	if includingLast {
+	if !includingLast {
 		last = len(line) - 1
 	}
 

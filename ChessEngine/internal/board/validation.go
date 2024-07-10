@@ -41,6 +41,7 @@ func (b Board) ValidatePieceMove(p piece.Piece, m move.Move) error {
 	case piece.Queen:
 		return b.validateQueenMove(p, m)
 	case piece.King:
+		// Move this logic to the validKingMove func so that we can refer to board for checking valid moves (threatened squares)
 		if m.Distance() == 1 {
 			return b.validateKingMove(p, m)
 		}
@@ -155,9 +156,14 @@ func (b Board) validateKingMove(p piece.Piece, m move.Move) error {
 		return ErrorInvalidKingMove
 	}
 
+	// Firstly do all things as if it weren't a castling move
+	// line := b.GetLine(m)
+
+	// Check for castling move, and do the necessary checks if needed, externalise this into a private func
+
 	validBoardMove := rules.Assert(
 		rules.IsLineClear(b.Pieces, m),
-		// rules.IsNotMovingIntoDanger(b.Pieces, m),
+		rules.IsNotMovingIntoDanger(b.Pieces, m), // This needs to change to reference the board for b.IsValidMove(...) method
 	)
 
 	if err := validBoardMove(); err != nil {
@@ -172,7 +178,10 @@ func (b Board) validateKingCastlingMove(p piece.Piece, m move.Move) error {
 		return ErrorInvalidKingMove
 	}
 
-	validBoardMove := rules.IsValidIfCastlingMove(b.Pieces, m)
+	validBoardMove := rules.Assert(
+		rules.IsValidIfCastlingMove(b.Width, b.Height, b.Pieces, m), // This needs to change to reference the board for b.IsValidMove(...) method
+		rules.IsNotMovingIntoDanger(b.Pieces, m),                    // This needs to change to reference the board for b.IsValidMove(...) method
+	)
 
 	if err := validBoardMove(); err != nil {
 		return err
@@ -180,3 +189,30 @@ func (b Board) validateKingCastlingMove(p piece.Piece, m move.Move) error {
 
 	return nil
 }
+
+// func (b Board) GetLine(m move.Move) []move.Position {
+// 	df := m.To.File - m.From.File
+// 	if df != 0 {
+// 		df /= df
+// 	}
+// 	dr := m.To.Rank - m.From.Rank
+// 	if dr != 0 {
+// 		dr /= dr
+// 	}
+
+// 	f := m.From.File + df
+// 	r := m.From.Rank + dr
+
+// 	line := []move.Position{}
+
+// 	for f != m.To.File || r != m.To.Rank {
+// 		line = append(line, move.Position{File: f, Rank: r})
+
+// 		f += df
+// 		r += dr
+// 	}
+
+// 	line = append(line, move.Position{File: f, Rank: r})
+
+// 	return line
+// }

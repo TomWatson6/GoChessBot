@@ -12,9 +12,13 @@ Extra:
 - Externalise the config by adding it to a terraform file? (Learn terraform)
 
 Castling Notes:
-    - if king is attempting to move 2 spaces, getSteps for king direction, and build up line in direction until a rook is hit
-    - if no rook is hit then invalid move, there shouldn't be anything obstructing the line between the king and rook
-    - once the line is retrieved, iterate over each square between king and destination square (includingLast) and check if any of the opponents pieces can move to that square
-    - this will require recursive calls to b.IsValidMove() but with different moves that shouldn't ever be cyclic
+    - If king is attempting to move 2 spaces, getSteps for king direction, and build up line in direction until a rook is hit
+    - If no rook is hit then invalid move, there shouldn't be anything obstructing the line between the king and rook
+    - Once the line is retrieved, iterate over each square between king and destination square (includingLast) and check if any of the opponents pieces can move to that square
+    - This will require recursive calls to b.IsValidMove() but with different moves that shouldn't ever be cyclic
 
+Bugs:
+    - King moves aren't accurate, it can still sometimes move into danger
+    - Valid pawn moves need to be distinguished as attacking (in the case of a diagonal move), and moving (in the case of a forward move) - king things moves are dangerous for it
+    - Pawns (black only??) can move diagonally and attack another (pawn only?) that is 2x2 squares away
 

@@ -2,6 +2,7 @@ package chess
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -34,9 +35,26 @@ func New(col colour.Colour) Chess {
 }
 
 func (c Chess) MarshalJSON() ([]byte, error) {
-	// output := fmt.Sprintf("Current Turn: %s\n", c.Turn.String())
+	b, err := c.Board.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
 
-	return c.Board.MarshalJSON()
+	bMap := map[string]any{}
+	err = json.Unmarshal(b, &bMap)
+	if err != nil {
+		return nil, err
+	}
+
+	return json.Marshal(
+		struct {
+			Board map[string]any `json:"board"`
+			Turn  string         `json:"turn"`
+		}{
+			bMap,
+			c.Turn.String(),
+		},
+	)
 }
 
 // Play starts a game for the colour specified, and cycles turns until a winner is determined - returns winning colour

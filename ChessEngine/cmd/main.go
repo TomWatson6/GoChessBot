@@ -1,15 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
-	"strings"
 
 	"github.com/tomwatson6/chessbot/cmd/api"
 	"github.com/tomwatson6/chessbot/generation"
@@ -20,28 +17,11 @@ import (
 
 var c chess.Chess
 
-func getUserInput(c colour.Colour) (string, error) {
-	fmt.Printf("%s's move: ", c)
-
-	reader := bufio.NewReader(os.Stdin)
-	text, err := reader.ReadString('\n')
-
-	if err != nil {
-		return "", err
-	}
-
-	// convert CRLF to LF
-	text = strings.Replace(text, "\n", "", -1)
-	text = strings.Replace(text, "\r", "", -1)
-
-	return text, nil
-}
-
 // Known bugs:
 // - pawn promotion to queen
 
 func getInput(r *http.Request, obj any) error {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return err
 	}
@@ -67,6 +47,8 @@ func startGame(w http.ResponseWriter, r *http.Request) {
 	getInput(r, &startGameInput)
 
 	c = chess.New(startGameInput.Colour)
+
+	state(w, r)
 }
 
 func movePiece(w http.ResponseWriter, r *http.Request) {
@@ -84,8 +66,6 @@ func movePiece(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		resp.Err = fmt.Sprintf("%s", err)
-		// fmt.Fprint(w, resp)
-		// return
 	}
 
 	resp.Moves = moves
@@ -120,7 +100,7 @@ func state(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getRandomBoard(w http.ResponseWriter, r *http.Request) {
+func startRandom(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	c = chess.New(colour.White)
 	b := generation.NewBoard(10)
@@ -175,16 +155,13 @@ func power(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// TODO: Get Valid Moves endpoint needs to be added for the AI
-
 func main() {
 	http.HandleFunc("/start", startGame)
+	http.HandleFunc("/startRandom", startRandom)
 	http.HandleFunc("/move", movePiece)
 	http.HandleFunc("/state", state)
-	http.HandleFunc("/randomboard", getRandomBoard)
 	http.HandleFunc("/power", power)
 
-	fmt.Println("Use /start {GET}, /move {POST}, /state {GET} to use ChessBot")
 	fmt.Println("Listening on :8000...")
 	err := http.ListenAndServe(":8000", nil)
 	if err != nil {
