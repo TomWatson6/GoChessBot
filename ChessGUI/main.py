@@ -2,46 +2,24 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.image as mpimg
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from colour import Colour
+from api import *
 
-# Function to plot chessboard with pieces
-def plot_chessboard(pieces):
-    # Create a grid
-    board = np.zeros((8, 8))
-    
-    # Color the squares
-    for row in range(8):
-        for col in range(8):
-            if (row + col) % 2 == 0:
-                board[row, col] = 1
-    
-    # Create the plot
-    plt.figure(figsize=(8, 8))
-    plt.imshow(board, cmap='coolwarm', extent=[0, 8, 0, 8])
-    
-    # Add the grid lines
-    plt.xticks(np.arange(8) + 0.5, ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'])
-    plt.yticks(np.arange(8) + 0.5, ['1', '2', '3', '4', '5', '6', '7', '8'])
-    plt.grid(False)
-    
-    # Invert y-axis to match chessboard coordinates
-    plt.gca().invert_yaxis()
-    
-    for pos, piece in pieces.items():
-        img = mpimg.imread(f"images/{piece}.png")
-        imagebox = OffsetImage(img, zoom=0.8)  # Adjust the zoom to fit the piece correctly
-        ab = AnnotationBbox(imagebox, (pos[1]+0.5, pos[0]+0.5), frameon=False)
-        plt.gca().add_artist(ab)
-    
-    # Show the plot
-    plt.show()
+def resolve_position(pos, col):
+    if col == Colour.Black:
+        pos = (7 - pos[0], pos[1])
+    else:
+        pos = (pos[0], 7 - pos[1])
 
-def test(pieces, power):
+    return pos
+
+def plot_chessboard(pieces, power, col):
     # Create a grid
     board = np.zeros((8, 8))
 
     # Color the squares with green and buff colors
-    for row in range(board_data.height):
-        for col in range(board_data.width):
+    for row in range(8):
+        for col in range(8):
             if (row + col) % 2 == 0:
                 board[row, col] = 1
 
@@ -57,7 +35,12 @@ def test(pieces, power):
 
     ax.set_xticklabels(files)
     ax.set_yticks(np.arange(8) + 0.5)
-    ax.set_yticklabels(['1', '2', '3', '4', '5', '6', '7', '8'])
+
+    ranks = ['1', '2', '3', '4', '5', '6', '7', '8']
+    if col == Colour.White:
+        ranks = ranks[::-1]
+
+    ax.set_yticklabels(ranks)
     ax.grid(False)
 
     # Invert y-axis to match chessboard coordinates
@@ -65,6 +48,7 @@ def test(pieces, power):
 
     # Add the pieces to the board
     for position, piece in pieces.items():
+        position = resolve_position(position, col)
         img = mpimg.imread(f'images/{piece}.png')
         imagebox = OffsetImage(img, zoom=0.8)  # Adjust the zoom to fit the piece correctly
         ab = AnnotationBbox(imagebox, (position[1]+0.5, position[0]+0.5), frameon=False)
@@ -82,7 +66,7 @@ def test(pieces, power):
             rect.remove()
         if event.inaxes is not None:
             x, y = int(event.xdata), int(event.ydata)
-            clicked_pos = (y, x)
+            clicked_pos = resolve_position((y, x), col)
             if clicked_pos in pieces and clicked_pos in power:
                 affected_positions = power[clicked_pos]
                 # Highlight the affected positions
@@ -99,5 +83,4 @@ def test(pieces, power):
 
 b = get_random_board()
 print(b.pieces)
-# plot_chessboard(b.pieces)
-test(b.pieces, b.power)
+plot_chessboard(b.pieces, b.power, Colour.White)
