@@ -302,8 +302,8 @@ func isThreatened(ps map[move.Position]*piece.Piece, p *piece.Piece, pos move.Po
 		}
 
 		attack := move.Move{From: pi.Position, To: pos}
-		if err := p.IsValidMove(attack); err == nil {
-			if p.GetPieceType() == piece.PieceTypeKnight {
+		if err := pi.IsValidMove(attack); err == nil {
+			if pi.GetPieceType() == piece.PieceTypeKnight {
 				return true
 			}
 
