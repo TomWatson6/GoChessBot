@@ -147,14 +147,20 @@ func (b *Board) Move(m move.Move) ([]move.Move, error) {
 		)
 
 		if _, ok := b.Pieces[m.To]; ok {
+			// Normal capture
 			b.Pieces[m.To] = p
 			delete(b.Pieces, m.From)
 		} else {
-			// En passant
+			// Could be forward move or en passant
 			dx := m.To.File - m.From.File
 
 			b.Pieces[m.To] = p
-			toDelete = move.Position{File: m.From.File + dx, Rank: m.From.Rank}
+			delete(b.Pieces, m.From)
+
+			// If diagonal move, it's en passant - delete the captured pawn
+			if dx != 0 {
+				toDelete = move.Position{File: m.From.File + dx, Rank: m.From.Rank}
+			}
 		}
 	} else if p.GetPieceType() == piece.PieceTypeKing {
 		p.PieceDetails = piece.NewKing(

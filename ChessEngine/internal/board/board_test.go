@@ -1058,3 +1058,79 @@ func TestPawnForwardMoveDoesNotTriggerEnPassantLogic(t *testing.T) {
 		t.Fatalf("Pawn should not be at old position (3,3) after move")
 	}
 }
+
+func TestEnPassantCapture(t *testing.T) {
+	// Test a proper en passant capture
+	history := []board.Turn{
+		{
+			colour.Black: &move.Move{
+				From: move.Position{File: 4, Rank: 6},
+				To:   move.Position{File: 4, Rank: 4},
+			},
+		},
+	}
+
+	b := payloads.NewEmptyBoard(
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 3, Rank: 4},
+			PieceDetails: piece.NewPawn(piece.PawnWithHasMoved(true)),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 4, Rank: 4},
+			PieceDetails: piece.NewPawn(piece.PawnWithHasMoved(true)),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 0, Rank: 0},
+			PieceDetails: piece.NewKing(),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 7, Rank: 7},
+			PieceDetails: piece.NewKing(),
+		}),
+		payloads.BoardWithHistory(history),
+	)
+
+	// Visualisation of the board
+	// 8 ## ## ## ## ## ## ## bK
+	// 7 ## ## ## ## ## ## ## ##
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## wP bP ## ## ##
+	// 4 ## ## ## ## ## ## ## ##
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 ## ## ## ## ## ## ## ##
+	// 1 wK ## ## ## ## ## ## ##
+	//    A  B  C  D  E  F  G  H
+
+	// White pawn at (3,4) captures black pawn at (4,4) via en passant
+	// The white pawn moves to (4,5) and the black pawn at (4,4) is removed
+	m := move.Move{
+		From: move.Position{File: 3, Rank: 4},
+		To:   move.Position{File: 4, Rank: 5},
+	}
+
+	_, err := b.Move(m)
+	if err != nil {
+		t.Fatalf("En passant capture should be valid, but got error: %v", err)
+	}
+
+	// Check that the white pawn is at the new position (4,5)
+	if p, ok := b.Pieces[move.Position{File: 4, Rank: 5}]; !ok {
+		t.Fatalf("White pawn should be at position (4,5) after en passant")
+	} else if p.Colour != colour.White || p.GetPieceType() != piece.PieceTypePawn {
+		t.Fatalf("Piece at (4,5) should be a white pawn, got: %v", p)
+	}
+
+	// Check that the black pawn at (4,4) was captured
+	if _, ok := b.Pieces[move.Position{File: 4, Rank: 4}]; ok {
+		t.Fatalf("Black pawn at (4,4) should have been captured by en passant")
+	}
+
+	// Check that the white pawn is not at the old position
+	if _, ok := b.Pieces[m.From]; ok {
+		t.Fatalf("White pawn should not be at old position (3,4) after move")
+	}
+}
