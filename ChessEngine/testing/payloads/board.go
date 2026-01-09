@@ -33,6 +33,7 @@ func NewEmptyBoard(opts ...BoardOption) board.Board {
 	}
 
 	b.Pieces = make(map[move.Position]*piece.Piece)
+	b.History = append(b.History, make(board.Turn))
 
 	for _, opt := range opts {
 		if err := opt(&b); err != nil {

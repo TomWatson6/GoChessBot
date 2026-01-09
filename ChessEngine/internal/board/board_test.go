@@ -1003,3 +1003,58 @@ func TestKingCannotMoveIntoKnightThreat(t *testing.T) {
 		t.Fatalf("King should not be able to move to (5,5) as it is attacked by the black knight at (4,7), but move was allowed")
 	}
 }
+
+func TestPawnForwardMoveDoesNotTriggerEnPassantLogic(t *testing.T) {
+	// Test that a normal pawn forward move doesn't incorrectly trigger en passant logic
+	b := payloads.NewEmptyBoard(
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 3, Rank: 3},
+			PieceDetails: piece.NewPawn(piece.PawnWithHasMoved(true)),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 4, Rank: 0},
+			PieceDetails: piece.NewKing(),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 4, Rank: 7},
+			PieceDetails: piece.NewKing(),
+		}),
+	)
+
+	// Visualisation of the board
+	// 8 ## ## ## ## bK ## ## ##
+	// 7 ## ## ## ## ## ## ## ##
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## ## ## ## ##
+	// 4 ## ## ## wP ## ## ## ##
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 ## ## ## ## ## ## ## ##
+	// 1 ## ## ## ## wK ## ## ##
+	//    A  B  C  D  E  F  G  H
+
+	// Pawn at (3,3) moving forward to (3,4)
+	m := move.Move{
+		From: move.Position{File: 3, Rank: 3},
+		To:   move.Position{File: 3, Rank: 4},
+	}
+
+	_, err := b.Move(m)
+	if err != nil {
+		t.Fatalf("Normal pawn forward move should be valid, but got error: %v", err)
+	}
+
+	// Check that the pawn is at the new position
+	if p, ok := b.Pieces[m.To]; !ok {
+		t.Fatalf("Pawn should be at position (3,4) after move")
+	} else if p.Colour != colour.White || p.GetPieceType() != piece.PieceTypePawn {
+		t.Fatalf("Piece at (3,4) should be a white pawn, got: %v", p)
+	}
+
+	// Check that the pawn is not at the old position
+	if _, ok := b.Pieces[m.From]; ok {
+		t.Fatalf("Pawn should not be at old position (3,3) after move")
+	}
+}
