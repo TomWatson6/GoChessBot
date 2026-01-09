@@ -1134,3 +1134,59 @@ func TestEnPassantCapture(t *testing.T) {
 		t.Fatalf("White pawn should not be at old position (3,4) after move")
 	}
 }
+
+func TestPawnMoveDoesNotDeletePieceAtOrigin(t *testing.T) {
+	// Test that moving a pawn doesn't accidentally delete a piece at (0,0)
+	// This was a bug where toDelete was initialized to zero value
+	b := payloads.NewEmptyBoard(
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 0, Rank: 0},
+			PieceDetails: piece.NewRook(),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 3, Rank: 3},
+			PieceDetails: piece.NewPawn(piece.PawnWithHasMoved(true)),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 4, Rank: 0},
+			PieceDetails: piece.NewKing(),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 4, Rank: 7},
+			PieceDetails: piece.NewKing(),
+		}),
+	)
+
+	// Visualisation of the board
+	// 8 ## ## ## ## bK ## ## ##
+	// 7 ## ## ## ## ## ## ## ##
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## ## ## ## ##
+	// 4 ## ## ## wP ## ## ## ##
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 ## ## ## ## ## ## ## ##
+	// 1 wR ## ## ## wK ## ## ##
+	//    A  B  C  D  E  F  G  H
+
+	// Move pawn from (3,3) to (3,4)
+	m := move.Move{
+		From: move.Position{File: 3, Rank: 3},
+		To:   move.Position{File: 3, Rank: 4},
+	}
+
+	_, err := b.Move(m)
+	if err != nil {
+		t.Fatalf("Pawn forward move should be valid, but got error: %v", err)
+	}
+
+	// Check that the rook at (0,0) is still there
+	if p, ok := b.Pieces[move.Position{File: 0, Rank: 0}]; !ok {
+		t.Fatalf("Rook at (0,0) should not have been deleted")
+	} else if p.GetPieceType() != piece.PieceTypeRook {
+		t.Fatalf("Piece at (0,0) should be a rook, got: %v", p)
+	}
+}

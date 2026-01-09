@@ -135,7 +135,7 @@ func (b *Board) Move(m move.Move) ([]move.Move, error) {
 		return []move.Move{}, err
 	}
 
-	var toDelete move.Position
+	var toDelete *move.Position
 
 	p := b.Pieces[m.From]
 	p.Position = m.To
@@ -159,7 +159,8 @@ func (b *Board) Move(m move.Move) ([]move.Move, error) {
 
 			// If diagonal move, it's en passant - delete the captured pawn
 			if dx != 0 {
-				toDelete = move.Position{File: m.From.File + dx, Rank: m.From.Rank}
+				capturedPos := move.Position{File: m.From.File + dx, Rank: m.From.Rank}
+				toDelete = &capturedPos
 			}
 		}
 	} else if p.GetPieceType() == piece.PieceTypeKing {
@@ -185,13 +186,15 @@ func (b *Board) Move(m move.Move) ([]move.Move, error) {
 		}
 
 		b.Pieces[m.To] = p
-		toDelete = m.From
+		toDelete = &m.From
 	} else {
 		b.Pieces[m.To] = p
-		toDelete = m.From
+		toDelete = &m.From
 	}
 
-	delete(b.Pieces, toDelete)
+	if toDelete != nil {
+		delete(b.Pieces, *toDelete)
+	}
 
 	b.History[len(b.History)-1][p.Colour] = &m
 
