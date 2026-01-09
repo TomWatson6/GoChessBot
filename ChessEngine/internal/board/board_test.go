@@ -880,3 +880,313 @@ func TestPawnPromotion(t *testing.T) {
 		})
 	}
 }
+
+func TestKingCannotMoveIntoThreat(t *testing.T) {
+	// This test specifically checks the isThreatened function bug
+	// A white king should not be able to move into a square that is attacked by a black rook
+	b := payloads.NewEmptyBoard(
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 4, Rank: 4},
+			PieceDetails: piece.NewKing(),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 5, Rank: 7},
+			PieceDetails: piece.NewRook(),
+		}),
+	)
+
+	// Visualisation of the board
+	// 8 ## ## ## ## ## bR ## ##
+	// 7 ## ## ## ## ## ## ## ##
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## wK ## ## ##
+	// 4 ## ## ## ## ## ## ## ##
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 ## ## ## ## ## ## ## ##
+	// 1 ## ## ## ## ## ## ## ##
+	//    A  B  C  D  E  F  G  H
+
+	// King at (4,4) trying to move to (5,5) - this square is attacked by rook at (5,7)
+	// The king should NOT be able to move there
+	m := move.Move{
+		From: move.Position{File: 4, Rank: 4},
+		To:   move.Position{File: 5, Rank: 5},
+	}
+
+	err := b.IsValidMove(m)
+	if err == nil {
+		t.Fatalf("King should not be able to move to (5,5) as it is attacked by the black rook at (5,7), but move was allowed")
+	}
+}
+
+func TestKingCannotCastleThroughCheck(t *testing.T) {
+	// Test that king cannot castle through a square that is under attack
+	b := payloads.NewEmptyBoard(
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 4, Rank: 0},
+			PieceDetails: piece.NewKing(),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 7, Rank: 0},
+			PieceDetails: piece.NewRook(),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 5, Rank: 7},
+			PieceDetails: piece.NewRook(),
+		}),
+	)
+
+	// Visualisation of the board
+	// 8 ## ## ## ## ## bR ## ##
+	// 7 ## ## ## ## ## ## ## ##
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## ## ## ## ##
+	// 4 ## ## ## ## ## ## ## ##
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 ## ## ## ## ## ## ## ##
+	// 1 ## ## ## ## wK ## ## wR
+	//    A  B  C  D  E  F  G  H
+
+	// White king at (4,0) trying to castle kingside to (6,0)
+	// The square (5,0) is attacked by black rook at (5,7), so castling should fail
+	m := move.Move{
+		From: move.Position{File: 4, Rank: 0},
+		To:   move.Position{File: 6, Rank: 0},
+	}
+
+	err := b.IsValidMove(m)
+	if err == nil {
+		t.Fatalf("King should not be able to castle through check at square (5,0), but castling was allowed")
+	}
+}
+
+func TestKingCannotMoveIntoKnightThreat(t *testing.T) {
+	// Test that king cannot move into a square attacked by an enemy knight
+	b := payloads.NewEmptyBoard(
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 4, Rank: 4},
+			PieceDetails: piece.NewKing(),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 4, Rank: 7},
+			PieceDetails: piece.NewKnight(),
+		}),
+	)
+
+	// Visualisation of the board
+	// 8 ## ## ## ## bN ## ## ##
+	// 7 ## ## ## ## ## ## ## ##
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## wK ## ## ##
+	// 4 ## ## ## ## ## ## ## ##
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 ## ## ## ## ## ## ## ##
+	// 1 ## ## ## ## ## ## ## ##
+	//    A  B  C  D  E  F  G  H
+
+	// King at (4,4) trying to move to (5,5)
+	// The black knight at (4,7) can attack (5,5) via an L-shaped move
+	m := move.Move{
+		From: move.Position{File: 4, Rank: 4},
+		To:   move.Position{File: 5, Rank: 5},
+	}
+
+	err := b.IsValidMove(m)
+	if err == nil {
+		t.Fatalf("King should not be able to move to (5,5) as it is attacked by the black knight at (4,7), but move was allowed")
+	}
+}
+
+func TestPawnForwardMoveDoesNotTriggerEnPassantLogic(t *testing.T) {
+	// Test that a normal pawn forward move doesn't incorrectly trigger en passant logic
+	b := payloads.NewEmptyBoard(
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 3, Rank: 3},
+			PieceDetails: piece.NewPawn(piece.PawnWithHasMoved(true)),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 4, Rank: 0},
+			PieceDetails: piece.NewKing(),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 4, Rank: 7},
+			PieceDetails: piece.NewKing(),
+		}),
+	)
+
+	// Visualisation of the board
+	// 8 ## ## ## ## bK ## ## ##
+	// 7 ## ## ## ## ## ## ## ##
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## ## ## ## ##
+	// 4 ## ## ## wP ## ## ## ##
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 ## ## ## ## ## ## ## ##
+	// 1 ## ## ## ## wK ## ## ##
+	//    A  B  C  D  E  F  G  H
+
+	// Pawn at (3,3) moving forward to (3,4)
+	m := move.Move{
+		From: move.Position{File: 3, Rank: 3},
+		To:   move.Position{File: 3, Rank: 4},
+	}
+
+	_, err := b.Move(m)
+	if err != nil {
+		t.Fatalf("Normal pawn forward move should be valid, but got error: %v", err)
+	}
+
+	// Check that the pawn is at the new position
+	if p, ok := b.Pieces[m.To]; !ok {
+		t.Fatalf("Pawn should be at position (3,4) after move")
+	} else if p.Colour != colour.White || p.GetPieceType() != piece.PieceTypePawn {
+		t.Fatalf("Piece at (3,4) should be a white pawn, got: %v", p)
+	}
+
+	// Check that the pawn is not at the old position
+	if _, ok := b.Pieces[m.From]; ok {
+		t.Fatalf("Pawn should not be at old position (3,3) after move")
+	}
+}
+
+func TestEnPassantCapture(t *testing.T) {
+	// Test a proper en passant capture
+	history := []board.Turn{
+		{
+			colour.Black: &move.Move{
+				From: move.Position{File: 4, Rank: 6},
+				To:   move.Position{File: 4, Rank: 4},
+			},
+		},
+	}
+
+	b := payloads.NewEmptyBoard(
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 3, Rank: 4},
+			PieceDetails: piece.NewPawn(piece.PawnWithHasMoved(true)),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 4, Rank: 4},
+			PieceDetails: piece.NewPawn(piece.PawnWithHasMoved(true)),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 0, Rank: 0},
+			PieceDetails: piece.NewKing(),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 7, Rank: 7},
+			PieceDetails: piece.NewKing(),
+		}),
+		payloads.BoardWithHistory(history),
+	)
+
+	// Visualisation of the board
+	// 8 ## ## ## ## ## ## ## bK
+	// 7 ## ## ## ## ## ## ## ##
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## wP bP ## ## ##
+	// 4 ## ## ## ## ## ## ## ##
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 ## ## ## ## ## ## ## ##
+	// 1 wK ## ## ## ## ## ## ##
+	//    A  B  C  D  E  F  G  H
+
+	// White pawn at (3,4) captures black pawn at (4,4) via en passant
+	// The white pawn moves to (4,5) and the black pawn at (4,4) is removed
+	m := move.Move{
+		From: move.Position{File: 3, Rank: 4},
+		To:   move.Position{File: 4, Rank: 5},
+	}
+
+	_, err := b.Move(m)
+	if err != nil {
+		t.Fatalf("En passant capture should be valid, but got error: %v", err)
+	}
+
+	// Check that the white pawn is at the new position (4,5)
+	if p, ok := b.Pieces[move.Position{File: 4, Rank: 5}]; !ok {
+		t.Fatalf("White pawn should be at position (4,5) after en passant")
+	} else if p.Colour != colour.White || p.GetPieceType() != piece.PieceTypePawn {
+		t.Fatalf("Piece at (4,5) should be a white pawn, got: %v", p)
+	}
+
+	// Check that the black pawn at (4,4) was captured
+	if _, ok := b.Pieces[move.Position{File: 4, Rank: 4}]; ok {
+		t.Fatalf("Black pawn at (4,4) should have been captured by en passant")
+	}
+
+	// Check that the white pawn is not at the old position
+	if _, ok := b.Pieces[m.From]; ok {
+		t.Fatalf("White pawn should not be at old position (3,4) after move")
+	}
+}
+
+func TestPawnMoveDoesNotDeletePieceAtOrigin(t *testing.T) {
+	// Test that moving a pawn doesn't accidentally delete a piece at (0,0)
+	// This was a bug where toDelete was initialized to zero value
+	b := payloads.NewEmptyBoard(
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 0, Rank: 0},
+			PieceDetails: piece.NewRook(),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 3, Rank: 3},
+			PieceDetails: piece.NewPawn(piece.PawnWithHasMoved(true)),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.White,
+			Position:     move.Position{File: 4, Rank: 0},
+			PieceDetails: piece.NewKing(),
+		}),
+		payloads.BoardWithPiece(&piece.Piece{
+			Colour:       colour.Black,
+			Position:     move.Position{File: 4, Rank: 7},
+			PieceDetails: piece.NewKing(),
+		}),
+	)
+
+	// Visualisation of the board
+	// 8 ## ## ## ## bK ## ## ##
+	// 7 ## ## ## ## ## ## ## ##
+	// 6 ## ## ## ## ## ## ## ##
+	// 5 ## ## ## ## ## ## ## ##
+	// 4 ## ## ## wP ## ## ## ##
+	// 3 ## ## ## ## ## ## ## ##
+	// 2 ## ## ## ## ## ## ## ##
+	// 1 wR ## ## ## wK ## ## ##
+	//    A  B  C  D  E  F  G  H
+
+	// Move pawn from (3,3) to (3,4)
+	m := move.Move{
+		From: move.Position{File: 3, Rank: 3},
+		To:   move.Position{File: 3, Rank: 4},
+	}
+
+	_, err := b.Move(m)
+	if err != nil {
+		t.Fatalf("Pawn forward move should be valid, but got error: %v", err)
+	}
+
+	// Check that the rook at (0,0) is still there
+	if p, ok := b.Pieces[move.Position{File: 0, Rank: 0}]; !ok {
+		t.Fatalf("Rook at (0,0) should not have been deleted")
+	} else if p.GetPieceType() != piece.PieceTypeRook {
+		t.Fatalf("Piece at (0,0) should be a rook, got: %v", p)
+	}
+}
